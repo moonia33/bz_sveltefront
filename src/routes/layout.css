@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@import '../assets/css/themes/zvynas.css';
+
+@custom-variant dark (&:where(.dark, .dark *));

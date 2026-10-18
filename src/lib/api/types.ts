@@ -210,3 +210,106 @@ export interface CartOut {
 	items_total: MoneyOut;
 	delivery_window: DeliveryWindowOut | null;
 }
+
+export interface AddressOut {
+	id: number;
+	label: string;
+	full_name: string;
+	line1: string;
+	line2: string;
+	city: string;
+	postal_code: string;
+	country_code: string;
+	is_default_shipping: boolean;
+	is_default_billing: boolean;
+}
+
+export interface ConsentOut {
+	code: string;
+	required: boolean;
+	granted: boolean;
+	version: string;
+}
+
+export interface PhoneOut {
+	id: number;
+	e164: string;
+	is_primary: boolean;
+}
+
+export interface CustomerGroupOut {
+	id: number;
+	code: string;
+	name: string;
+}
+
+export interface PickupPointOut {
+	carrier: string;
+	pickup_point_id: string;
+	name: string;
+	address: string;
+	city: string;
+	postal_code: string;
+	country_code: string;
+}
+
+export interface MeOut {
+	email: string;
+	first_name: string;
+	last_name: string;
+	customer_groups: CustomerGroupOut[];
+	primary_customer_group: CustomerGroupOut | null;
+	consents: ConsentOut[];
+	phones: PhoneOut[];
+	addresses: AddressOut[];
+	primary_pickup_point: PickupPointOut | null;
+}
+
+export interface OrderLineOut {
+	id: number;
+	product_id: number | null;
+	variant_id: number | null;
+	sku: string;
+	name: string;
+	qty: number;
+	unit_price: MoneyOut;
+	line_total: MoneyOut;
+}
+
+export interface FeeOut {
+	code: string;
+	name: string;
+	amount: MoneyOut;
+}
+
+export interface OrderOut {
+	id: number;
+	status: string;
+	status_label: string;
+	delivery_status: string;
+	delivery_status_label: string;
+	fulfillment_mode: string;
+	fulfillment_mode_label: string;
+	currency: string;
+	country_code: string;
+	shipping_method: string;
+	carrier_code: string;
+	tracking_number: string;
+	delivered_at: string;
+	invoice_number: string;
+	payment_provider: string;
+	payment_provider_label: string;
+	payment_status: string;
+	payment_status_label: string;
+	payment_redirect_url: string;
+	payment_instructions: string;
+	items: OrderLineOut[];
+	delivery_window: DeliveryWindowOut | null;
+	items_total: MoneyOut;
+	discount_total: MoneyOut;
+	shipping_total: MoneyOut;
+	fees_total: MoneyOut;
+	fees: FeeOut[];
+	order_total: MoneyOut;
+	created_at: string;
+}

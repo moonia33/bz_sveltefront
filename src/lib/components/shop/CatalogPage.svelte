@@ -2,8 +2,9 @@
 	import { goto } from '$app/navigation';
 	import FilterSidebar from '#lib/components/shop/FilterSidebar.svelte';
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
-	import { ChevronDown } from '@lucide/svelte';
+	import { ChevronDown, Loader2 } from '@lucide/svelte';
 	import type { CatalogFacetsOut, Paginated, ProductListOut } from '#lib/api/types';
+	import { onDestroy, onMount } from 'svelte';
 
 	let {
 		title,
@@ -17,9 +18,25 @@
 		params: URLSearchParams;
 	} = $props();
 
-	const page = $derived(Math.max(1, Number(params.get('page') ?? 1) || 1));
 	const pageSize = 20;
-	const pages = $derived(Math.max(1, Math.ceil(products.count / pageSize)));
+
+	let items = $state<ProductListOut[]>([]);
+	let total = $state(0);
+	let currentPage = $state(1);
+	let loadingMore = $state(false);
+	let loadError = $state<string | null>(null);
+	let sentinel = $state<HTMLDivElement | null>(null);
+	let observer: IntersectionObserver | null = null;
+
+	// Reset kai load() duoda naują puslapio rezultatą (filtrų/paieškos pasikeitimas).
+	$effect(() => {
+		items = products.items ?? [];
+		total = products.count ?? 0;
+		currentPage = Math.max(1, Number(params.get('page') ?? 1) || 1);
+		loadError = null;
+	});
+
+	const hasMore = $derived(items.length < total);
 	const currentSort = $derived(params.get('sort') ?? '');
 
 	function href(patch: Record<string, string | null>): string {
@@ -29,17 +46,50 @@
 			if (v === null || v === '') p.delete(k);
 			else p.set(k, v);
 		}
-		const s = p.toString();
-		return `?${s}`;
+		return `?${p.toString()}`;
 	}
 
-	function pageHref(n: number): string {
-		const p = new URLSearchParams(params);
-		if (n <= 1) p.delete('page');
-		else p.set('page', String(n));
-		const s = p.toString();
-		return `?${s}`;
+	async function loadMore() {
+		if (loadingMore || !hasMore) return;
+		loadingMore = true;
+		loadError = null;
+		try {
+			const p = new URLSearchParams(params);
+			p.set('page', String(currentPage + 1));
+			const res = await fetch(`/api/v1/catalog/products?${p.toString()}`, {
+				credentials: 'include',
+				headers: { Accept: 'application/json' }
+			});
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			const data = (await res.json()) as Paginated<ProductListOut>;
+			const seen = new Set(items.map((i) => i.id));
+			items = [...items, ...(data.items ?? []).filter((i) => !seen.has(i.id))];
+			total = data.count ?? total;
+			currentPage += 1;
+		} catch {
+			loadError = 'Nepavyko užkrauti daugiau prekių.';
+		} finally {
+			loadingMore = false;
+		}
 	}
+
+	onMount(() => {
+		observer = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((e) => e.isIntersecting)) loadMore();
+			},
+			{ rootMargin: '600px 0px' }
+		);
+		if (sentinel) observer.observe(sentinel);
+	});
+
+	$effect(() => {
+		if (!observer || !sentinel) return;
+		observer.disconnect();
+		observer.observe(sentinel);
+	});
+
+	onDestroy(() => observer?.disconnect());
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -57,7 +107,7 @@
 		<div class="min-w-0 grow">
 			<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
 				<p class="text-sm text-gray-500 dark:text-neutral-400">
-					{products.count} prekė(-ių)
+					{total} prekė(-ių)
 					{#if params.get('q')}
 						— „{params.get('q')}“
 					{/if}
@@ -83,45 +133,46 @@
 				</div>
 			</div>
 
-			{#if products.items.length}
-				<ProductGrid products={products.items} />
+			{#if items.length}
+				<ProductGrid products={items} />
 			{:else}
-				<div class="rounded-xl border border-dashed border-gray-300 py-16 text-center dark:border-neutral-700">
+				<div
+					class="rounded-xl border border-dashed border-gray-300 py-16 text-center dark:border-neutral-700"
+				>
 					<p class="text-gray-500 dark:text-neutral-400">Prekių nerasta.</p>
 				</div>
 			{/if}
 
-			{#if pages > 1}
-				<nav class="mt-8 flex items-center justify-center gap-x-1" aria-label="Puslapiai">
-					{#if page > 1}
-						<a
-							href={pageHref(page - 1)}
-							class="rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
-							>‹ Ankstesnis</a
-						>
-					{/if}
-					{#each Array.from({ length: pages }, (_, i) => i + 1) as n (n)}
-						{#if n === 1 || n === pages || Math.abs(n - page) <= 2}
-							<a
-								href={pageHref(n)}
-								aria-current={n === page ? 'page' : undefined}
-								class="rounded-lg px-3 py-2 text-sm {n === page
-									? 'bg-zvynas-600 font-semibold text-white'
-									: 'text-gray-600 hover:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800'}"
-								>{n}</a
-							>
-						{:else if Math.abs(n - page) === 3}
-							<span class="px-1 text-gray-400">…</span>
+			<!-- Infinite scroll sentinel + manual fallback -->
+			{#if hasMore}
+				<div bind:this={sentinel} class="mt-8 flex justify-center">
+					<button
+						type="button"
+						onclick={loadMore}
+						disabled={loadingMore}
+						class="inline-flex items-center gap-x-2 rounded-full border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+					>
+						{#if loadingMore}
+							<Loader2 class="size-4 animate-spin" /> Kraunama…
+						{:else}
+							Rodyti daugiau
 						{/if}
+					</button>
+				</div>
+			{/if}
+			{#if loadingMore}
+				<div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+					{#each Array.from({ length: 4 }) as _, i (i)}
+						<div class="animate-pulse">
+							<div class="aspect-square rounded-xl bg-gray-100 dark:bg-neutral-800"></div>
+							<div class="mt-3 h-4 w-3/4 rounded bg-gray-100 dark:bg-neutral-800"></div>
+							<div class="mt-2 h-4 w-1/3 rounded bg-gray-100 dark:bg-neutral-800"></div>
+						</div>
 					{/each}
-					{#if page < pages}
-						<a
-							href={pageHref(page + 1)}
-							class="rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
-							>Kitas ›</a
-						>
-					{/if}
-				</nav>
+				</div>
+			{/if}
+			{#if loadError}
+				<p class="mt-4 text-center text-sm text-zvynas-600">{loadError}</p>
 			{/if}
 		</div>
 	</div>

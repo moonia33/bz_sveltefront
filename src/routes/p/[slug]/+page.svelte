@@ -111,7 +111,7 @@
 
 	<div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
 		<!-- Galerija -->
-		<div>
+		<div class="lg:sticky lg:top-32 lg:self-start">
 			<div
 				class="aspect-square overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
 			>
@@ -284,31 +284,47 @@
 				{/if}
 			</form>
 
-			{#if product.description}
-				<div class="prose mt-8 max-w-none text-sm dark:prose-invert">
-					{@html product.description}
-				</div>
-			{/if}
 		</div>
 	</div>
 
-	{#if product.features?.length}
-		<section class="mt-12">
-			<h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Specifikacijos</h2>
-			<dl
-				class="grid grid-cols-1 gap-x-8 gap-y-2 rounded-xl border border-gray-200 p-5 sm:grid-cols-2 dark:border-neutral-700 dark:bg-neutral-900"
-			>
-				{#each product.features as f (f.feature_id)}
-					<div class="flex justify-between gap-4 border-b border-gray-100 py-2 last:border-0 dark:border-neutral-800">
-						<dt class="text-sm text-gray-500 dark:text-neutral-400">{f.feature_name}</dt>
-						<dd class="text-sm font-medium text-gray-900 dark:text-white">
-							{f.value_label || f.value}
-						</dd>
-					</div>
-				{/each}
-			</dl>
-		</section>
-	{/if}
+	<!-- Aprašymas + specifikacijos kaip accordion'ai -->
+	<section class="mt-12 max-w-4xl divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white dark:divide-neutral-700 dark:border-neutral-700 dark:bg-neutral-900">
+		{#if product.description}
+			<details class="group" open>
+				<summary
+					class="flex cursor-pointer items-center justify-between px-5 py-4 font-semibold text-gray-900 dark:text-white"
+				>
+					Aprašymas
+					<span class="text-gray-400 transition group-open:rotate-180">▾</span>
+				</summary>
+				<div class="prose max-w-none px-5 pb-5 text-sm dark:prose-invert">
+					{@html product.description}
+				</div>
+			</details>
+		{/if}
+		{#if product.features?.length}
+			<details class="group" open>
+				<summary
+					class="flex cursor-pointer items-center justify-between px-5 py-4 font-semibold text-gray-900 dark:text-white"
+				>
+					Specifikacijos
+					<span class="text-gray-400 transition group-open:rotate-180">▾</span>
+				</summary>
+				<dl class="grid grid-cols-1 gap-x-8 gap-y-1 px-5 pb-5 sm:grid-cols-2">
+					{#each product.features as f (f.feature_id)}
+						<div
+							class="flex justify-between gap-4 border-b border-gray-100 py-2 last:border-0 dark:border-neutral-800"
+						>
+							<dt class="text-sm text-gray-500 dark:text-neutral-400">{f.feature_name}</dt>
+							<dd class="text-sm font-medium text-gray-900 dark:text-white">
+								{f.value_label || f.value}
+							</dd>
+						</div>
+					{/each}
+				</dl>
+			</details>
+		{/if}
+	</section>
 
 	{#if data.recommendations.length}
 		<section class="mt-12">

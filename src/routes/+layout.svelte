@@ -7,7 +7,7 @@
 </script>
 
 <div class="flex min-h-screen flex-col bg-gray-50 dark:bg-neutral-950">
-	<Header categories={data.categories} cartCount={data.cartCount} />
+	<Header categories={data.categories} cartCount={data.cartCount} me={data.me} />
 	<main class="grow">
 		{@render children()}
 	</main>

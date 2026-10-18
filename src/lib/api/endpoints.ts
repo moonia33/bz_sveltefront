@@ -3,6 +3,8 @@ import type {
 	CartOut,
 	CatalogFacetsOut,
 	CategoryOut,
+	MeOut,
+	OrderOut,
 	Paginated,
 	ProductDetailOut,
 	ProductListOut
@@ -55,6 +57,21 @@ export function getRecommendations(
 
 export function getCart(ctx: Ctx) {
 	return apiFetch<CartOut>(ctx, '/checkout/cart');
+}
+
+export function getMe(ctx: Ctx) {
+	return apiFetch<MeOut>(ctx, '/auth/me');
+}
+
+export function getOrders(ctx: Ctx, limit = 20) {
+	return apiFetch<OrderOut[]>(ctx, `/checkout/orders${qs({ limit })}`);
+}
+
+export function searchProducts(ctx: Ctx, q: string, limit = 6) {
+	return apiFetch<Paginated<ProductListOut>>(
+		ctx,
+		`/catalog/products${qs({ q, page_size: limit, in_stock_only: undefined })}`
+	);
 }
 
 export interface HomeSection {

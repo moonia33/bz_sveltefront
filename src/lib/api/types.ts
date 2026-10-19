@@ -131,7 +131,16 @@ export interface VariantOut {
 	condition_grade: string;
 	offer_visibility: string;
 	discount_percent: number | null;
+	// Trade-pack info (manufacturer data, same for all suppliers)
+	sold_as_pack: boolean;
+	pack_quantity: number;
+	trade_pack_qty: number;
+	pack_unit: string;
+	pack_barcode: string;
+	pack_price: MoneyOut | null;
 	options: VariantOptionOut[];
+	// Variant-level features (override product features with the same feature_code)
+	features: ProductFeatureOut[];
 	images: ProductImageOut[];
 }
 

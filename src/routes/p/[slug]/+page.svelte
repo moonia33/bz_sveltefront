@@ -3,8 +3,8 @@
 	import { invalidateAll } from '$app/navigation';
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
 	import { formatMoney } from '#lib/money';
-	import { Minus, Plus, ShoppingCart, Truck, Check } from '@lucide/svelte';
-	import type { VariantOut } from '#lib/api/types';
+	import { Minus, Plus, ShoppingCart, Truck, Check, Package } from '@lucide/svelte';
+	import type { ProductFeatureOut, VariantOut } from '#lib/api/types';
 
 	let { data, form } = $props();
 	const product = $derived(data.product);
@@ -81,6 +81,37 @@
 	let activeImage = $state(0);
 	const price = $derived(selectedVariant?.price ?? variants[0]?.price);
 	const stock = $derived(selectedVariant?.stock_available ?? 0);
+
+	// Specifikacijos: produkto features + pasirinkto varianto features
+	// (varianto reikšmė laimi tų pačių feature_code kolizijose).
+	const specs = $derived.by<ProductFeatureOut[]>(() => {
+		const map = new Map<string, ProductFeatureOut>();
+		for (const f of product.features ?? []) map.set(f.feature_code, f);
+		for (const f of selectedVariant?.features ?? []) map.set(f.feature_code, f);
+		return [...map.values()];
+	});
+
+	// Pakuotės info: trade_pack_qty (gamintojo dėžė) arba pack_quantity.
+	const packInfo = $derived.by(() => {
+		const v = selectedVariant;
+		if (!v) return null;
+		const qtyInPack = v.trade_pack_qty || v.pack_quantity;
+		if (!v.sold_as_pack && !qtyInPack) return null;
+		const unitGross =
+			v.sold_as_pack && qtyInPack > 0 && price ? Number(price.gross) / qtyInPack : null;
+		return {
+			qty: qtyInPack,
+			unit: v.pack_unit || 'vnt.',
+			soldAsPack: v.sold_as_pack,
+			unitPrice:
+				unitGross != null
+					? new Intl.NumberFormat('lt-LT', {
+							style: 'currency',
+							currency: (price?.currency || 'EUR').toUpperCase()
+						}).format(unitGross)
+					: null
+		};
+	});
 
 	function fmtDate(iso: string): string {
 		return new Intl.DateTimeFormat('lt-LT', { month: 'long', day: 'numeric' }).format(
@@ -177,10 +208,26 @@
 				{/if}
 			</div>
 
+			{#if packInfo}
+				<p
+					class="mt-2 flex items-center gap-x-1.5 text-sm text-gray-500 dark:text-neutral-400"
+				>
+					<Package class="size-4" />
+					{#if packInfo.soldAsPack}
+						Kaina už pilną pakuotę ({packInfo.qty} {packInfo.unit})
+						{#if packInfo.unitPrice}
+							· {packInfo.unitPrice}/{packInfo.unit}
+						{/if}
+					{:else}
+						Pakuotėje: {packInfo.qty} {packInfo.unit}
+					{/if}
+				</p>
+			{/if}
+
 			<p class="mt-2 text-sm">
 				{#if stock > 0}
 					<span class="font-medium text-green-600 dark:text-green-400">
-						Sandėlyje ({stock} vnt.)
+						Sandėlyje ({stock} {packInfo?.soldAsPack ? 'pak.' : 'vnt.'})
 					</span>
 				{:else}
 					<span class="font-medium text-amber-600">Išparduota / pagal užsakymą</span>
@@ -302,7 +349,7 @@
 				</div>
 			</details>
 		{/if}
-		{#if product.features?.length}
+		{#if specs.length}
 			<details class="group" open>
 				<summary
 					class="flex cursor-pointer items-center justify-between px-5 py-4 font-semibold text-gray-900 dark:text-white"
@@ -311,7 +358,7 @@
 					<span class="text-gray-400 transition group-open:rotate-180">▾</span>
 				</summary>
 				<dl class="grid grid-cols-1 gap-x-8 gap-y-1 px-5 pb-5 sm:grid-cols-2">
-					{#each product.features as f (f.feature_id)}
+					{#each specs as f (f.feature_code)}
 						<div
 							class="flex justify-between gap-4 border-b border-gray-100 py-2 last:border-0 dark:border-neutral-800"
 						>

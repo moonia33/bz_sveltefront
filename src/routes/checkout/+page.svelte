@@ -270,6 +270,40 @@
 		paymentOptions.find((o) => o.id === paymentOptionId) ?? null
 	);
 
+	// Inbank kalkuliatorius — „nuo X €/mėn" pasirinktam produktui.
+	let inbankPeriod = $state(24);
+	let inbankCalc = $state<{ monthly_payment: number; total_cost: number } | null>(null);
+	let inbankCalcBusy = $state(false);
+	const _zeroMoney = { currency: 'EUR', net: 0, vat_rate: 0, vat: 0 };
+	const inbankPeriods = $derived.by(() => {
+		const p = chosenPaymentOption?.payload;
+		if (Array.isArray(p?.allowed_periods) && p!.allowed_periods!.length) {
+			return p!.allowed_periods!;
+		}
+		const min = Number(p?.min_period) || 6;
+		const max = Math.min(Number(p?.max_period) || 60, 84);
+		const out: number[] = [];
+		for (let n = 6; n <= max; n += 6) if (n >= min) out.push(n);
+		return out.length ? out : [12, 24, 36];
+	});
+
+	$effect(() => {
+		const url = chosenPaymentOption?.payload?.calculator_url;
+		const total = preview?.order_total?.gross;
+		if (!url || !total) {
+			inbankCalc = null;
+			return;
+		}
+		const period = inbankPeriod;
+		inbankCalcBusy = true;
+		getJson<{ monthly_payment: number; total_cost: number }>(
+			`${url}?amount=${total}&period=${period}`
+		)
+			.then((d) => (inbankCalc = d))
+			.catch(() => (inbankCalc = null))
+			.finally(() => (inbankCalcBusy = false));
+	});
+
 	$effect(() => {
 		// Mokėjimo opcijos + consents — kai pasirinktas pristatymas.
 		if (me && shippingMethod && !paymentOptions.length && !payBusy) {
@@ -318,6 +352,7 @@
 					payment_method: opt.payload?.payment_method || 'bank_transfer',
 					payment_provider: opt.payload?.preferred_provider || null,
 					montonio_method: opt.payload?.montonio_method || null,
+					inbank_product_code: opt.payload?.inbank_product_code || null,
 					coupon_code: couponCode.trim() || null,
 					consents: consents
 						.filter((c) => c.required)
@@ -615,6 +650,34 @@
 							{/each}
 							{#if !paymentOptions.length && !payBusy}
 								<p class="text-sm text-gray-400">Mokėjimo būdų nerasta.</p>
+							{/if}
+
+							{#if chosenPaymentOption?.payload?.calculator_url}
+								<div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-800">
+									<div class="flex items-center gap-x-3">
+										<label for="inbank-period" class="text-sm text-gray-600 dark:text-neutral-300">Terminas</label>
+										<select
+											id="inbank-period"
+											bind:value={inbankPeriod}
+											class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+										>
+											{#each inbankPeriods as n (n)}
+												<option value={n}>{n} mėn.</option>
+											{/each}
+										</select>
+										{#if inbankCalcBusy}
+											<Loader2 class="size-4 animate-spin text-gray-400" />
+										{/if}
+									</div>
+									{#if inbankCalc}
+										<p class="mt-2 text-sm text-gray-900 dark:text-white">
+											<span class="font-semibold">{formatMoney({ ..._zeroMoney, gross: inbankCalc.monthly_payment })}/mėn.</span>
+											{#if inbankCalc.total_cost}
+												<span class="ml-2 text-xs text-gray-500">viso {formatMoney({ ..._zeroMoney, gross: inbankCalc.total_cost })}</span>
+											{/if}
+										</p>
+									{/if}
+								</div>
 							{/if}
 						</div>
 

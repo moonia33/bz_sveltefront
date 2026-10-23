@@ -425,7 +425,13 @@ export interface PaymentOptionOut {
 		payment_method: string;
 		montonio_method?: string;
 		preferred_provider?: string;
+		inbank_product_code?: string;
 		calculator_url?: string;
+		min_amount?: number;
+		max_amount?: number;
+		min_period?: number;
+		max_period?: number;
+		allowed_periods?: number[];
 	};
 }
 

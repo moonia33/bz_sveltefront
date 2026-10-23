@@ -472,6 +472,7 @@ export interface OrderLineOut {
 	qty: number;
 	unit_price: MoneyOut;
 	line_total: MoneyOut;
+	delivery_window: DeliveryWindowOut | null;
 }
 
 export interface FeeOut {

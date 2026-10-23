@@ -363,7 +363,11 @@
 			if (!res.ok) throw new Error(d?.detail ?? `Klaida (${res.status})`);
 			confirmed = d as CheckoutConfirmOut;
 			await invalidateAll();
-			if (confirmed.redirect_url) window.location.href = confirmed.redirect_url;
+			if (confirmed.redirect_url) {
+				window.location.href = confirmed.redirect_url;
+			} else {
+				await goto(`/uzsakymas?order=${confirmed.order_id}`);
+			}
 		} catch (e) {
 			confirmError = e instanceof Error ? e.message : 'Nepavyko patvirtinti užsakymo.';
 		} finally {
@@ -388,25 +392,8 @@
 	<h1 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Atsiskaitymas</h1>
 
 	{#if confirmed}
-		<!-- Užsakymas patvirtintas -->
-		<div class="mx-auto max-w-lg rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-900">
-			<div class="mx-auto flex size-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/10">
-				<Check class="size-7 text-green-600" />
-			</div>
-			<h2 class="mt-4 text-xl font-bold text-gray-900 dark:text-white">Užsakymas priimtas</h2>
-			<p class="mt-2 text-sm text-gray-500 dark:text-neutral-400">
-				Užsakymo numeris: <span class="font-semibold text-gray-900 dark:text-white">#{confirmed.order_id}</span>
-			</p>
-			{#if confirmed.payment_instructions}
-				<div class="mt-4 whitespace-pre-line rounded-xl bg-gray-50 p-4 text-left text-sm text-gray-700 dark:bg-neutral-800 dark:text-neutral-200">
-					{confirmed.payment_instructions}
-				</div>
-			{/if}
-			<div class="mt-6 flex justify-center gap-3">
-				<a href="/paskyra" class="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">Mano užsakymai</a>
-				<a href="/katalogas" class="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-neutral-600 dark:text-neutral-200">Tęsti apsipirkimą</a>
-			</div>
-		</div>
+		<!-- Redirect'inama į /uzsakymas -->
+		<p class="text-sm text-gray-500">Nukreipiama…</p>
 	{:else}
 		<div class="grid grid-cols-1 gap-10 lg:grid-cols-5">
 			<!-- Žingsniai -->

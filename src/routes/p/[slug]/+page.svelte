@@ -146,6 +146,8 @@
 		srcsetAvif?: string;
 		srcsetWebp?: string;
 		full?: string | null;
+		fullW?: number;
+		fullH?: number;
 	};
 	const srcsetOf = (s?: { url: string; width: number }[]) =>
 		s?.length ? s.map((i) => `${i.url} ${i.width}w`).join(', ') : undefined;
@@ -156,7 +158,9 @@
 			alt: i.alt_text || product.name,
 			srcsetAvif: srcsetOf(i.avif_srcset),
 			srcsetWebp: srcsetOf(i.webp_srcset),
-			full: i.full_url
+			full: i.full_url,
+			fullW: i.full_width || 0,
+			fullH: i.full_height || 0
 		})),
 		...(product.videos ?? []).map((v) => ({
 			kind: 'video' as const,
@@ -189,18 +193,24 @@
 				im.src = src;
 			});
 
-		// Atidaromam slide'ui matuojam dims sinchroniškai (PhotoSwipe jų reikalauja);
-		// likusieji gauna placeholder'į — tikrą size pritaikom 'loadComplete'.
-		const openingSrc = imageSlides[index].s.full || imageSlides[index].s.url;
-		const openingDims = await measure(openingSrc);
-
-		const dataSource = imageSlides.map((x, i) => ({
-			src: x.s.full || x.s.url,
-			msrc: x.s.url,
-			alt: x.s.alt,
-			width: i === index ? openingDims.w : 1200,
-			height: i === index ? openingDims.h : 1200
-		}));
+		// Tikrūs w/h — PhotoSwipe juos reikalauja. Backend duoda originalo
+		// dims; kurių trūksta — išmatuojam prieš atidarymą (retas fallback).
+		const dataSource = await Promise.all(
+			imageSlides.map(async (x) => {
+				const src = x.s.full || x.s.url;
+				const dims =
+					x.s.fullW && x.s.fullH
+						? { w: x.s.fullW, h: x.s.fullH }
+						: await measure(src);
+				return {
+					src,
+					msrc: x.s.url,
+					alt: x.s.alt,
+					width: dims.w,
+					height: dims.h
+				};
+			})
+		);
 
 		const { default: PhotoSwipe } = await import('photoswipe');
 		const pswp = new PhotoSwipe({
@@ -210,19 +220,6 @@
 			wheelToZoom: true,
 			zoom: false,
 			padding: { top: 48, bottom: 48, left: 24, right: 24 }
-		});
-		// Realūs matmenys — iškart po užsikrovimo (placeholder dims sąmoningai).
-		pswp.on('loadComplete', (e) => {
-			const content = e.content;
-			const img = content.element;
-			if (!(img instanceof HTMLImageElement)) return;
-			const w = img.naturalWidth;
-			const h = img.naturalHeight;
-			if (w && h && (content.data.width !== w || content.data.height !== h)) {
-				content.data.width = w;
-				content.data.height = h;
-				content.slide?.updateContentSize(true);
-			}
 		});
 		pswp.init();
 	}

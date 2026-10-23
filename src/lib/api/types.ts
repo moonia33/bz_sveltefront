@@ -41,6 +41,9 @@ export interface ProductImageOut {
 	webp_srcset: ImageSourceOut[];
 	/** Originalas — PDP zoom/lightbox. */
 	full_url: string | null;
+	/** Originalo matmenys (0 = nežinoma → FE išmatuoja prieš atidarymą). */
+	full_width: number;
+	full_height: number;
 }
 
 export interface ProductListOut {

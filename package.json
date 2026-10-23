@@ -30,6 +30,8 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^1.59.0",
+		"marked": "^18.1.1",
+		"photoswipe": "^5.4.4",
 		"preline": "^4.2.0"
 	}
 }

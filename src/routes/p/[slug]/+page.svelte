@@ -194,14 +194,19 @@
 			});
 
 		// Tikrūs w/h — PhotoSwipe juos reikalauja. Backend duoda originalo
-		// dims; kurių trūksta — išmatuojam prieš atidarymą (retas fallback).
+		// dims; trūkstant — matuojam d800 rendition'o (mažas, greitis) ir
+		// ×4 pakeliam: aspect'as identiškas originalui, o perdėtas zoom
+		// limitas nekenkia (originalas vistiek lieka aštrus).
 		const dataSource = await Promise.all(
 			imageSlides.map(async (x) => {
 				const src = x.s.full || x.s.url;
-				const dims =
-					x.s.fullW && x.s.fullH
-						? { w: x.s.fullW, h: x.s.fullH }
-						: await measure(src);
+				let dims: { w: number; h: number };
+				if (x.s.fullW && x.s.fullH) {
+					dims = { w: x.s.fullW, h: x.s.fullH };
+				} else {
+					const d = await measure(x.s.url);
+					dims = { w: d.w * 4, h: d.h * 4 };
+				}
 				return {
 					src,
 					msrc: x.s.url,

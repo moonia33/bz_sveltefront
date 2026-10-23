@@ -13,6 +13,10 @@ export interface BrandRefOut {
 	id: number;
 	slug: string;
 	name: string;
+	/** PDP brand sekcijai; null jei brand'as neturi logo. */
+	logo_url?: string | null;
+	/** 256px webp thumb (fallback — logo_url). */
+	logo_thumb_url?: string | null;
 }
 
 export interface CategoryRefOut {
@@ -21,12 +25,22 @@ export interface CategoryRefOut {
 	name: string;
 }
 
+export interface ImageSourceOut {
+	url: string;
+	width: number;
+}
+
 export interface ProductImageOut {
 	avif_url: string | null;
 	webp_url: string | null;
 	url: string;
 	alt_text: string;
 	sort_order: number;
+	/** srcset rinkiniai: listing → sq300/sq600; PDP → m300/d800. */
+	avif_srcset: ImageSourceOut[];
+	webp_srcset: ImageSourceOut[];
+	/** Originalas — PDP zoom/lightbox. */
+	full_url: string | null;
 }
 
 export interface ProductListOut {
@@ -35,6 +49,7 @@ export interface ProductListOut {
 	slug: string;
 	name: string;
 	is_active: boolean;
+	is_part: boolean;
 	product_group_code: string;
 	brand: BrandRefOut | null;
 	category: CategoryRefOut | null;
@@ -43,6 +58,8 @@ export interface ProductListOut {
 	price_to: MoneyOut | null;
 	compare_at_price: MoneyOut | null;
 	discount_percent: number | null;
+	has_video?: boolean;
+	labels?: string[];
 }
 
 export interface Paginated<T> {
@@ -55,6 +72,7 @@ export interface CategoryOut {
 	slug: string;
 	name: string;
 	parent_id: number | null;
+	list_template: 'grid' | 'list';
 	description: string;
 	hero_image_url: string | null;
 	menu_icon_url: string | null;
@@ -63,10 +81,25 @@ export interface CategoryOut {
 	seo_keywords: string;
 }
 
+export interface BrandCategoryOut {
+	slug: string;
+	name: string;
+	product_count: number;
+}
+
 export interface BrandOut {
 	id: number;
 	slug: string;
 	name: string;
+	description?: string;
+	logo_url?: string | null;
+	logo_thumb_url?: string | null;
+	logo_alt?: string;
+	seo_title?: string;
+	seo_description?: string;
+	seo_keywords?: string;
+	// Brand „shelf": kategorijos su brand'o prekių skaičiais (detail endpoint).
+	categories?: BrandCategoryOut[];
 }
 
 export interface FeatureValueOut {
@@ -79,6 +112,12 @@ export interface FeatureOut {
 	id: number;
 	code: string;
 	name: string;
+	// 'checkbox' (default) renders values; 'range' renders a numeric
+	// min/max input pair and carries min/max/unit instead of values (F4).
+	widget?: 'checkbox' | 'range';
+	min?: number | null;
+	max?: number | null;
+	unit?: string;
 	values: FeatureValueOut[];
 }
 
@@ -92,6 +131,14 @@ export interface OptionTypeOut {
 	id: number;
 	code: string;
 	name?: string;
+	display_type: string;
+	swatch_type: string | null;
+	// Same facet widget contract as FeatureOut (F4).
+	widget?: 'checkbox' | 'range';
+	min?: number | null;
+	max?: number | null;
+	unit?: string;
+	values: OptionValueOut[];
 }
 
 export interface ProductGroupOut {
@@ -114,6 +161,12 @@ export interface VariantOptionOut {
 	option_type_name: string;
 	option_value_code: string;
 	option_value_label: string;
+}
+
+// Per-warehouse split pagal Warehouse.kind (local/remote) — PDP variantui.
+export interface StockLineOut {
+	qty: number;
+	delivery_window: DeliveryWindowOut | null;
 }
 
 export interface VariantOut {
@@ -142,6 +195,9 @@ export interface VariantOut {
 	// Variant-level features (override product features with the same feature_code)
 	features: ProductFeatureOut[];
 	images: ProductImageOut[];
+	// Per-warehouse stock split pagal Warehouse.kind (local/remote)
+	stock_local?: StockLineOut | null;
+	stock_remote?: StockLineOut | null;
 }
 
 export interface DeliveryWindowOut {
@@ -197,12 +253,36 @@ export interface ProductDetailOut {
 	variants: VariantOut[];
 }
 
+export interface CmsContentBlockOut {
+	type: string;
+	payload: Record<string, unknown>;
+}
+
+export interface CmsPageOut {
+	slug: string;
+	title: string;
+	seo_title: string;
+	seo_description: string;
+	content_blocks: CmsContentBlockOut[];
+}
+
+export interface CartItemOptionOut {
+	option_type_code: string;
+	option_type_name: string;
+	option_value_code: string;
+	option_value_label: string;
+}
+
 export interface CartItemOut {
 	id: number;
 	variant_id: number;
 	offer_id: number | null;
 	sku: string;
 	name: string;
+	product_slug: string;
+	variant_name: string;
+	options: CartItemOptionOut[];
+	image: ProductImageOut | null;
 	qty: number;
 	stock_available: number;
 	unit_price: MoneyOut;
@@ -272,6 +352,109 @@ export interface MeOut {
 	phones: PhoneOut[];
 	addresses: AddressOut[];
 	primary_pickup_point: PickupPointOut | null;
+}
+
+// Mėgstamos (wishlist): GET/POST/DELETE /checkout/favorites (guest session palaikoma).
+export interface FavoriteVariantOut {
+	id: number;
+	label: string;
+	sku: string;
+	in_stock: boolean;
+}
+
+export interface FavoriteItemOut {
+	favorite_id: number;
+	variant_id: number;
+	product: ProductListOut;
+	variants: FavoriteVariantOut[];
+}
+
+export interface FavoritesOut {
+	items: FavoriteItemOut[];
+	variant_ids: number[];
+	count: number;
+}
+
+// Viešas PDP pristatymo metodas: GET /shipping/methods (be auth).
+export interface ShippingMethodOut {
+	code: string;
+	name: string;
+	carrier_code: string;
+	requires_pickup_point: boolean;
+	price: MoneyOut;
+}
+
+// Paštomatai: GET /dpd/lockers, GET /unisend/terminals.
+export interface PickupPointLocation {
+	id: string;
+	name: string;
+	city: string;
+	street: string;
+	postalCode: string;
+	countryCode: string;
+	latitude: number | null;
+	longitude: number | null;
+}
+
+// Checkout (auth reikalingas — OTP sessija).
+export interface ConsentDefinitionOut {
+	kind: string;
+	name: string;
+	document_version: string;
+	required: boolean;
+	url: string;
+}
+
+export interface PaymentMethodOut {
+	code: string;
+	name: string;
+	kind: string;
+	provider: string;
+	instructions: string;
+	logo_url: string;
+}
+
+export interface PaymentOptionOut {
+	id: string;
+	kind: string;
+	title: string;
+	provider: string;
+	instructions: string;
+	logo_url: string;
+	payload: {
+		payment_method: string;
+		montonio_method?: string;
+		preferred_provider?: string;
+		calculator_url?: string;
+	};
+}
+
+export interface FeeOut {
+	code: string;
+	name: string;
+	amount: MoneyOut;
+}
+
+export interface CheckoutPreviewOut {
+	currency: string;
+	country_code: string;
+	shipping_method: string;
+	items: CartItemOut[];
+	delivery_window: DeliveryWindowOut | null;
+	items_total: MoneyOut;
+	discount_total: MoneyOut;
+	shipping_total: MoneyOut;
+	fees_total: MoneyOut;
+	fees: FeeOut[];
+	order_total: MoneyOut;
+}
+
+export interface CheckoutConfirmOut {
+	order_id: number;
+	payment_provider: string;
+	payment_status: string;
+	redirect_url: string;
+	payment_instructions: string;
 }
 
 export interface OrderLineOut {

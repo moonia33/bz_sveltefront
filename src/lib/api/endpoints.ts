@@ -112,13 +112,14 @@ export function getOrders(ctx: Ctx, limit = 20) {
 // Viešas order-confirmation lookup: Montonio order-token arba authed order_id.
 export function lookupOrder(
 	ctx: Ctx,
-	params: { order_token?: string; order_id?: number }
+	params: { order_token?: string; order_id?: number; session_uuid?: string }
 ) {
 	return apiFetch<OrderOut>(
 		ctx,
 		`/checkout/orders/lookup${qs({
 			order_token: params.order_token || undefined,
-			order_id: params.order_id || undefined
+			order_id: params.order_id || undefined,
+			session_uuid: params.session_uuid || undefined
 		})}`
 	);
 }

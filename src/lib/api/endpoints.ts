@@ -1,18 +1,25 @@
 import { browser } from '$app/env';
 import { apiFetch, qs, type ApiError } from './client';
 import type {
+	AddressOut,
 	BrandOut,
 	CartOut,
 	CatalogFacetsOut,
 	CategoryOut,
+	CmsCategoryOut,
+	CmsPageListOut,
 	CmsPageOut,
 	FavoritesOut,
+	GiftCardOut,
 	MeOut,
+	NewsletterStatusOut,
 	OrderOut,
 	Paginated,
 	ProductDetailOut,
 	ProductListOut,
-	ShippingMethodOut
+	ReturnOut,
+	ShippingMethodOut,
+	StoreLocationOut
 } from './types';
 
 type Ctx = Parameters<typeof apiFetch>[0];
@@ -105,8 +112,115 @@ export function getMe(ctx: Ctx) {
 	return apiFetch<MeOut>(ctx, '/auth/me');
 }
 
+function json<T>(ctx: Ctx, path: string, method: string, body?: unknown) {
+	return apiFetch<T>(ctx, path, {
+		method,
+		headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+		body: body !== undefined ? JSON.stringify(body) : undefined
+	});
+}
+
+export function updateMe(ctx: Ctx, payload: { first_name?: string; last_name?: string; phone?: string }) {
+	return json<MeOut>(ctx, '/auth/me', 'PATCH', payload);
+}
+
+export function updateConsents(ctx: Ctx, items: { key: string; accepted: boolean }[]) {
+	return json<MeOut>(ctx, '/auth/consents', 'PUT', { items });
+}
+
+export interface AddressPayload {
+	label?: string;
+	full_name?: string;
+	company?: string;
+	company_reg_no?: string;
+	company_vat_no?: string;
+	line1?: string;
+	city?: string;
+	postal_code?: string;
+	country_code?: string;
+	phone?: string;
+	is_default_shipping?: boolean;
+	is_default_billing?: boolean;
+}
+
+export function createAddress(ctx: Ctx, payload: AddressPayload) {
+	return json<AddressOut>(ctx, '/auth/addresses', 'POST', payload);
+}
+
+export function updateAddress(ctx: Ctx, id: number, payload: AddressPayload) {
+	return json<AddressOut>(ctx, `/auth/addresses/${id}`, 'PATCH', payload);
+}
+
+export function deleteAddress(ctx: Ctx, id: number) {
+	return json<void>(ctx, `/auth/addresses/${id}`, 'DELETE');
+}
+
 export function getOrders(ctx: Ctx, limit = 20) {
 	return apiFetch<OrderOut[]>(ctx, `/checkout/orders${qs({ limit })}`);
+}
+
+export function getOrder(ctx: Ctx, id: number) {
+	return apiFetch<OrderOut>(ctx, `/checkout/orders/${id}`);
+}
+
+// RMA — customer returns (list/detail/create/cancel).
+export function getReturns(ctx: Ctx) {
+	return apiFetch<ReturnOut[]>(ctx, '/checkout/returns');
+}
+
+export function getReturn(ctx: Ctx, id: number) {
+	return apiFetch<ReturnOut>(ctx, `/checkout/returns/${id}`);
+}
+
+export function createReturnRequest(
+	ctx: Ctx,
+	orderId: number,
+	payload: { lines: { order_line_id: number; qty: number; reason?: string }[]; note?: string }
+) {
+	return json<ReturnOut>(ctx, `/checkout/orders/${orderId}/returns`, 'POST', payload);
+}
+
+export function cancelReturn(ctx: Ctx, id: number) {
+	return json<ReturnOut>(ctx, `/checkout/returns/${id}/cancel`, 'POST', {});
+}
+
+// Dovanų kortelės — stored-value (checkout payment_method=gift_card).
+export function getGiftCards(ctx: Ctx) {
+	return apiFetch<GiftCardOut[]>(ctx, '/giftcards/mine');
+}
+
+export function checkGiftCard(ctx: Ctx, code: string) {
+	return json<GiftCardOut>(ctx, '/giftcards/check', 'POST', { code });
+}
+
+export function redeemGiftCard(ctx: Ctx, code: string) {
+	return json<GiftCardOut>(ctx, '/giftcards/redeem', 'POST', { code });
+}
+
+// Naujienlaiškis — public subscribe + authed preference.
+export function subscribeNewsletter(ctx: Ctx, email: string, source = 'footer') {
+	return json<NewsletterStatusOut>(ctx, '/newsletter/subscribe', 'POST', { email, source });
+}
+
+export function getNewsletterStatus(ctx: Ctx) {
+	return apiFetch<NewsletterStatusOut>(ctx, '/newsletter/status');
+}
+
+export function setNewsletterPreference(ctx: Ctx, subscribed: boolean) {
+	return json<NewsletterStatusOut>(ctx, '/newsletter/preference', 'PUT', { subscribed });
+}
+
+// CMS help-centras + parduotuvės.
+export function getCmsCategories(ctx: Ctx) {
+	return apiFetch<CmsCategoryOut[]>(ctx, '/cms/categories');
+}
+
+export function getCmsCategoryPages(ctx: Ctx, slug: string) {
+	return apiFetch<CmsPageListOut[]>(ctx, `/cms/categories/${encodeURIComponent(slug)}/pages`);
+}
+
+export function getStores(ctx: Ctx) {
+	return apiFetch<StoreLocationOut[]>(ctx, '/cms/stores');
 }
 
 // Viešas order-confirmation lookup: Montonio order-token arba authed order_id.

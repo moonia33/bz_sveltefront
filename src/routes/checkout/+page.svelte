@@ -53,7 +53,7 @@
 	let firstName = $state(data.me?.first_name ?? '');
 	let lastName = $state(data.me?.last_name ?? '');
 	let phone = $state(
-		data.me?.phones?.find((p) => p.is_primary)?.e164 ?? data.me?.phones?.[0]?.e164 ?? ''
+		data.me?.phones?.find((p) => p.is_primary)?.phone ?? data.me?.phones?.[0]?.phone ?? ''
 	);
 	let contactBusy = $state(false);
 	let contactError = $state<string | null>(null);
@@ -83,7 +83,7 @@
 			me = await getJson<MeOut>('/auth/me');
 			firstName = firstName || me.first_name || '';
 			lastName = lastName || me.last_name || '';
-			phone = phone || me.phones?.find((p) => p.is_primary)?.e164 || '';
+			phone = phone || me.phones?.find((p) => p.is_primary)?.phone || '';
 			await invalidateAll();
 		} catch (e) {
 			contactError = e instanceof Error ? e.message : 'Neteisingas kodas.';

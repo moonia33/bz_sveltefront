@@ -307,42 +307,51 @@ export interface AddressOut {
 	id: number;
 	label: string;
 	full_name: string;
+	company: string;
+	company_reg_no: string;
+	company_vat_no: string;
 	line1: string;
-	line2: string;
 	city: string;
 	postal_code: string;
 	country_code: string;
+	phone: string;
 	is_default_shipping: boolean;
 	is_default_billing: boolean;
 }
 
 export interface ConsentOut {
-	code: string;
+	key: string;
+	name: string;
+	version: string | null;
 	required: boolean;
-	granted: boolean;
-	version: string;
+	accepted: boolean;
+	accepted_at: string | null;
+	revoked_at: string | null;
 }
 
 export interface PhoneOut {
-	id: number;
-	e164: string;
+	phone: string;
+	label: string;
 	is_primary: boolean;
+	is_verified: boolean;
 }
 
 export interface CustomerGroupOut {
-	id: number;
 	code: string;
 	name: string;
+	priority: number;
+	pricing_type: string;
+	allow_additional_discounts: boolean;
+	allow_coupons: boolean;
 }
 
 export interface PickupPointOut {
-	carrier: string;
+	shipping_method_code: string;
 	pickup_point_id: string;
-	name: string;
-	address: string;
-	city: string;
-	postal_code: string;
+	pickup_point_name: string;
+	pickup_point_raw: Record<string, unknown>;
 	country_code: string;
+	shipping_method_image_url: string;
 }
 
 export interface MeOut {
@@ -468,14 +477,19 @@ export interface CheckoutConfirmOut {
 
 export interface OrderLineOut {
 	id: number;
-	product_id: number | null;
-	variant_id: number | null;
 	sku: string;
 	name: string;
 	qty: number;
 	unit_price: MoneyOut;
+	compare_at_unit_price: MoneyOut | null;
+	discount_percent: number | null;
 	line_total: MoneyOut;
+	compare_at_line_total: MoneyOut | null;
 	delivery_window: DeliveryWindowOut | null;
+	// RMA: ar eilutė grąžinama, langas (d.) ir jau grąžintas kiekis.
+	returnable: boolean;
+	return_days: number;
+	returned_qty: number;
 }
 
 export interface FeeOut {
@@ -514,4 +528,82 @@ export interface OrderOut {
 	fees: FeeOut[];
 	order_total: MoneyOut;
 	created_at: string;
+	supplier_reservation_status?: string;
+	supplier_reservation_status_label?: string;
+}
+
+// RMA — customer-facing return request (checkout/api/returns.py).
+export interface ReturnLineOut {
+	id: number;
+	order_line_id: number;
+	sku: string;
+	name: string;
+	qty: number;
+	received_qty: number;
+	credited_qty: number;
+	reason: string;
+}
+
+export interface ReturnOut {
+	id: number;
+	number: string;
+	status: string;
+	status_label: string;
+	order_id: number;
+	note: string;
+	tracking_number: string;
+	credit_invoice_number: string;
+	created_at: string;
+	decided_at: string;
+	received_at: string;
+	completed_at: string;
+	lines: ReturnLineOut[];
+}
+
+// Dovanų kortelė — stored-value mokėjimo priemonė (ne nuolaidos kodas).
+export interface GiftCardOut {
+	code: string;
+	currency: string;
+	initial_amount: string;
+	balance: string;
+	status: string;
+	expires_at: string | null;
+	is_spendable: boolean;
+}
+
+export interface NewsletterStatusOut {
+	subscribed: boolean;
+	email: string;
+}
+
+// CMS help-centras / parduotuvės.
+export interface CmsCategoryOut {
+	slug: string;
+	name: string;
+	description: string;
+	icon: string;
+	page_count: number;
+}
+
+export interface CmsPageListOut {
+	slug: string;
+	title: string;
+	updated_at: string;
+}
+
+export interface StoreLocationOut {
+	id: number;
+	name: string;
+	line1: string;
+	city: string;
+	postal_code: string;
+	country_code: string;
+	phone: string;
+	email: string;
+	latitude: string | null;
+	longitude: string | null;
+	opening_hours: Record<string, string>;
+	services: string[];
+	description: string;
+	is_pickup_point: boolean;
 }

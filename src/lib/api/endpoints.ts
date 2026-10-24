@@ -12,6 +12,7 @@ import type {
 	FavoritesOut,
 	GiftCardOut,
 	MeOut,
+	NavigationOut,
 	NewsletterStatusOut,
 	OrderOut,
 	Paginated,
@@ -221,6 +222,11 @@ export function getCmsCategoryPages(ctx: Ctx, slug: string) {
 
 export function getStores(ctx: Ctx) {
 	return apiFetch<StoreLocationOut[]>(ctx, '/cms/stores');
+}
+
+// Header/promo/mega-meniu struktūra iš BE (cms Menu + MenuItem medis).
+export function getNavigation(ctx: Ctx) {
+	return apiFetch<NavigationOut>(ctx, '/cms/navigation');
 }
 
 // Viešas order-confirmation lookup: Montonio order-token arba authed order_id.

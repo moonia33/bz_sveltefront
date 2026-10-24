@@ -617,3 +617,30 @@ export interface StoreLocationOut {
 	description: string;
 	is_pickup_point: boolean;
 }
+
+export interface NavItemOut {
+	id: number;
+	kind: string;
+	label: string;
+	url: string;
+	icon: string;
+	badge: string;
+	highlight: boolean;
+	new_tab: boolean;
+	show_in: string;
+	children: NavItemOut[];
+}
+
+export interface MegaMenuFeatureOut {
+	title: string;
+	text: string;
+	image_url: string;
+	url: string;
+	cta_label: string;
+}
+
+export interface NavigationOut {
+	promo: NavItemOut | null;
+	items: NavItemOut[];
+	mega_features: Record<string, MegaMenuFeatureOut>;
+}

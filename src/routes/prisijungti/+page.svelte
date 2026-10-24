@@ -84,13 +84,13 @@
 						required
 						autocomplete="email"
 						placeholder="vardas@pastas.lt"
-						class="block w-full rounded-lg border-gray-200 px-3 py-2.5 text-sm focus:border-zvynas-500 focus:ring-zvynas-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+						class="block w-full rounded-lg border-gray-200 px-3 py-2.5 text-sm focus:border-primary-focus focus:ring-primary-focus dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
 					/>
 				</div>
 				<button
 					type="submit"
 					disabled={busy || !email.trim()}
-					class="flex w-full items-center justify-center gap-x-2 rounded-full bg-zvynas-600 px-6 py-3 text-sm font-semibold text-white hover:bg-zvynas-700 disabled:opacity-60"
+					class="flex w-full items-center justify-center gap-x-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-60"
 				>
 					{#if busy}<Loader2 class="size-4 animate-spin" />{/if}
 					Gauti kodą
@@ -113,7 +113,7 @@
 						bind:value={email}
 						required
 						autocomplete="email"
-						class="block w-full rounded-lg border-gray-200 px-3 py-2.5 text-sm focus:border-zvynas-500 focus:ring-zvynas-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+						class="block w-full rounded-lg border-gray-200 px-3 py-2.5 text-sm focus:border-primary-focus focus:ring-primary-focus dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
 					/>
 				</div>
 				<div>
@@ -128,13 +128,13 @@
 						required
 						autocomplete="one-time-code"
 						placeholder="••••••"
-						class="block w-full rounded-lg border-gray-200 px-3 py-2.5 text-center text-lg font-semibold tracking-[0.3em] focus:border-zvynas-500 focus:ring-zvynas-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+						class="block w-full rounded-lg border-gray-200 px-3 py-2.5 text-center text-lg font-semibold tracking-[0.3em] focus:border-primary-focus focus:ring-primary-focus dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
 					/>
 				</div>
 				<button
 					type="submit"
 					disabled={busy || !code.trim()}
-					class="flex w-full items-center justify-center gap-x-2 rounded-full bg-zvynas-600 px-6 py-3 text-sm font-semibold text-white hover:bg-zvynas-700 disabled:opacity-60"
+					class="flex w-full items-center justify-center gap-x-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-60"
 				>
 					{#if busy}<Loader2 class="size-4 animate-spin" />{/if}
 					Prisijungti
@@ -161,14 +161,14 @@
 								error = 'Nepavyko išsiųsti kodo.';
 							}
 						}}
-						class="text-zvynas-600 underline">Siųsti kodą iš naujo</button
+						class="text-primary underline">Siųsti kodą iš naujo</button
 					>
 				</div>
 			</form>
 		{/if}
 
 		{#if error}
-			<p class="mt-4 rounded-lg bg-zvynas-50 px-3 py-2.5 text-sm text-zvynas-700 dark:bg-zvynas-500/10 dark:text-zvynas-400">
+			<p class="mt-4 rounded-lg bg-primary-100 px-3 py-2.5 text-sm text-primary dark:bg-primary-100/10 dark:text-primary">
 				{error}
 			</p>
 		{/if}

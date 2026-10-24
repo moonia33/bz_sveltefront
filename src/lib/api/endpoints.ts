@@ -113,6 +113,19 @@ export function getMe(ctx: Ctx) {
 	return apiFetch<MeOut>(ctx, '/auth/me');
 }
 
+/** Ar request'e yra auth cookie (BE: AUTH_COOKIE_ACCESS_NAME=access_token). */
+export function hasAuthCookie(ctx: Ctx): boolean {
+	if (browser) return true; // klientui cookie nusprendžia pats fetch
+	const cookie = ctx.request?.headers.get('cookie') ?? '';
+	return /(?:^|;\s*)access_token=/.test(cookie);
+}
+
+/** getMe, bet guest'ams be auth cookie – null vietoj 401 (BE logai švarūs). */
+export function getMeOrNull(ctx: Ctx): Promise<MeOut | null> {
+	if (!hasAuthCookie(ctx)) return Promise.resolve(null);
+	return getMe(ctx).catch(() => null);
+}
+
 function json<T>(ctx: Ctx, path: string, method: string, body?: unknown) {
 	return apiFetch<T>(ctx, path, {
 		method,

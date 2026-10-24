@@ -8,7 +8,7 @@
 	let { data, children } = $props();
 </script>
 
-<div class="flex min-h-screen flex-col">
+<div class="flex min-h-screen flex-col pb-14 md:pb-0">
 	<Header
 		categories={data.categories}
 		cart={data.cart}
@@ -19,7 +19,7 @@
 	<main id="content" class="grow">
 		{@render children()}
 	</main>
-	<Footer categories={data.categories} />
+	<Footer categories={data.categories} navigation={data.navigation} />
 	<BackToTop />
 	<NavProgress />
 </div>

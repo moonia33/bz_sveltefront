@@ -32,7 +32,9 @@
 	} from '#lib/api/types';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
 	import CatalogMenu from './CatalogMenu.svelte';
+	import BottomTabBar from './BottomTabBar.svelte';
 	import MiniCart from './MiniCart.svelte';
+	import MobileDrawer from './MobileDrawer.svelte';
 	import SearchModal from './SearchModal.svelte';
 
 	let {
@@ -50,6 +52,7 @@
 	} = $props();
 
 	let cartOpen = $state(false);
+	let drawerOpen = $state(false);
 	let accountOpen = $state(false);
 	let accountBox = $state<HTMLDivElement | null>(null);
 	let navBox = $state<HTMLDivElement | null>(null);
@@ -100,6 +103,10 @@
 
 	const navItems = $derived(
 		navigation?.items?.length ? navigation.items : FALLBACK_ITEMS
+	);
+	// Desktop juosta nerodo mobile-only item'ų; drawer'is — atvirkščiai.
+	const desktopNavItems = $derived(
+		navItems.filter((i) => i.show_in !== 'mobile')
 	);
 	const promoText = $derived(
 		navigation?.promo?.label || 'Nemokamas pristatymas užsakymams nuo 50 €'
@@ -183,7 +190,9 @@
 			<!-- Catalog + Search -->
 			<div class="md:w-full order-2 md:grow md:w-auto">
 				<div class="flex basis-full items-center gap-x-1 md:gap-x-3">
-					<CatalogMenu {categories} megaFeatures={navigation?.mega_features ?? {}} />
+					<div class="hidden md:block">
+						<CatalogMenu {categories} megaFeatures={navigation?.mega_features ?? {}} />
+					</div>
 
 					<div class="hidden md:block w-full">
 						<button
@@ -322,15 +331,16 @@
 	</div>
 	<!-- End Main row -->
 
-	<!-- Bottom nav (BE meniu: cms Menu 'header') -->
+	<!-- Bottom nav (BE meniu: cms Menu 'header') — tik desktop'ui,
+	     mobile naudoja BottomTabBar + MobileDrawer -->
 	<div
-		class="relative flex items-center max-w-340 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-1"
+		class="relative hidden md:flex items-center max-w-340 w-full mx-auto px-4 sm:px-6 lg:px-8 pb-1"
 		bind:this={navBox}
 	>
 		<div
 			class="flex min-w-0 flex-1 items-center gap-x-1 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
 		>
-			{#each navItems as item (item.id)}
+			{#each desktopNavItems as item (item.id)}
 				{@const Icon = ICONS[item.icon]}
 				{@const hasChildren = (item.children ?? []).length > 0}
 				<div class="relative shrink-0">
@@ -425,3 +435,11 @@
 
 <SearchModal bind:open={searchOpen} {categories} />
 <MiniCart bind:open={cartOpen} {cart} />
+<MobileDrawer bind:open={drawerOpen} {categories} {navItems} />
+<BottomTabBar
+	{cartCount}
+	{favoriteCount}
+	{me}
+	onCatalog={() => (drawerOpen = true)}
+	onCart={() => (cartOpen = true)}
+/>

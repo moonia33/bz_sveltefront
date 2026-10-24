@@ -1,14 +1,74 @@
 <script lang="ts">
-	import type { CategoryOut } from '#lib/api/types';
+	import type { CategoryOut, NavItemOut, NavigationOut } from '#lib/api/types';
 	import { Check } from '@lucide/svelte';
 
-	let { categories = [] }: { categories?: CategoryOut[] } = $props();
+	let {
+		categories = [],
+		navigation = null
+	}: {
+		categories?: CategoryOut[];
+		navigation?: NavigationOut | null;
+	} = $props();
 
 	const topCategories = $derived(categories.filter((c) => !c.parent_id).slice(0, 6));
 	const year = new Date().getFullYear();
 
 	const linkClass =
 		'text-sm text-muted-foreground-1 underline-offset-4 hover:underline hover:text-foreground focus:outline-hidden focus:underline focus:text-foreground';
+
+	// Fallback'as — identiškas ankstesniam hardkodintam footer'iui,
+	// naudojamas tik kai /cms/navigation nepasiekiamas.
+	const FALLBACK_COLS: NavItemOut[] = [
+		{
+			id: -1, kind: 'link', label: 'Pagalba', url: '', icon: '',
+			badge: '', highlight: false, new_tab: false, show_in: 'all',
+			children: [
+				{ id: -11, kind: 'link', label: 'Pagalbos centras', url: '/pagalba', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -12, kind: 'link', label: 'Keitimas ir grąžinimas', url: '/grazinimas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -13, kind: 'link', label: 'Parduotuvės', url: '/parduotuves', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -14, kind: 'link', label: 'DUK', url: '/info/duk', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+			]
+		},
+		{
+			id: -2, kind: 'link', label: 'Informacija', url: '', icon: '',
+			badge: '', highlight: false, new_tab: false, show_in: 'all',
+			children: [
+				{ id: -21, kind: 'link', label: 'Apie mus', url: '/info/apie-mus', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -22, kind: 'link', label: 'Taisyklės', url: '/info/taisykles', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -23, kind: 'link', label: 'Privatumas', url: '/info/privatumas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+			]
+		},
+		{
+			id: -3, kind: 'link', label: 'Katalogas', url: '', icon: '',
+			badge: '', highlight: false, new_tab: false, show_in: 'all',
+			children: []
+		},
+		{
+			id: -4, kind: 'link', label: 'Kontaktai', url: '', icon: '',
+			badge: '', highlight: false, new_tab: false, show_in: 'all',
+			children: [
+				{ id: -41, kind: 'link', label: '+370 600 00000', url: 'tel:+37060000000', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -42, kind: 'link', label: 'info@baltijoszvynas.lt', url: 'mailto:info@baltijoszvynas.lt', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -43, kind: 'link', label: 'Parduotuvių kontaktai', url: '/parduotuves', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+			]
+		}
+	];
+	const FALLBACK_BOTTOM: NavItemOut[] = [
+		{ id: -91, kind: 'link', label: 'Taisyklės', url: '/info/taisykles', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+		{ id: -92, kind: 'link', label: 'Privatumas', url: '/info/privatumas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+	];
+
+	// Stulpeliai: tiesiogiai iš 'footer' meniu (root = antraštė,
+	// children = nuorodos); 'Katalogas' stulpelį fallback'e paliekam
+	// dinaminį iš kategorijų medžio.
+	const columns = $derived(
+		navigation?.footers?.length ? navigation.footers : FALLBACK_COLS
+	);
+	const bottomLinks = $derived(
+		navigation?.bottom_links?.length
+			? navigation.bottom_links
+			: FALLBACK_BOTTOM
+	);
 
 	let nlEmail = $state('');
 	let nlState = $state<'idle' | 'busy' | 'ok' | 'err'>('idle');
@@ -79,42 +139,33 @@
 		</div>
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 mb-14">
-			<div>
-				<p class="mb-3 font-medium text-sm text-foreground">Pagalba</p>
-				<ul class="grid space-y-2">
-					<li><a class={linkClass} href="/pagalba">Pagalbos centras</a></li>
-					<li><a class={linkClass} href="/grazinimas">Keitimas ir grąžinimas</a></li>
-					<li><a class={linkClass} href="/parduotuves">Parduotuvės</a></li>
-					<li><a class={linkClass} href="/info/duk">DUK</a></li>
-				</ul>
-			</div>
-			<div>
-				<p class="mb-3 font-medium text-sm text-foreground">Informacija</p>
-				<ul class="grid space-y-2">
-					<li><a class={linkClass} href="/info/apie-mus">Apie mus</a></li>
-					<li><a class={linkClass} href="/info/taisykles">Taisyklės</a></li>
-					<li><a class={linkClass} href="/info/privatumas">Privatumas</a></li>
-				</ul>
-			</div>
-			<div>
-				<p class="mb-3 font-medium text-sm text-foreground">Katalogas</p>
-				<ul class="grid space-y-2">
-					{#each topCategories as c (c.id)}
-						<li><a class={linkClass} href="/k/{c.slug}">{c.name}</a></li>
-					{/each}
-					<li><a class={linkClass} href="/katalogas">Visos prekės</a></li>
-				</ul>
-			</div>
-			<div>
-				<p class="mb-3 font-medium text-sm text-foreground">Kontaktai</p>
-				<ul class="grid space-y-2">
-					<li><span class="text-sm text-muted-foreground-1">+370 600 00000</span></li>
-					<li><span class="text-sm text-muted-foreground-1">info@baltijoszvynas.lt</span></li>
-					<li class="pt-1">
-						<a class={linkClass} href="/parduotuves">Parduotuvių kontaktai →</a>
-					</li>
-				</ul>
-			</div>
+			{#each columns as col (col.id)}
+				<div>
+					{#if col.url}
+						<a class="mb-3 block font-medium text-sm text-foreground hover:text-primary-hover" href={col.url}>{col.label}</a>
+					{:else}
+						<p class="mb-3 font-medium text-sm text-foreground">{col.label}</p>
+					{/if}
+					<ul class="grid space-y-2">
+						{#each col.children as link (link.id)}
+							<li>
+								<a
+									class={linkClass}
+									href={link.url || '#'}
+									target={link.new_tab ? '_blank' : undefined}
+									rel={link.new_tab ? 'noopener noreferrer' : undefined}
+								>{link.label}</a>
+							</li>
+						{/each}
+						{#if !navigation?.footers?.length && col.label === 'Katalogas'}
+							{#each topCategories as c (c.id)}
+								<li><a class={linkClass} href="/k/{c.slug}">{c.name}</a></li>
+							{/each}
+							<li><a class={linkClass} href="/katalogas">Visos prekės</a></li>
+						{/if}
+					</ul>
+				</div>
+			{/each}
 		</div>
 
 		<div
@@ -122,8 +173,9 @@
 		>
 			<p class="text-xs text-muted-foreground-1">© {year} Baltijos Žvynas</p>
 			<div class="flex items-center gap-x-4">
-				<a class="text-xs {linkClass}" href="/info/taisykles">Taisyklės</a>
-				<a class="text-xs {linkClass}" href="/info/privatumas">Privatumas</a>
+				{#each bottomLinks as link (link.id)}
+					<a class="text-xs {linkClass}" href={link.url || '#'}>{link.label}</a>
+				{/each}
 			</div>
 		</div>
 	</div>

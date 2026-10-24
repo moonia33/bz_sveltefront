@@ -642,5 +642,7 @@ export interface MegaMenuFeatureOut {
 export interface NavigationOut {
 	promo: NavItemOut | null;
 	items: NavItemOut[];
+	footers: NavItemOut[];
+	bottom_links: NavItemOut[];
 	mega_features: Record<string, MegaMenuFeatureOut>;
 }

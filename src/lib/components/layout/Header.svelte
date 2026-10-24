@@ -80,24 +80,14 @@
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -4, kind: 'preset', label: 'Visos kategorijos',
-			url: '/kategorijos', icon: 'layout-grid', badge: '',
+			id: -4, kind: 'preset', label: 'Pagalba',
+			url: '/pagalba', icon: 'info', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -5, kind: 'preset', label: 'Visos prekės',
-			url: '/katalogas', icon: 'store', badge: '',
+			id: -5, kind: 'preset', label: 'Parduotuvės',
+			url: '/parduotuves', icon: 'map-pin', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
-		},
-		{
-			id: -6, kind: 'link', label: 'Puslapiai', url: '', icon: 'layers',
-			badge: '', highlight: false, new_tab: false, show_in: 'all',
-			children: [
-				{ id: -61, kind: 'link', label: 'Pristatymas', url: '/info/pristatymas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -62, kind: 'link', label: 'Grąžinimas', url: '/info/grazinimas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -63, kind: 'link', label: 'DUK', url: '/info/duk', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -64, kind: 'link', label: 'Kontaktai', url: '/info/kontaktai', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
-			]
 		}
 	];
 

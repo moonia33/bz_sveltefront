@@ -102,15 +102,30 @@
 		};
 	}
 
+	// Featured nuorodos (CMS meniu) — atskirta vizuali grupė root lygyje.
+	const featuredNodes = $derived(
+		navItems.filter((i) => i.show_in !== 'desktop').map(navNode)
+	);
+
+	// Kategorijos nemaišomos su nuorodomis — atsidaro per „Prekių
+	// katalogas" mazgą kaip atskiras drill-down lygis.
+	const catalogNode = $derived<Node>({
+		key: 'catalog',
+		label: 'Prekių katalogas',
+		url: '',
+		icon: 'layout-grid',
+		iconUrl: '',
+		badge: '',
+		highlight: false,
+		children: categories
+			.filter((c) => c.parent_id == null || !catById.has(c.parent_id))
+			.map(catNode)
+	});
+
 	const rootLevel = $derived<Level>({
 		title: 'Meniu',
 		url: '',
-		nodes: [
-			...navItems.filter((i) => i.show_in !== 'desktop').map(navNode),
-			...categories
-				.filter((c) => c.parent_id == null || !catById.has(c.parent_id))
-				.map(catNode)
-		]
+		nodes: [catalogNode]
 	});
 
 	// Lygių krūva — nuoseklus gilinimas (drill-down).
@@ -191,6 +206,53 @@
 					transition:fly={{ x: stack.length ? 48 : 0, duration: 150 }}
 				>
 					<nav class="p-2">
+						{#if stack.length === 0 && featuredNodes.length}
+							<p class="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground-1">
+								Trumpiniai
+							</p>
+							<div class="mb-3 rounded-xl border border-surface-line bg-surface p-1">
+								{#each featuredNodes as node (node.key)}
+									{@const Icon = ICONS[node.icon]}
+									{#if node.children.length}
+										<button
+											type="button"
+											onclick={() => push(node)}
+											class="flex min-h-12 w-full items-center gap-x-3 rounded-lg px-3 text-start text-[15px] font-medium text-foreground hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus {node.highlight
+												? 'text-secondary'
+												: ''}"
+										>
+											{#if Icon}
+												<Icon class="size-5 shrink-0" />
+											{/if}
+											<span class="grow truncate">{node.label}</span>
+											{#if node.badge}
+												<span class="inline-flex items-center rounded-full bg-secondary px-1.5 py-px text-[10px] font-semibold text-secondary-foreground">{node.badge}</span>
+											{/if}
+											<ChevronRight class="size-4 shrink-0 text-muted-foreground-1" />
+										</button>
+									{:else}
+										<a
+											href={node.url || '#'}
+											onclick={() => (open = false)}
+											class="flex min-h-12 items-center gap-x-3 rounded-lg px-3 text-[15px] font-medium text-foreground hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus {node.highlight
+												? 'text-secondary'
+												: ''}"
+										>
+											{#if Icon}
+												<Icon class="size-5 shrink-0" />
+											{/if}
+											<span class="grow truncate">{node.label}</span>
+											{#if node.badge}
+												<span class="inline-flex items-center rounded-full bg-secondary px-1.5 py-px text-[10px] font-semibold text-secondary-foreground">{node.badge}</span>
+											{/if}
+										</a>
+									{/if}
+								{/each}
+							</div>
+							<p class="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground-1">
+								Katalogas
+							</p>
+						{/if}
 						{#if current.url}
 							<a
 								href={current.url}

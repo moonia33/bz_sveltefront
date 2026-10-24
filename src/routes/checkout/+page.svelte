@@ -353,6 +353,7 @@
 					payment_provider: opt.payload?.preferred_provider || null,
 					montonio_method: opt.payload?.montonio_method || null,
 					inbank_product_code: opt.payload?.inbank_product_code || null,
+					gift_card_code: giftCardCode.trim() || null,
 					coupon_code: couponCode.trim() || null,
 					consents: consents
 						.filter((c) => c.required)
@@ -378,8 +379,16 @@
 	const step = $derived(
 		!me ? 1 : !contactDone ? 1 : !shippingAddressId ? 2 : 3
 	);
+	// Dovanų kortelė — stored-value; kodas privalomas prieš confirm.
+	let giftCardCode = $state('');
+	const isGiftCard = $derived(
+		chosenPaymentOption?.payload?.payment_method === 'gift_card'
+	);
 	const canConfirm = $derived(
-		Boolean(shippingAddressId && shippingMethod && paymentOptionId && consentsChecked && !confirmBusy)
+		Boolean(
+			shippingAddressId && shippingMethod && paymentOptionId && consentsChecked && !confirmBusy
+				&& (!isGiftCard || giftCardCode.trim())
+		)
 	);
 </script>
 
@@ -637,6 +646,22 @@
 							{/each}
 							{#if !paymentOptions.length && !payBusy}
 								<p class="text-sm text-gray-400">Mokėjimo būdų nerasta.</p>
+							{/if}
+
+							{#if isGiftCard}
+								<div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-800">
+									<label for="gc-code" class="text-sm text-gray-600 dark:text-neutral-300">Dovanų kortelės kodas</label>
+									<input
+										id="gc-code"
+										type="text"
+										bind:value={giftCardCode}
+										placeholder="XXXX-XXXX-XXXX"
+										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm uppercase tracking-wider dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+									/>
+									<p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+										Kortelės likutis padengia visą užsakymo sumą.
+									</p>
+								</div>
 							{/if}
 
 							{#if chosenPaymentOption?.payload?.calculator_url}

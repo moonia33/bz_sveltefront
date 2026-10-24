@@ -1,43 +1,73 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { ChevronDown, ChevronRight, Loader2, SlidersHorizontal } from '@lucide/svelte';
 	import FilterSidebar from '#lib/components/shop/FilterSidebar.svelte';
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
-	import { ChevronDown, Loader2 } from '@lucide/svelte';
-	import type { CatalogFacetsOut, Paginated, ProductListOut } from '#lib/api/types';
+	import ProductList from '#lib/components/shop/ProductList.svelte';
+	import { pluralLt } from '#lib/i18n';
+	import type { CatalogFacetsOut, CategoryOut, Paginated, ProductListOut } from '#lib/api/types';
 	import { onDestroy, onMount } from 'svelte';
 
 	let {
 		title,
+		description,
 		products,
 		facets,
-		params
+		params,
+		pathname,
+		breadcrumbs = [],
+		categoryChips = [],
+		categoryLinks = [],
+		categorySlug,
+		listTemplate = 'grid',
+		pageSize = 20
 	}: {
 		title: string;
+		description?: string;
 		products: Paginated<ProductListOut>;
 		facets: CatalogFacetsOut;
 		params: URLSearchParams;
+		pathname: string;
+		breadcrumbs?: { name: string; href?: string }[];
+		categoryChips?: CategoryOut[];
+		categoryLinks?: { slug: string; name: string }[];
+		categorySlug?: string;
+		listTemplate?: 'grid' | 'list';
+		pageSize?: number;
 	} = $props();
 
-	const pageSize = 20;
-
-	let items = $state<ProductListOut[]>([]);
-	let total = $state(0);
-	let currentPage = $state(1);
-	let loadingMore = $state(false);
+	let items = $state<ProductListOut[]>(products.items ?? []);
+	let total = $state(products.count ?? 0);
+	let lastPage = $state(Math.max(1, Number(params.get('page') ?? 1) || 1));
+	let loading = $state(false);
 	let loadError = $state<string | null>(null);
+	let filtersOpen = $state(false);
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let observer: IntersectionObserver | null = null;
 
-	// Reset kai load() duoda naują puslapio rezultatą (filtrų/paieškos pasikeitimas).
+	// Reset when load() returns a new result set (filters/sort/query changed).
 	$effect(() => {
 		items = products.items ?? [];
 		total = products.count ?? 0;
-		currentPage = Math.max(1, Number(params.get('page') ?? 1) || 1);
+		lastPage = Math.max(1, Number(params.get('page') ?? 1) || 1);
 		loadError = null;
 	});
 
-	const hasMore = $derived(items.length < total);
+	const hasMore = $derived(lastPage * pageSize < total);
 	const currentSort = $derived(params.get('sort') ?? '');
+	const currentPage = $derived(Math.max(1, Number(params.get('page') ?? 1) || 1));
+
+	export function capture() {
+		return { items: $state.snapshot(items), lastPage, total };
+	}
+
+	export function restore(v: { items: ProductListOut[]; lastPage: number; total: number } | undefined) {
+		if (!v) return;
+		items = v.items;
+		lastPage = v.lastPage;
+		total = v.total;
+	}
 
 	function href(patch: Record<string, string | null>): string {
 		const p = new URLSearchParams(params);
@@ -46,16 +76,31 @@
 			if (v === null || v === '') p.delete(k);
 			else p.set(k, v);
 		}
-		return `?${p.toString()}`;
+		const s = p.toString();
+		return `${pathname}${s ? `?${s}` : ''}`;
 	}
 
+	const nextHref = $derived.by(() => {
+		const p = new URLSearchParams(params);
+		p.set('page', String(lastPage + 1));
+		return `${pathname}?${p.toString()}`;
+	});
+
+	const fromStartHref = $derived.by(() => {
+		const p = new URLSearchParams(params);
+		p.delete('page');
+		const s = p.toString();
+		return `${pathname}${s ? `?${s}` : ''}`;
+	});
+
 	async function loadMore() {
-		if (loadingMore || !hasMore) return;
-		loadingMore = true;
+		if (loading || !hasMore || loadError) return;
+		loading = true;
 		loadError = null;
 		try {
 			const p = new URLSearchParams(params);
-			p.set('page', String(currentPage + 1));
+			p.set('page', String(lastPage + 1));
+			if (categorySlug) p.set('category_slug', categorySlug);
 			const res = await fetch(`/api/v1/catalog/products?${p.toString()}`, {
 				credentials: 'include',
 				headers: { Accept: 'application/json' }
@@ -65,12 +110,27 @@
 			const seen = new Set(items.map((i) => i.id));
 			items = [...items, ...(data.items ?? []).filter((i) => !seen.has(i.id))];
 			total = data.count ?? total;
-			currentPage += 1;
+			lastPage += 1;
+			// Reflect loaded depth in URL without re-running load().
+			const up = new URLSearchParams(params);
+			if (lastPage > 1) up.set('page', String(lastPage));
+			else up.delete('page');
+			const us = up.toString();
+			await goto(`${pathname}${us ? `?${us}` : ''}`, {
+				state: page.state,
+				shallow: true,
+				replace: true
+			});
 		} catch {
 			loadError = 'Nepavyko užkrauti daugiau prekių.';
 		} finally {
-			loadingMore = false;
+			loading = false;
 		}
+	}
+
+	function retry() {
+		loadError = null;
+		loadMore();
 	}
 
 	onMount(() => {
@@ -78,7 +138,7 @@
 			(entries) => {
 				if (entries.some((e) => e.isIntersecting)) loadMore();
 			},
-			{ rootMargin: '600px 0px' }
+			{ rootMargin: '800px 0px' }
 		);
 		if (sentinel) observer.observe(sentinel);
 	});
@@ -90,89 +150,206 @@
 	});
 
 	onDestroy(() => observer?.disconnect());
+
+	const sorts: [string, string][] = [
+		['', 'Rekomenduojama'],
+		['best_selling', 'Populiariausios'],
+		['price', 'Kaina: nuo mažiausios'],
+		['-price', 'Kaina: nuo didžiausios'],
+		['-created', 'Naujausios'],
+		['discounted', 'Su nuolaida'],
+		['name', 'Pavadinimas A–Ž']
+	];
 </script>
 
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-	<nav class="mb-4 text-sm text-gray-500 dark:text-neutral-400" aria-label="Duonos traiškanys">
-		<a href="/" class="hover:text-gray-800 dark:hover:text-neutral-200">Pradžia</a>
-		<span class="mx-1">/</span>
-		<span class="text-gray-800 dark:text-neutral-200">{title}</span>
-	</nav>
+<div class="w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">
+	<div class="lg:flex">
+		<FilterSidebar {facets} {params} bind:open={filtersOpen} {categoryLinks} />
 
-	<h1 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
+		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">
+			{#if breadcrumbs.length}
+				<nav aria-label="Naršymo kelias" class="mb-4">
+					<ol class="flex items-center gap-x-1.5 text-sm">
+						{#each breadcrumbs as crumb, i (i)}
+							<li class="flex items-center gap-x-1.5">
+								{#if i > 0}<ChevronRight class="size-3.5 text-muted-foreground-2" />{/if}
+								{#if crumb.href && i < breadcrumbs.length - 1}
+									<a
+										href={crumb.href}
+										class="text-muted-foreground-1 hover:text-foreground hover:underline underline-offset-4"
+										>{crumb.name}</a
+									>
+								{:else}
+									<span class="text-foreground">{crumb.name}</span>
+								{/if}
+							</li>
+						{/each}
+					</ol>
+				</nav>
+			{/if}
 
-	<div class="flex flex-col gap-8 lg:flex-row">
-		<FilterSidebar {facets} {params} />
-
-		<div class="min-w-0 grow">
-			<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-				<p class="text-sm text-gray-500 dark:text-neutral-400">
-					{total} prekė(-ių)
-					{#if params.get('q')}
-						— „{params.get('q')}“
-					{/if}
-				</p>
-				<div class="relative">
-					<select
-						class="appearance-none rounded-lg border-gray-200 py-2 pe-9 ps-3 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
-						aria-label="Rūšiavimas"
-						onchange={(e) => {
-							const v = (e.target as HTMLSelectElement).value;
-							goto(href({ sort: v || null }));
-						}}
-					>
-						<option value="" selected={!currentSort}>Rekomenduojama</option>
-						<option value="price" selected={currentSort === 'price'}>Kaina: nuo mažiausios</option>
-						<option value="-price" selected={currentSort === '-price'}>Kaina: nuo didžiausios</option>
-						<option value="-created" selected={currentSort === '-created'}>Naujausios</option>
-						<option value="name" selected={currentSort === 'name'}>Pavadinimas A–Ž</option>
-					</select>
-					<ChevronDown
-						class="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
-					/>
-				</div>
+			<div class="mb-4">
+				<h1 class="font-medium text-xl text-foreground">{title}</h1>
+				{#if description}
+					<p class="mt-1 text-sm text-muted-foreground-1">{description}</p>
+				{/if}
 			</div>
 
-			{#if items.length}
-				<ProductGrid products={items} />
-			{:else}
-				<div
-					class="rounded-xl border border-dashed border-gray-300 py-16 text-center dark:border-neutral-700"
-				>
-					<p class="text-gray-500 dark:text-neutral-400">Prekių nerasta.</p>
+			{#if categoryChips.length}
+				<div class="mb-10">
+					<div class="flex flex-wrap gap-1 sm:gap-3">
+						{#each categoryChips as c (c.id)}
+							<a
+								class="p-1 group flex items-center rounded-full bg-layer border border-layer-line hover:border-line-3 focus:outline-hidden focus:border-line-3"
+								href="/k/{c.slug}"
+							>
+								{#if c.menu_icon_url}
+									<img
+										src={c.menu_icon_url}
+										alt=""
+										width="32"
+										height="32"
+										loading="lazy"
+										class="shrink-0 size-8 object-cover rounded-full"
+									/>
+								{:else}
+									<span
+										class="shrink-0 size-8 rounded-full bg-surface inline-flex items-center justify-center text-xs text-surface-foreground"
+										>{c.name.slice(0, 1)}</span
+									>
+								{/if}
+								<span class="grow py-1 ps-2 pe-3">
+									<span
+										class="text-[13px] font-medium text-layer-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
+										>{c.name}</span
+									>
+								</span>
+							</a>
+						{/each}
+					</div>
 				</div>
 			{/if}
 
-			<!-- Infinite scroll sentinel + manual fallback -->
-			{#if hasMore}
-				<div bind:this={sentinel} class="mt-8 flex justify-center">
+			<!-- Filter bar -->
+			<div class="mb-6 flex flex-wrap justify-between items-center gap-3">
+				<div class="lg:hidden grow">
 					<button
 						type="button"
-						onclick={loadMore}
-						disabled={loadingMore}
-						class="inline-flex items-center gap-x-2 rounded-full border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+						onclick={() => (filtersOpen = true)}
+						class="flex items-center gap-x-2 text-xs sm:text-sm text-start text-foreground rounded-lg underline-offset-4 hover:underline focus:outline-hidden"
 					>
-						{#if loadingMore}
-							<Loader2 class="size-4 animate-spin" /> Kraunama…
-						{:else}
-							Rodyti daugiau
-						{/if}
+						<SlidersHorizontal class="shrink-0 size-3.5" />
+						Filtrai
 					</button>
 				</div>
+
+				<div class="flex flex-wrap lg:justify-between lg:grow items-center">
+					<span class="me-1 text-xs sm:text-sm text-foreground"
+						>{total} {pluralLt(total, ['prekė', 'prekės', 'prekių'])}</span
+					>
+
+					<div class="lg:hidden mx-3 w-px h-3 bg-surface-2"></div>
+
+					<div class="relative min-h-7.5 inline-flex items-center">
+						<span class="me-1 text-xs sm:text-sm text-foreground">Rūšiuoti:</span>
+						<select
+							aria-label="Rūšiavimas"
+							class="appearance-none py-1 ps-1.5 pe-7 text-xs sm:text-sm bg-transparent border-transparent text-foreground rounded-lg focus:ring-0 cursor-pointer"
+							onchange={(e) => {
+								const v = (e.target as HTMLSelectElement).value;
+								goto(href({ sort: v || null }));
+							}}
+						>
+							{#each sorts as [value, label] (value)}
+								<option {value} selected={currentSort === value}>{label}</option>
+							{/each}
+						</select>
+						<ChevronDown
+							class="pointer-events-none absolute end-2 top-1/2 size-3.5 -translate-y-1/2 text-foreground"
+						/>
+					</div>
+				</div>
+			</div>
+			<!-- End Filter Bar -->
+
+			{#if currentPage > 1}
+				<p class="mb-6">
+					<a
+						href={fromStartHref}
+						data-sveltekit-noscroll
+						class="text-sm text-foreground underline underline-offset-4 hover:text-primary-hover"
+						>← Rodyti nuo pradžios</a
+					>
+				</p>
 			{/if}
-			{#if loadingMore}
-				<div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+
+			{#if items.length}
+				{#if listTemplate === 'list'}
+					<ProductList products={items} />
+				{:else}
+					<ProductGrid products={items} priorityFirst={currentPage === 1} />
+				{/if}
+			{:else}
+				<div class="py-16 text-center">
+					<p class="font-medium text-foreground">Prekių nerasta</p>
+					<p class="mt-1 text-sm text-muted-foreground-1">
+						Pabandykite pakeisti filtrus arba paieškos frazę.
+					</p>
+					<a
+						href={pathname}
+						class="mt-4 inline-flex items-center text-sm text-foreground underline underline-offset-4 hover:text-primary-hover"
+						>Išvalyti filtrus</a
+					>
+				</div>
+			{/if}
+
+			<!-- Infinite scroll sentinel -->
+			{#if hasMore && items.length}
+				<div bind:this={sentinel} class="h-px" aria-hidden="true"></div>
+			{/if}
+
+			{#if loading}
+				<p class="mt-10 text-sm text-muted-foreground-1">
+					<span class="inline-flex items-center gap-x-2 text-sm text-muted-foreground-1">
+						<Loader2 class="animate-spin shrink-0 size-4" />
+						Kraunama…
+					</span>
+				</p>
+				<div class="mt-6 grid grid-cols-2 gap-y-10 gap-x-4 md:grid-cols-3 xl:grid-cols-4">
 					{#each Array.from({ length: 4 }) as _, i (i)}
 						<div class="animate-pulse">
-							<div class="aspect-square rounded-xl bg-gray-100 dark:bg-neutral-800"></div>
-							<div class="mt-3 h-4 w-3/4 rounded bg-gray-100 dark:bg-neutral-800"></div>
-							<div class="mt-2 h-4 w-1/3 rounded bg-gray-100 dark:bg-neutral-800"></div>
+							<div class="aspect-square rounded-xl bg-surface"></div>
+							<div class="mt-3 h-4 w-3/4 rounded bg-surface"></div>
+							<div class="mt-2 h-4 w-1/3 rounded bg-surface"></div>
 						</div>
 					{/each}
 				</div>
 			{/if}
+
 			{#if loadError}
-				<p class="mt-4 text-center text-sm text-zvynas-600">{loadError}</p>
+				<div class="mt-10 text-center">
+					<p class="text-sm text-destructive">{loadError}</p>
+					<button
+						type="button"
+						onclick={retry}
+						class="mt-3 py-2 px-4 inline-flex justify-center items-center text-sm font-medium rounded-lg bg-secondary border border-secondary-line text-secondary-foreground hover:bg-secondary-hover focus:outline-hidden"
+						>Bandyti dar kartą</button
+					>
+				</div>
+			{:else if hasMore && !loading}
+				<div class="mt-10 text-center">
+					<a
+						href={nextHref}
+						rel="next"
+						data-sveltekit-preload-data="false"
+						onclick={(e) => {
+							e.preventDefault();
+							loadMore();
+						}}
+						class="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
+						>Rodyti daugiau</a
+					>
+				</div>
 			{/if}
 		</div>
 	</div>

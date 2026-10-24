@@ -43,5 +43,22 @@ export const actions: Actions = {
 		const id = form.get('item_id');
 		if (!id) return fail(400, { error: 'Trūksta eilutės.' });
 		return mutate(event, 'DELETE', `/checkout/cart/items/${id}`);
+	},
+	// „Save for later": variantas → į mėgstamas, eilutė → iš krepšelio.
+	fav_remove: async (event) => {
+		const ctx = { fetch: event.fetch, request: event.request };
+		const form = await event.request.formData();
+		const id = form.get('item_id');
+		const variantId = Number(form.get('variant_id'));
+		if (!id || !variantId) return fail(400, { error: 'Trūksta eilutės arba varianto.' });
+
+		const favRes = await apiFetchRaw(ctx, '/checkout/favorites', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ variant_id: variantId })
+		});
+		forwardCookies(favRes, event.cookies);
+		// Net jei favorite jau yra — krepšelio eilutę vis tiek šaliname.
+		return mutate(event, 'DELETE', `/checkout/cart/items/${id}`);
 	}
 };

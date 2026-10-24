@@ -21,3 +21,11 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Preline templates (proprietary, local only)
+/preline-pro-templates/
+/preline-pro-templates.zip
+
+# Debug/scratch
+/.tmp-shots/
+/tmp-icon-*.txt

@@ -1,5 +1,18 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
-@import '../assets/css/themes/zvynas.css';
-
+@import '../../node_modules/preline/variants.css';
+@import '../../node_modules/preline/css/themes/theme.css';
+@import '../../node_modules/preline/css/themes/moon.css';
 @custom-variant dark (&:where(.dark, .dark *));
+
+.nav-progress {
+	animation: nav-progress 1.2s ease-in-out infinite;
+}
+@keyframes nav-progress {
+	0% {
+		transform: translateX(-120%);
+	}
+	100% {
+		transform: translateX(350%);
+	}
+}

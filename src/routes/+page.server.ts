@@ -1,22 +1,13 @@
-import { getHome, getProducts } from '#lib/api/endpoints';
+import { getHome, getProducts, getRecentlyViewed } from '#lib/api/endpoints';
+import type { ProductListOut } from '#lib/api/types';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const ctx = { fetch: event.fetch, request: event.request };
-	let home = null;
-	try {
-		home = await getHome(ctx);
-	} catch {
-		home = null;
-	}
-	// Fallback: newest products when the home builder page is not configured.
-	let fallback = null;
-	if (!home || !home.sections?.length) {
-		try {
-			fallback = await getProducts(ctx, { page_size: 10, sort: '-created' });
-		} catch {
-			fallback = null;
-		}
-	}
-	return { home, fallback };
+	const [home, recentlyViewed, newest] = await Promise.all([
+		getHome(ctx).catch(() => null),
+		getRecentlyViewed(ctx).catch(() => [] as ProductListOut[]),
+		getProducts(ctx, { sort: '-created', page_size: 12 }).catch(() => null)
+	]);
+	return { home, recentlyViewed, newest, origin: event.url.origin };
 };

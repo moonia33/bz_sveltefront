@@ -182,7 +182,12 @@
 							{o.shipping_method === 'digital' ? 'El. paštas (skaitmeninis)' : o.shipping_method}
 						</dd>
 					</div>
-					{#if o.delivery_window}
+					{#if o.shipping_method === 'digital'}
+						<div class="flex justify-between gap-x-3">
+							<dt class="text-muted-foreground">Numatomas</dt>
+							<dd class="text-right font-medium text-foreground">Iškart po apmokėjimo</dd>
+						</div>
+					{:else if o.delivery_window}
 						<div class="flex justify-between gap-x-3">
 							<dt class="text-muted-foreground">Numatomas</dt>
 							<dd class="text-right font-medium text-foreground">

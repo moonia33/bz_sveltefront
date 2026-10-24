@@ -70,6 +70,20 @@ export interface Paginated<T> {
 	count: number;
 }
 
+/** Lengvas autocomplete įrašas iš /catalog/suggest — name_html/sku_html
+ *  turi <mark> žymes (saugus HTML, generuoja BE). */
+export interface SuggestItemOut {
+	id: number;
+	slug: string;
+	name: string;
+	name_html: string;
+	sku: string;
+	sku_html: string;
+	brand_name: string;
+	image_url: string | null;
+	price: MoneyOut | null;
+}
+
 export interface CategoryOut {
 	id: number;
 	slug: string;

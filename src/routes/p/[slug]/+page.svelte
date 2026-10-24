@@ -20,6 +20,7 @@
 		ChevronRight,
 		Heart,
 		Image as ImageIcon,
+		MailCheck,
 		Package,
 		Play,
 		ShieldCheck,
@@ -1016,7 +1017,7 @@
 							<div class="mt-2 grid grid-cols-2 gap-2">
 								{#each variants as v (v.sku)}
 									{@const active = selectedVariant === v}
-									{@const avail = v.stock_available > 0}
+									{@const avail = v.stock_available > 0 || product.is_gift_card}
 									{@const delta = (v.price?.gross ?? 0) - cheapestGross}
 									<button
 										type="button"
@@ -1056,26 +1057,40 @@
 						</div>
 					{/if}
 
-					<!-- Stock -->
-					<div class="mt-5 space-y-1.5">
-						<p class="flex items-center gap-x-1.5 text-sm">
-							<Store class="shrink-0 size-4 text-foreground" />
-							<span class="text-muted-foreground-1">Parduotuvėje:</span>
-							{@render stockStatus(localQty)}
-						</p>
-						<p class="flex items-center gap-x-1.5 text-sm">
-							<Warehouse class="shrink-0 size-4 text-foreground" />
-							<span class="text-muted-foreground-1">Nuotolinis sandėlys:</span>
-							{@render stockStatus(remoteQty)}
-						</p>
-						{#if etaSpan}
-							<p class="flex items-center gap-x-1.5 text-sm">
-								<AnimatedStopwatch class="shrink-0 size-4 text-foreground" />
-								<span class="text-muted-foreground-1">Pristatymas:</span>
-								<span class="text-foreground">{etaSpan}</span>
+					<!-- Stock / skaitmeninio pristatymo pastaba -->
+					{#if product.is_gift_card}
+						<div class="mt-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3.5 dark:border-blue-500/20 dark:bg-blue-500/10">
+							<p class="flex items-center gap-x-1.5 text-sm font-medium text-blue-900 dark:text-blue-200">
+								<MailCheck class="shrink-0 size-4" />
+								Skaitmeninė dovanų kortelė
 							</p>
-						{/if}
-					</div>
+							<ul class="mt-1.5 list-disc space-y-0.5 ps-5 text-sm text-blue-800 dark:text-blue-300">
+								<li>Kodas išsiunčiamas el. paštu iškart po apmokėjimo</li>
+								<li>Pristatymas nereikalingas — nieko nereikia laukti</li>
+								<li>Galioja 12 mėn.; sumą galima išleisti dalimis</li>
+							</ul>
+						</div>
+					{:else}
+						<div class="mt-5 space-y-1.5">
+							<p class="flex items-center gap-x-1.5 text-sm">
+								<Store class="shrink-0 size-4 text-foreground" />
+								<span class="text-muted-foreground-1">Parduotuvėje:</span>
+								{@render stockStatus(localQty)}
+							</p>
+							<p class="flex items-center gap-x-1.5 text-sm">
+								<Warehouse class="shrink-0 size-4 text-foreground" />
+								<span class="text-muted-foreground-1">Nuotolinis sandėlys:</span>
+								{@render stockStatus(remoteQty)}
+							</p>
+							{#if etaSpan}
+								<p class="flex items-center gap-x-1.5 text-sm">
+									<AnimatedStopwatch class="shrink-0 size-4 text-foreground" />
+									<span class="text-muted-foreground-1">Pristatymas:</span>
+									<span class="text-foreground">{etaSpan}</span>
+								</p>
+							{/if}
+						</div>
+					{/if}
 					<!-- End Stock -->
 
 					<!-- Button Group -->
@@ -1106,7 +1121,7 @@
 
 						<button
 							type="submit"
-							disabled={!selectedVariant || totalQty <= 0}
+							disabled={!selectedVariant || (!product.is_gift_card && totalQty <= 0)}
 							class="py-3 px-4 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-secondary border border-secondary-line text-secondary-foreground hover:bg-secondary-hover focus:outline-hidden focus:bg-secondary-focus disabled:opacity-50 disabled:pointer-events-none"
 						>
 							{#if addedFlash}

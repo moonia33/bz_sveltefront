@@ -242,6 +242,9 @@ export interface ProductDetailOut {
 	name: string;
 	description: string;
 	is_active: boolean;
+	// Skaitmeninė dovanų kortelė — PDP rodo el. pašto pristatymo
+	// pastabą vietoj sandėlio likučių/ETA.
+	is_gift_card: boolean;
 	product_group_code: string;
 	seo_title: string;
 	seo_description: string;
@@ -293,6 +296,8 @@ export interface CartItemOut {
 	discount_percent: number | null;
 	line_total: MoneyOut;
 	delivery_window: DeliveryWindowOut | null;
+	// Skaitmeninė dovanų kortelė — nereikalauja pristatymo.
+	is_gift_card: boolean;
 }
 
 export interface CartOut {
@@ -457,6 +462,8 @@ export interface CheckoutPreviewOut {
 	currency: string;
 	country_code: string;
 	shipping_method: string;
+	// Visas krepšelis skaitmeninis → shipping žingsnis slėpiamas.
+	is_digital: boolean;
 	items: CartItemOut[];
 	delivery_window: DeliveryWindowOut | null;
 	items_total: MoneyOut;
@@ -519,6 +526,9 @@ export interface OrderOut {
 	payment_status_label: string;
 	payment_redirect_url: string;
 	payment_instructions: string;
+	// Split tender: padengta dovanų kortele / liko provider'iui.
+	gift_card_amount: string;
+	provider_amount: string;
 	items: OrderLineOut[];
 	delivery_window: DeliveryWindowOut | null;
 	items_total: MoneyOut;

@@ -3,6 +3,7 @@
 	import { formatMoney } from '#lib/money';
 	import {
 		Check,
+		Gift,
 		Loader2,
 		MailCheck,
 		MapPin,
@@ -15,6 +16,7 @@
 		CheckoutConfirmOut,
 		CheckoutPreviewOut,
 		ConsentDefinitionOut,
+		GiftCardOut,
 		MeOut,
 		PaymentOptionOut,
 		PickupPointLocation,
@@ -115,6 +117,11 @@
 
 	// ---------- Pristatymas ----------
 	const methods = $derived<ShippingMethodOut[]>(data.shipping_methods ?? []);
+	// Skaitmeninis krepšelis (vien dovanų kortelės) — pristatymas nereikalingas.
+	const isDigital = $derived(
+		(data.cart?.items?.length ?? 0) > 0 &&
+		(data.cart?.items ?? []).every((i) => i.is_gift_card)
+	);
 	let shippingMethod = $state<ShippingMethodOut | null>(null);
 	let shippingAddressId = $state<number | null>(null);
 	let pickupPointId = $state<string | null>(null);
@@ -178,6 +185,21 @@
 
 	// Adresai (kurjeris / atsiėmimas su sąskaitos adresu)
 	const savedAddresses = $derived<AddressOut[]>(me?.addresses ?? []);
+
+	// Digital krepšelis: sąskaitos adresas parenkamas automatiškai —
+	// default billing → default shipping → pirmas išsaugotas.
+	$effect(() => {
+		if (!isDigital || shippingAddressId || !savedAddresses.length) return;
+		const def =
+			savedAddresses.find((a) => a.is_default_billing) ??
+			savedAddresses.find((a) => a.is_default_shipping) ??
+			savedAddresses[0];
+		if (def) {
+			shippingAddressId = def.id;
+			addrSelectedId = def.id;
+			refreshPreview();
+		}
+	});
 	let addrMode = $state<'saved' | 'new'>('saved');
 	let addrSelectedId = $state<number | null>(null);
 	let newAddr = $state({ full_name: '', line1: '', city: '', postal_code: '', phone: '' });
@@ -199,7 +221,8 @@
 				const a = await api<AddressOut>('/auth/addresses', {
 					...newAddr,
 					country_code: 'LT',
-					is_default_shipping: true
+					is_default_shipping: !isDigital,
+					is_default_billing: true
 				});
 				shippingAddressId = a.id;
 				me = me ? { ...me, addresses: [...(me.addresses ?? []), a] } : me;
@@ -235,7 +258,7 @@
 	let couponError = $state<string | null>(null);
 
 	async function refreshPreview() {
-		if (!shippingAddressId || !shippingMethod) return;
+		if (isDigital ? !shippingAddressId : !shippingAddressId || !shippingMethod) return;
 		if (previewTimer) clearTimeout(previewTimer);
 		previewTimer = setTimeout(async () => {
 			previewBusy = true;
@@ -243,7 +266,7 @@
 			try {
 				preview = await api<CheckoutPreviewOut>('/checkout/preview', {
 					shipping_address_id: shippingAddressId,
-					shipping_method: shippingMethod!.code,
+					shipping_method: isDigital ? 'digital' : shippingMethod!.code,
 					pickup_point_id: pickupPointId,
 					payment_method: chosenPaymentOption?.payload?.payment_method || 'bank_transfer',
 					coupon_code: couponCode.trim() || null
@@ -305,12 +328,14 @@
 	});
 
 	$effect(() => {
-		// Mokėjimo opcijos + consents — kai pasirinktas pristatymas.
-		if (me && shippingMethod && !paymentOptions.length && !payBusy) {
+		// Mokėjimo opcijos + consents — kai pasirinktas pristatymas
+		// (digital krepšeliui — be shipping metodo).
+		const methodCode = isDigital ? 'digital' : shippingMethod?.code;
+		if (me && methodCode && !paymentOptions.length && !payBusy) {
 			payBusy = true;
 			Promise.all([
 				getJson<PaymentOptionOut[]>(
-					`/checkout/payment-options?country_code=LT&shipping_method=${shippingMethod.code}`
+					`/checkout/payment-options?country_code=LT&shipping_method=${methodCode}`
 				).catch(() => []),
 				consentsLoaded
 					? Promise.resolve(consents)
@@ -334,7 +359,8 @@
 
 	async function confirmOrder() {
 		const opt = chosenPaymentOption;
-		if (!shippingAddressId || !shippingMethod || !opt || !consentsChecked) return;
+		const methodReady = isDigital || shippingMethod;
+		if (!shippingAddressId || !methodReady || (!opt && gcRemaining > 0) || !consentsChecked) return;
 		confirmBusy = true;
 		confirmError = null;
 		try {
@@ -347,13 +373,15 @@
 				},
 				body: JSON.stringify({
 					shipping_address_id: shippingAddressId,
-					shipping_method: shippingMethod.code,
+					shipping_method: isDigital ? 'digital' : shippingMethod!.code,
 					pickup_point_id: pickupPointId,
-					payment_method: opt.payload?.payment_method || 'bank_transfer',
-					payment_provider: opt.payload?.preferred_provider || null,
-					montonio_method: opt.payload?.montonio_method || null,
-					inbank_product_code: opt.payload?.inbank_product_code || null,
-					gift_card_code: giftCardCode.trim() || null,
+					payment_method: opt?.payload?.payment_method || 'bank_transfer',
+					payment_provider: opt?.payload?.preferred_provider || null,
+					montonio_method: opt?.payload?.montonio_method || null,
+					inbank_product_code: opt?.payload?.inbank_product_code || null,
+					gift_card_code: gcApplied?.code || null,
+					gift_card_recipient_email:
+						(isDigital && gcRecipient.trim()) || null,
 					coupon_code: couponCode.trim() || null,
 					consents: consents
 						.filter((c) => c.required)
@@ -379,15 +407,66 @@
 	const step = $derived(
 		!me ? 1 : !contactDone ? 1 : !shippingAddressId ? 2 : 3
 	);
-	// Dovanų kortelė — stored-value; kodas privalomas prieš confirm.
-	let giftCardCode = $state('');
-	const isGiftCard = $derived(
-		chosenPaymentOption?.payload?.payment_method === 'gift_card'
+
+	// ---------- Dovanų kortelė (stored-value, ne nuolaidos kodas) ----------
+	// Visada matomas kodų įvedimas — dalinis padengimas; likutis apmokamas
+	// pasirinktu būdu. Pilnas padengimas → radio opcijų nereikia.
+	let gcCode = $state('');
+	let gcApplied = $state<{ code: string; balance: number } | null>(null);
+	let gcBusy = $state(false);
+	let gcError = $state<string | null>(null);
+	// Kortelės PIrkimo pusė: kam siųsti išleistą kodą (dovana tiesiogiai).
+	let gcRecipient = $state('');
+
+	const orderTotal = $derived(
+		preview?.order_total?.gross ?? data.cart?.items_total?.gross ?? 0
 	);
+	const gcCover = $derived(
+		gcApplied ? Math.min(gcApplied.balance, Number(orderTotal) || 0) : 0
+	);
+	const gcRemaining = $derived(Math.max(0, (Number(orderTotal) || 0) - gcCover));
+	// Išsimokėtinai negalima derinti su dovanų kortele — paslepiam.
+	const visiblePaymentOptions = $derived(
+		gcApplied
+			? paymentOptions.filter((o) => o.payload?.payment_method !== 'inbank')
+			: paymentOptions
+	);
+
+	async function applyGiftCard() {
+		const code = gcCode.trim();
+		if (!code) return;
+		gcBusy = true;
+		gcError = null;
+		try {
+			const card = await api<GiftCardOut>('/giftcards/check', { code });
+			gcApplied = { code: card.code, balance: Number(card.balance) };
+			gcCode = '';
+		} catch (e) {
+			gcError = e instanceof Error ? e.message : 'Kortelė nerasta arba nebegalioja.';
+		} finally {
+			gcBusy = false;
+		}
+	}
+
+	function removeGiftCard() {
+		gcApplied = null;
+		gcError = null;
+	}
+
+	// GC + inbank draudžiamas: jei pasirinkta opcija tapo inbank — perjungti.
+	$effect(() => {
+		if (gcApplied && chosenPaymentOption?.payload?.payment_method === 'inbank') {
+			paymentOptionId = visiblePaymentOptions[0]?.id ?? '';
+		}
+	});
+
 	const canConfirm = $derived(
 		Boolean(
-			shippingAddressId && shippingMethod && paymentOptionId && consentsChecked && !confirmBusy
-				&& (!isGiftCard || giftCardCode.trim())
+			shippingAddressId &&
+			(isDigital || shippingMethod) &&
+			(paymentOptionId || gcRemaining <= 0) &&
+			consentsChecked &&
+			!confirmBusy
 		)
 	);
 </script>
@@ -500,16 +579,34 @@
 					{/if}
 				</section>
 
-				<!-- 2. Pristatymas -->
+				<!-- 2. Pristatymas / Sąskaitos duomenys -->
 				<section class="rounded-xl border border-gray-200 bg-white p-5 dark:border-neutral-700 dark:bg-neutral-900 {step < 2 ? 'opacity-50' : ''}">
 					<h2 class="flex items-center gap-x-2 text-base font-semibold text-gray-900 dark:text-white">
 						<span class="flex size-6 items-center justify-center rounded-full {shippingAddressId ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'} text-xs font-bold">
 							{#if shippingAddressId}<Check class="size-3.5" />{:else}2{/if}
 						</span>
-						Pristatymas
+						{isDigital ? 'Sąskaitos duomenys' : 'Pristatymas'}
 					</h2>
 
 					{#if step >= 2}
+						{#if isDigital}
+							<p class="mt-4 rounded-lg bg-blue-50 px-3 py-2.5 text-sm text-blue-800 dark:bg-blue-500/10 dark:text-blue-300">
+								Skaitmeninė prekė — pristatymas nereikalingas. Dovanų kortelę
+								atsiųsime el. paštu iškart po apmokėjimo.
+							</p>
+							<div class="mt-3">
+								<label for="gc-recipient" class="text-sm text-gray-600 dark:text-neutral-300">
+									Kam išsiųsti kortelę? (nebūtina)
+								</label>
+								<input
+									id="gc-recipient"
+									type="email"
+									bind:value={gcRecipient}
+									placeholder="gavejas@pastas.lt — tuščią palikus atsiųsime jums"
+									class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+								/>
+							</div>
+						{:else}
 						<div class="mt-4 space-y-2">
 							{#each methods as m (m.code)}
 								{@const active = shippingMethod?.code === m.code}
@@ -532,6 +629,7 @@
 								</button>
 							{/each}
 						</div>
+						{/if}
 
 						{#if shippingMethod && isPickupMethod}
 							<!-- Paštomato pasirinkimas — adresas užpildomas automatiškai -->
@@ -576,10 +674,10 @@
 									</div>
 								{/if}
 							</div>
-						{:else if shippingMethod}
-							<!-- Kurjeris / atsiėmimas parduotuvėje — adreso pasirinkimas -->
+						{:else if shippingMethod || isDigital}
+							<!-- Kurjeris / atsiėmimas / sąskaitos duomenys — adreso pasirinkimas -->
 							<div class="mt-4">
-								{#if shippingMethod.code === 'store_pickup'}
+								{#if shippingMethod?.code === 'store_pickup'}
 									<p class="mb-3 text-xs text-gray-500 dark:text-neutral-400">
 										Prekes atsiimsite parduotuvėje — žemiau nurodykite tik sąskaitos duomenis.
 									</p>
@@ -635,33 +733,71 @@
 
 					{#if step >= 3}
 						<div class="mt-4 space-y-2">
-							{#each paymentOptions as opt (opt.id)}
-								<label class="flex cursor-pointer items-center gap-x-3 rounded-xl border p-3 {paymentOptionId === opt.id ? 'border-primary bg-primary-50 dark:bg-primary-500/10' : 'border-gray-200 dark:border-neutral-700'}">
-									<input type="radio" name="pm" value={opt.id} bind:group={paymentOptionId} onchange={() => refreshPreview()} />
-									{#if opt.logo_url}
-										<img src={opt.logo_url} alt="" class="h-6 w-auto shrink-0" loading="lazy" />
+							<!-- Dovanų kortelė — stored-value, gali padengti viską arba dalį -->
+							<div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-800">
+								{#if gcApplied}
+									<div class="flex items-center justify-between gap-x-3">
+										<span class="flex items-center gap-x-2 text-sm text-gray-900 dark:text-white">
+											<Gift class="size-4 shrink-0 text-primary" />
+											<span>
+												Dovanų kortelė ····{gcApplied.code.slice(-4)}:
+												<strong>−{formatMoney({ ..._zeroMoney, gross: gcCover })}</strong>
+											</span>
+										</span>
+										<button
+											type="button"
+											onclick={removeGiftCard}
+											class="shrink-0 text-xs font-medium text-gray-500 underline hover:text-gray-700 dark:text-neutral-400"
+										>
+											Pašalinti
+										</button>
+									</div>
+									{#if gcApplied.balance > orderTotal}
+										<p class="mt-1.5 text-xs text-gray-500 dark:text-neutral-400">
+											Kortelėje liks {formatMoney({ ..._zeroMoney, gross: gcApplied.balance - orderTotal })} — galėsite naudoti kitą kartą.
+										</p>
 									{/if}
-									<span class="grow text-sm font-medium text-gray-900 dark:text-white">{opt.title}</span>
-								</label>
-							{/each}
-							{#if !paymentOptions.length && !payBusy}
-								<p class="text-sm text-gray-400">Mokėjimo būdų nerasta.</p>
-							{/if}
+								{:else}
+									<div class="flex gap-x-2">
+										<input
+											type="text"
+											bind:value={gcCode}
+											onkeydown={(e) => e.key === 'Enter' && applyGiftCard()}
+											placeholder="Dovanų kortelės kodas"
+											class="grow rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm uppercase tracking-wider dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+										/>
+										<button
+											type="button"
+											onclick={applyGiftCard}
+											disabled={gcBusy || !gcCode.trim()}
+											class="shrink-0 rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary-50 disabled:opacity-50"
+										>
+											{#if gcBusy}<Loader2 class="size-4 animate-spin" />{:else}Pritaikyti{/if}
+										</button>
+									</div>
+								{/if}
+								{#if gcError}
+									<p class="mt-1.5 text-xs text-red-600 dark:text-red-400">{gcError}</p>
+								{/if}
+							</div>
 
-							{#if isGiftCard}
-								<div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-800">
-									<label for="gc-code" class="text-sm text-gray-600 dark:text-neutral-300">Dovanų kortelės kodas</label>
-									<input
-										id="gc-code"
-										type="text"
-										bind:value={giftCardCode}
-										placeholder="XXXX-XXXX-XXXX"
-										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm uppercase tracking-wider dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
-									/>
-									<p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
-										Kortelės likutis padengia visą užsakymo sumą.
-									</p>
-								</div>
+							{#if gcRemaining > 0}
+								{#each visiblePaymentOptions as opt (opt.id)}
+									<label class="flex cursor-pointer items-center gap-x-3 rounded-xl border p-3 {paymentOptionId === opt.id ? 'border-primary bg-primary-50 dark:bg-primary-500/10' : 'border-gray-200 dark:border-neutral-700'}">
+										<input type="radio" name="pm" value={opt.id} bind:group={paymentOptionId} onchange={() => refreshPreview()} />
+										{#if opt.logo_url}
+											<img src={opt.logo_url} alt="" class="h-6 w-auto shrink-0" loading="lazy" />
+										{/if}
+										<span class="grow text-sm font-medium text-gray-900 dark:text-white">{opt.title}</span>
+									</label>
+								{/each}
+								{#if !visiblePaymentOptions.length && !payBusy}
+									<p class="text-sm text-gray-400">Mokėjimo būdų nerasta.</p>
+								{/if}
+							{:else}
+								<p class="rounded-lg bg-green-50 px-3 py-2.5 text-sm text-green-800 dark:bg-green-500/10 dark:text-green-300">
+									Visa suma padengta dovanų kortele — mokėti nieko nereikia.
+								</p>
 							{/if}
 
 							{#if chosenPaymentOption?.payload?.calculator_url}
@@ -803,6 +939,18 @@
 							{formatMoney(preview?.order_total ?? data.cart?.items_total)}
 						</dd>
 					</div>
+					{#if gcApplied}
+						<div class="flex justify-between text-green-600">
+							<dt>Dovanų kortelė</dt>
+							<dd>−{formatMoney({ ..._zeroMoney, gross: gcCover })}</dd>
+						</div>
+						<div class="flex justify-between border-t border-gray-200 pt-2.5 dark:border-neutral-700">
+							<dt class="font-semibold text-gray-900 dark:text-white">Liko apmokėti</dt>
+							<dd class="text-lg font-bold text-gray-900 dark:text-white">
+								{formatMoney({ ..._zeroMoney, gross: gcRemaining })}
+							</dd>
+						</div>
+					{/if}
 				</dl>
 				{#if previewBusy}
 					<p class="mt-2 flex items-center gap-1.5 text-xs text-gray-400">

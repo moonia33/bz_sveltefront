@@ -153,6 +153,22 @@
 						<dt class="font-semibold text-foreground">Iš viso</dt>
 						<dd class="font-semibold text-foreground">{formatMoney(o.order_total)}</dd>
 					</div>
+					{#if Number(o.gift_card_amount) > 0}
+						<div class="flex justify-between">
+							<dt class="text-muted-foreground">Apmokėta dovanų kortele</dt>
+							<dd class="font-medium text-teal-600 dark:text-teal-400">
+								{Number(o.gift_card_amount).toFixed(2)} €
+							</dd>
+						</div>
+						{#if Number(o.provider_amount) > 0}
+							<div class="flex justify-between">
+								<dt class="text-muted-foreground">Apmokėta ({o.payment_provider_label})</dt>
+								<dd class="font-medium text-foreground">
+									{Number(o.provider_amount).toFixed(2)} €
+								</dd>
+							</div>
+						{/if}
+					{/if}
 				</dl>
 			</div>
 
@@ -162,7 +178,9 @@
 				<dl class="mt-4 space-y-2.5 text-sm">
 					<div class="flex justify-between gap-x-3">
 						<dt class="text-muted-foreground">Būdas</dt>
-						<dd class="text-right font-medium text-foreground">{o.shipping_method}</dd>
+						<dd class="text-right font-medium text-foreground">
+							{o.shipping_method === 'digital' ? 'El. paštas (skaitmeninis)' : o.shipping_method}
+						</dd>
 					</div>
 					{#if o.delivery_window}
 						<div class="flex justify-between gap-x-3">

@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { forwardHost } from '$lib/api/client';
+import { forwardHost } from '#lib/api/client';
 
 const API_BASE = (process.env.API_BASE_URL || 'http://localhost:8000').replace(/\/+$/, '');
 

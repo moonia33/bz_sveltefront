@@ -16,6 +16,13 @@ interface Ctx {
 	url?: URL;
 }
 
+// Backend sits behind the same TLS proxy; without the original scheme Django
+// (SECURE_SSL_REDIRECT) answers internal plain-HTTP calls with a redirect.
+function forwardProto(request: Request, headers: Headers) {
+	const proto = request.headers.get('x-forwarded-proto') ?? new URL(request.url).protocol.replace(':', '');
+	if (proto) headers.set('X-Forwarded-Proto', proto);
+}
+
 function buildUrl(path: string): string {
 	// Browser: go through the same-origin proxy route so HttpOnly cookies flow.
 	if (browser) return `/api/v1${path}`;
@@ -38,6 +45,7 @@ export async function apiFetch<T = unknown>(
 		if (cookie) headers.set('Cookie', cookie);
 		const lang = ctx.request.headers.get('accept-language');
 		if (lang) headers.set('Accept-Language', lang);
+		forwardProto(ctx.request, headers);
 	}
 
 	const res = await ctx.fetch(buildUrl(path), { ...init, headers });
@@ -77,6 +85,7 @@ export async function apiFetchRaw(
 	if (host) headers.set('Host', host);
 	const cookie = ctx.request?.headers.get('cookie');
 	if (cookie) headers.set('Cookie', cookie);
+	if (!browser && ctx.request) forwardProto(ctx.request, headers);
 	return ctx.fetch(buildUrl(path), { ...init, headers });
 }
 

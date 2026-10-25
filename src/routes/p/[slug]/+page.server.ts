@@ -1,6 +1,6 @@
 import { apiFetch, apiFetchRaw, forwardCookies } from '#lib/api/client';
-import { getRecommendations } from '#lib/api/endpoints';
-import type { CartOut, ProductDetailOut } from '#lib/api/types';
+import { getFavoriteIds, getRecommendations, getShippingMethods } from '#lib/api/endpoints';
+import type { CartOut, ProductDetailOut, ShippingMethodOut } from '#lib/api/types';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -15,9 +15,19 @@ export const load: PageServerLoad = async (event) => {
 		throw error(404, 'Prekė nerasta');
 	}
 
-	const recommendations = await getRecommendations(ctx, slug, 'cross_sell', 8).catch(() => []);
+	const [recommendations, shipping_methods, favoriteIds] = await Promise.all([
+		getRecommendations(ctx, slug, 'cross_sell', 8).catch(() => []),
+		getShippingMethods(ctx).catch(() => [] as ShippingMethodOut[]),
+		getFavoriteIds(ctx).catch(() => ({ variant_ids: [] as number[], count: 0 }))
+	]);
 
-	return { product, recommendations };
+	return {
+		product,
+		recommendations,
+		shipping_methods,
+		favorite_ids: favoriteIds.variant_ids,
+		origin: event.url.origin
+	};
 };
 
 export const actions: Actions = {
@@ -47,5 +57,31 @@ export const actions: Actions = {
 		}
 		const cart = (await res.json()) as CartOut;
 		return { added: true, cart };
+	},
+
+	// Heart toggle: prideda/pašalina variantą iš mėgstamų.
+	fav: async (event) => {
+		const ctx = { fetch: event.fetch, request: event.request };
+		const form = await event.request.formData();
+		const variantId = Number(form.get('variant_id'));
+		const isFav = form.get('is_fav') === '1';
+		if (!variantId) return fail(400, { addError: 'Pasirinkite variantą.' });
+
+		const res = await apiFetchRaw(
+			ctx,
+			isFav ? `/checkout/favorites/${variantId}` : '/checkout/favorites',
+			isFav
+				? { method: 'DELETE' }
+				: {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ variant_id: variantId })
+					}
+		);
+		forwardCookies(res, event.cookies);
+		if (!res.ok) {
+			return fail(res.status, { favError: 'Nepavyko atnaujinti mėgstamų.' });
+		}
+		return { favToggled: true };
 	}
 };

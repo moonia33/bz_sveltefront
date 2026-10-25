@@ -11,14 +11,38 @@ export const load: PageServerLoad = async (event) => {
 		group_code: sp.get('group_code') ?? undefined,
 		feature: sp.get('feature') ?? undefined,
 		option: sp.get('option') ?? undefined,
+		range: sp.get('range') ?? undefined,
 		sort: sp.get('sort') ?? undefined,
 		in_stock_only: sp.get('in_stock_only') === '1',
 		page: Number(sp.get('page') ?? 1) || 1
 	};
 
-	const [products, facets] = await Promise.all([
+	const [products, facets, parent] = await Promise.all([
 		getProducts(ctx, filters),
-		getProductFacets(ctx, filters)
+		getProductFacets(ctx, filters),
+		event.parent()
 	]);
-	return { products, facets, params: Object.fromEntries(sp) };
+
+	const q = sp.get('q') ?? '';
+	const filterParams = [
+		'brand_slug',
+		'group_code',
+		'feature',
+		'option',
+		'range',
+		'in_stock_only',
+		'category_slug'
+	];
+	const noindex = filterParams.some((k) => sp.has(k)) || !!q || filters.page > 1;
+
+	return {
+		products,
+		facets,
+		params: Object.fromEntries(sp),
+		categoryChips: (parent.categories ?? []).filter((c) => !c.parent_id),
+		title: q ? `Paieška: „${q}“` : 'Visos prekės',
+		noindex,
+		origin: event.url.origin,
+		pathname: event.url.pathname
+	};
 };

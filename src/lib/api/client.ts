@@ -23,6 +23,15 @@ function forwardProto(request: Request, headers: Headers) {
 	if (proto) headers.set('X-Forwarded-Proto', proto);
 }
 
+// Node's fetch always sends Host from the target URL, so the storefront host
+// (= shop domain) also travels as X-Forwarded-Host (backend: USE_X_FORWARDED_HOST).
+export function forwardHost(request: Request, headers: Headers) {
+	const host = request.headers.get('host');
+	if (!host) return;
+	headers.set('Host', host);
+	headers.set('X-Forwarded-Host', host);
+}
+
 function buildUrl(path: string): string {
 	// Browser: go through the same-origin proxy route so HttpOnly cookies flow.
 	if (browser) return `/api/v1${path}`;
@@ -39,8 +48,7 @@ export async function apiFetch<T = unknown>(
 
 	if (!browser && ctx.request) {
 		// Forward shop context: the storefront host IS the shop domain.
-		const host = ctx.request.headers.get('host');
-		if (host) headers.set('Host', host);
+		forwardHost(ctx.request, headers);
 		const cookie = ctx.request.headers.get('cookie');
 		if (cookie) headers.set('Cookie', cookie);
 		const lang = ctx.request.headers.get('accept-language');
@@ -81,8 +89,7 @@ export async function apiFetchRaw(
 ): Promise<Response> {
 	const headers = new Headers(init.headers);
 	headers.set('Accept', 'application/json');
-	const host = ctx.request?.headers.get('host');
-	if (host) headers.set('Host', host);
+	if (ctx.request) forwardHost(ctx.request, headers);
 	const cookie = ctx.request?.headers.get('cookie');
 	if (cookie) headers.set('Cookie', cookie);
 	if (!browser && ctx.request) forwardProto(ctx.request, headers);

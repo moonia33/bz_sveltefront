@@ -1,4 +1,5 @@
 import type { RequestHandler } from './$types';
+import { forwardHost } from '$lib/api/client';
 
 const API_BASE = (process.env.API_BASE_URL || 'http://localhost:8000').replace(/\/+$/, '');
 
@@ -19,8 +20,7 @@ async function proxy({ request, params, url }: Parameters<RequestHandler>[0]) {
 		if (!HOP_BY_HOP.has(k.toLowerCase())) headers.set(k, v);
 	}
 	// Shop context: storefront host == shop domain.
-	const host = request.headers.get('host');
-	if (host) headers.set('Host', host);
+	forwardHost(request, headers);
 
 	const hasBody = !['GET', 'HEAD'].includes(request.method);
 	const upstream = await fetch(target, {

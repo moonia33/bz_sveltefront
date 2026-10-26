@@ -387,9 +387,15 @@
 		});
 	}
 
+	// Description yra Markdown — renderuojame per marked (raw {@html}
+	// suspaustų naujas eilutes į vieną).
+	const descHtml = $derived(
+		product.description ? md({ markdown: product.description }) : ''
+	);
+
 	// --- SEO ---
 	const plainDesc = $derived(
-		product.description
+		descHtml
 			.replace(/<[^>]+>/g, ' ')
 			.replace(/\s+/g, ' ')
 			.trim()
@@ -710,7 +716,7 @@
 							</summary>
 							<div class="pb-6">
 								<div class="prose max-w-none dark:prose-invert">
-									{@html product.description}
+									{@html descHtml}
 								</div>
 							</div>
 						</details>

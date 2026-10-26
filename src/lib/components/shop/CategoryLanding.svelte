@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ChevronRight, PanelLeft } from '@lucide/svelte';
+	import { marked } from 'marked';
 	import type { CatalogFacetsOut, CategoryOut, ProductListOut } from '#lib/api/types';
 	import CategoryNav from '#lib/components/shop/CategoryNav.svelte';
 	import CategoryCardGrid from '#lib/components/shop/CategoryCardGrid.svelte';
@@ -25,6 +26,11 @@
 
 	const catalogHref = $derived(`/katalogas?category_slug=${encodeURIComponent(category.slug)}`);
 	const brands = $derived((facets?.brands ?? []).slice(0, 12));
+	const descHtml = $derived(
+		category.description
+			? marked.parse(String(category.description), { async: false })
+			: ''
+	);
 </script>
 
 <div class="w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">
@@ -71,7 +77,9 @@
 
 				<h1 class="font-medium text-xl md:text-2xl text-foreground">{category.name}</h1>
 				{#if category.description}
-					<p class="mt-1 text-sm text-muted-foreground-1">{category.description}</p>
+					<div class="mt-1 text-sm text-muted-foreground-1 prose max-w-none dark:prose-invert">
+						{@html descHtml}
+					</div>
 				{/if}
 
 				<!-- Hero -->

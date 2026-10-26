@@ -9,12 +9,40 @@ export const load: PageServerLoad = async (event) => {
 	const slug = event.params.slug;
 	const sp = event.url.searchParams;
 
-	const [category, parent] = await Promise.all([
-		apiFetch<CategoryOut>(ctx, `/catalog/categories/${slug}`).catch(() => {
-			throw error(404, 'Kategorija nerasta');
-		}),
-		event.parent()
-	]);
+	const filters = {
+		q: sp.get('q') ?? undefined,
+		category_slug: slug,
+		brand_slug: sp.get('brand_slug') ?? undefined,
+		group_code: sp.get('group_code') ?? undefined,
+		feature: sp.get('feature') ?? undefined,
+		option: sp.get('option') ?? undefined,
+		range: sp.get('range') ?? undefined,
+		sort: sp.get('sort') ?? undefined,
+		in_stock_only: sp.get('in_stock_only') === '1',
+		page: Number(sp.get('page') ?? 1) || 1
+	};
+
+	// Viskas lygiagrečiai nuo pat pradžių: produktai/facet'ai/topProducts
+	// priklauso tik nuo slug'o, o ne nuo kategorijos rezoliucijos — jų
+	// rezultatai reikalingi abiem režimams (landing vs listing).
+	const [category, parent, listingProducts, listingFacets, topProducts, landingFacets] =
+		await Promise.all([
+			apiFetch<CategoryOut>(ctx, `/catalog/categories/${slug}`).catch(() => {
+				throw error(404, 'Kategorija nerasta');
+			}),
+			event.parent(),
+			getProducts(ctx, filters).catch(() => null),
+			getProductFacets(ctx, filters).catch(() => null),
+			getProducts(ctx, {
+				category_slug: slug,
+				sort: 'best_selling',
+				in_stock_only: true,
+				page_size: 12
+			})
+				.then((r) => r.items)
+				.catch(() => [] as ProductListOut[]),
+			getProductFacets(ctx, { category_slug: slug }).catch(() => null)
+		]);
 
 	const all = parent.categories ?? [];
 	const children = all.filter((c) => c.parent_id === category.id);
@@ -44,44 +72,22 @@ export const load: PageServerLoad = async (event) => {
 	// Landing mode: a category with sub-categories gets a curated page
 	// (real SEO entry point — always indexable).
 	if (children.length > 0) {
-		const [topProducts, facets] = await Promise.all([
-			getProducts(ctx, {
-				category_slug: slug,
-				sort: 'best_selling',
-				in_stock_only: true,
-				page_size: 12
-			})
-				.then((r) => r.items)
-				.catch(() => [] as ProductListOut[]),
-			getProductFacets(ctx, { category_slug: slug }).catch(() => null)
-		]);
-
 		return {
 			...common,
 			mode: 'landing' as const,
 			topProducts,
-			facets,
+			facets: landingFacets,
 			noindex: false
 		};
 	}
 
-	const filters = {
-		q: sp.get('q') ?? undefined,
-		category_slug: slug,
-		brand_slug: sp.get('brand_slug') ?? undefined,
-		group_code: sp.get('group_code') ?? undefined,
-		feature: sp.get('feature') ?? undefined,
-		option: sp.get('option') ?? undefined,
-		range: sp.get('range') ?? undefined,
-		sort: sp.get('sort') ?? undefined,
-		in_stock_only: sp.get('in_stock_only') === '1',
-		page: Number(sp.get('page') ?? 1) || 1
-	};
-
-	const [products, facets] = await Promise.all([
-		getProducts(ctx, filters),
-		getProductFacets(ctx, filters)
-	]);
+	// API klaida listing'e propaguojama kaip anksčiau (500), o ne
+	// nutylima tuščiu katalogu.
+	if (!listingProducts || !listingFacets) {
+		throw error(502, 'Nepavyko užkrauti katalogo');
+	}
+	const products = listingProducts;
+	const facets = listingFacets;
 
 	const filterParams = ['brand_slug', 'group_code', 'feature', 'option', 'range', 'in_stock_only', 'q'];
 	const noindex = filterParams.some((k) => sp.has(k)) || filters.page > 1;

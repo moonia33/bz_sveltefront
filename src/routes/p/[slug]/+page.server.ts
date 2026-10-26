@@ -8,18 +8,23 @@ export const load: PageServerLoad = async (event) => {
 	const ctx = { fetch: event.fetch, request: event.request };
 	const slug = event.params.slug;
 
-	let product: ProductDetailOut;
-	try {
-		product = await apiFetch<ProductDetailOut>(ctx, `/catalog/products/${slug}`);
-	} catch {
-		throw error(404, 'Prekė nerasta');
-	}
-
-	const [recommendations, shipping_methods, favoriteIds] = await Promise.all([
+	// Visi užklausimai lygiagrečiai — rekomendacijoms užtenka route slug'o,
+	// prekės atsakymo joms nereikia. 404 metamas iškart, kai prekė
+	// nepavyksta (likusieji promise'ai tęsia foniniame režime).
+	const productP = apiFetch<ProductDetailOut>(ctx, `/catalog/products/${slug}`).catch(
+		() => null
+	);
+	const recsP = Promise.all([
 		getRecommendations(ctx, slug, 'cross_sell', 8).catch(() => []),
 		getShippingMethods(ctx).catch(() => [] as ShippingMethodOut[]),
 		getFavoriteIds(ctx).catch(() => ({ variant_ids: [] as number[], count: 0 }))
 	]);
+
+	const product = await productP;
+	if (!product) {
+		throw error(404, 'Prekė nerasta');
+	}
+	const [recommendations, shipping_methods, favoriteIds] = await recsP;
 
 	return {
 		product,

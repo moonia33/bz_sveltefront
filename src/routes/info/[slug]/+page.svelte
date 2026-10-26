@@ -23,7 +23,11 @@
 	);
 
 	function md(payload: Record<string, unknown>): string {
-		return marked.parse(String(payload?.markdown ?? payload?.text ?? ''), { async: false });
+		// breaks:true — viengubos eilutės „•" sąrašuose išlaikomos.
+		return marked.parse(String(payload?.markdown ?? payload?.text ?? ''), {
+			async: false,
+			breaks: true
+		});
 	}
 </script>
 

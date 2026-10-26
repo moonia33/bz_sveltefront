@@ -28,7 +28,7 @@
 	const brands = $derived((facets?.brands ?? []).slice(0, 12));
 	const descHtml = $derived(
 		category.description
-			? marked.parse(String(category.description), { async: false })
+			? marked.parse(String(category.description), { async: false, breaks: true })
 			: ''
 	);
 </script>

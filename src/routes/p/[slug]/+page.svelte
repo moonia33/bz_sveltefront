@@ -382,8 +382,11 @@
 	}
 
 	function md(payload: Record<string, unknown>): string {
+		// breaks:true — tiekėjų aprašymuose naudojamos viengubos eilutės
+		// su „•" glifais; be breaks jos sukollapsuotų į vieną <p>.
 		return marked.parse(String(payload?.markdown ?? payload?.text ?? ''), {
-			async: false
+			async: false,
+			breaks: true
 		});
 	}
 

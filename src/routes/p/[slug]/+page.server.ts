@@ -1,7 +1,7 @@
 import { apiFetch, apiFetchRaw, forwardCookies } from '#lib/api/client';
 import { getFavoriteIds, getRecommendations, getShippingMethods } from '#lib/api/endpoints';
 import type { CartOut, ProductDetailOut, ShippingMethodOut } from '#lib/api/types';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -23,6 +23,10 @@ export const load: PageServerLoad = async (event) => {
 	const product = await productP;
 	if (!product) {
 		throw error(404, 'Prekė nerasta');
+	}
+	// Senas arba kitos kalbos slug'as -> kanoninis adresas (SEO).
+	if (product.slug && product.slug !== slug) {
+		throw redirect(301, `/p/${encodeURIComponent(product.slug)}${event.url.search}`);
 	}
 	const [recommendations, shipping_methods, favoriteIds] = await recsP;
 

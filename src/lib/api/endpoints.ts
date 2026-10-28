@@ -40,6 +40,7 @@ export interface ProductListParams {
 	in_stock_only?: boolean;
 	country_code?: string;
 	channel?: string;
+	collection?: 'new' | 'sale';
 }
 
 export function getProducts(ctx: Ctx, p: ProductListParams) {
@@ -76,6 +77,13 @@ export function getBrands(ctx: Ctx) {
 
 export function getBrand(ctx: Ctx, slug: string) {
 	return apiFetch<BrandOut>(ctx, `/catalog/brands/${encodeURIComponent(slug)}`);
+}
+
+export function getProductGroup(ctx: Ctx, code: string) {
+	return apiFetch<{ id: number; code: string; name: string; description: string }>(
+		ctx,
+		`/catalog/product-groups/${encodeURIComponent(code)}`
+	);
 }
 
 export function getProduct(ctx: Ctx, slug: string, params: Record<string, string> = {}) {

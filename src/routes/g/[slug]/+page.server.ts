@@ -1,31 +1,59 @@
-import { getBrand, getProducts } from '#lib/api/endpoints';
-import type { BrandOut, ProductListOut } from '#lib/api/types';
+import { getBrand, getProductFacets, getProducts } from '#lib/api/endpoints';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const ctx = { fetch: event.fetch, request: event.request };
 	const slug = event.params.slug;
+	const sp = event.url.searchParams;
+	const filters = {
+		q: sp.get('q') ?? undefined,
+		category_slug: sp.get('category_slug') ?? undefined,
+		brand_slug: slug,
+		group_code: sp.get('group_code') ?? undefined,
+		feature: sp.get('feature') ?? undefined,
+		option: sp.get('option') ?? undefined,
+		range: sp.get('range') ?? undefined,
+		sort: sp.get('sort') ?? undefined,
+		in_stock_only: sp.get('in_stock_only') === '1',
+		page: Number(sp.get('page') ?? 1) || 1
+	};
 
-	const [brand, parent, topProducts] = await Promise.all([
+	const [brand, products, facets, parent] = await Promise.all([
 		getBrand(ctx, slug).catch(() => {
 			throw error(404, 'Gamintojas nerastas');
 		}),
-		event.parent(),
-		getProducts(ctx, {
-			brand_slug: slug,
-			sort: 'best_selling',
-			in_stock_only: true,
-			page_size: 12
-		})
-			.then((r) => r.items)
-			.catch(() => [] as ProductListOut[])
+		getProducts(ctx, filters).catch(() => ({ count: 0, items: [] })),
+		getProductFacets(ctx, filters).catch(() => ({
+			categories: [],
+			brands: [],
+			product_groups: [],
+			features: [],
+			option_types: []
+		})),
+		event.parent()
 	]);
 
+	const q = sp.get('q') ?? '';
+	const noindex =
+		['category_slug', 'group_code', 'feature', 'option', 'range', 'in_stock_only'].some((k) =>
+			sp.has(k)
+		) ||
+		!!q ||
+		filters.page > 1;
+
 	return {
-		brand: brand as BrandOut,
-		all: parent.categories ?? [],
-		topProducts,
+		brand,
+		products,
+		facets,
+		params: Object.fromEntries(sp),
+		categoryChips: (parent.categories ?? []).filter((c) => !c.parent_id),
+		title: brand.name,
+		description:
+			brand.seo_description || brand.description || `Visos ${brand.name} prekės.`,
+		seoTitle: brand.seo_title || '',
+		logoUrl: brand.logo_url || '',
+		noindex,
 		origin: event.url.origin,
 		pathname: event.url.pathname
 	};

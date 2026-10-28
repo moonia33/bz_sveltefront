@@ -1,6 +1,6 @@
 import { apiFetch } from '#lib/api/client';
 import { getProductFacets, getProducts } from '#lib/api/endpoints';
-import type { CategoryOut, ProductListOut } from '#lib/api/types';
+import type { CategoryOut } from '#lib/api/types';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -22,27 +22,14 @@ export const load: PageServerLoad = async (event) => {
 		page: Number(sp.get('page') ?? 1) || 1
 	};
 
-	// Viskas lygiagrečiai nuo pat pradžių: produktai/facet'ai/topProducts
-	// priklauso tik nuo slug'o, o ne nuo kategorijos rezoliucijos — jų
-	// rezultatai reikalingi abiem režimams (landing vs listing).
-	const [category, parent, listingProducts, listingFacets, topProducts, landingFacets] =
-		await Promise.all([
-			apiFetch<CategoryOut>(ctx, `/catalog/categories/${slug}`).catch(() => {
-				throw error(404, 'Kategorija nerasta');
-			}),
-			event.parent(),
-			getProducts(ctx, filters).catch(() => null),
-			getProductFacets(ctx, filters).catch(() => null),
-			getProducts(ctx, {
-				category_slug: slug,
-				sort: 'best_selling',
-				in_stock_only: true,
-				page_size: 12
-			})
-				.then((r) => r.items)
-				.catch(() => [] as ProductListOut[]),
-			getProductFacets(ctx, { category_slug: slug }).catch(() => null)
-		]);
+	const [category, parent, listingProducts, listingFacets] = await Promise.all([
+		apiFetch<CategoryOut>(ctx, `/catalog/categories/${slug}`).catch(() => {
+			throw error(404, 'Kategorija nerasta');
+		}),
+		event.parent(),
+		getProducts(ctx, filters).catch(() => null),
+		getProductFacets(ctx, filters).catch(() => null)
+	]);
 
 	const all = parent.categories ?? [];
 	const children = all.filter((c) => c.parent_id === category.id);
@@ -68,18 +55,6 @@ export const load: PageServerLoad = async (event) => {
 		origin: event.url.origin,
 		pathname: event.url.pathname
 	};
-
-	// Landing mode: a category with sub-categories gets a curated page
-	// (real SEO entry point — always indexable).
-	if (children.length > 0) {
-		return {
-			...common,
-			mode: 'landing' as const,
-			topProducts,
-			facets: landingFacets,
-			noindex: false
-		};
-	}
 
 	// API klaida listing'e propaguojama kaip anksčiau (500), o ne
 	// nutylima tuščiu katalogu.

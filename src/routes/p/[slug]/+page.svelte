@@ -1131,6 +1131,16 @@
 						</div>
 					{/if}
 
+					{#if optionGroups.length > 0 && Object.keys(selection).length > 0}
+						<div class="mt-4 text-center text-xs">
+							<button
+								type="button"
+								class="text-muted-foreground-1 underline underline-offset-2 hover:text-foreground"
+								onclick={() => (selection = {})}
+							>Išvalyti pasirinkimą</button>
+						</div>
+					{/if}
+
 					<!-- Stock / skaitmeninio pristatymo pastaba -->
 					{#if product.is_gift_card}
 						<div class="mt-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3.5 dark:border-blue-500/20 dark:bg-blue-500/10">
@@ -1144,7 +1154,7 @@
 								<li>Galioja 12 mėn.; sumą galima išleisti dalimis</li>
 							</ul>
 						</div>
-					{:else}
+					{:else if selectionComplete}
 						<div class="mt-5 space-y-1.5">
 							<p class="flex items-center gap-x-1.5 text-sm">
 								<Store class="shrink-0 size-4 text-foreground" />
@@ -1193,17 +1203,6 @@
 							{/if}
 						{/if}
 
-						{#if optionGroups.length > 0}
-							<div class="mb-2 flex items-center justify-center gap-3 text-xs">
-								{#if Object.keys(selection).length > 0}
-									<button
-										type="button"
-										class="text-muted-foreground-1 underline underline-offset-2 hover:text-foreground"
-										onclick={() => (selection = {})}
-									>Išvalyti pasirinkimą</button>
-								{/if}
-							</div>
-						{/if}
 						<button
 							type="submit"
 							disabled={addBusy || !selectedVariant || !selectionComplete || (!product.is_gift_card && totalQty <= 0)}

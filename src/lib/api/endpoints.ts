@@ -79,6 +79,13 @@ export function getBrand(ctx: Ctx, slug: string) {
 	return apiFetch<BrandOut>(ctx, `/catalog/brands/${encodeURIComponent(slug)}`);
 }
 
+export function getProductGroups(ctx: Ctx) {
+	return apiFetch<{ id: number; code: string; name: string; description: string }[]>(
+		ctx,
+		'/catalog/product-groups'
+	);
+}
+
 export function getProductGroup(ctx: Ctx, code: string) {
 	return apiFetch<{ id: number; code: string; name: string; description: string }>(
 		ctx,

@@ -497,12 +497,20 @@
 {/snippet}
 
 <!-- Desktop: statinis sidebar -->
-<aside class="hidden lg:block lg:w-72 lg:shrink-0 lg:pe-8" aria-label="Filtrai">
+<aside
+	class="hidden lg:block lg:w-72 lg:shrink-0 lg:pe-8 border-e border-sidebar-line bg-sidebar"
+	aria-label="Filtrai"
+>
 	{@render content()}
 </aside>
 
 <!-- Mobile: overlay -->
-<Overlay bind:open side="start" label="Filtrai" panelClass="overflow-y-auto">
+<Overlay
+	bind:open
+	side="start"
+	label="Filtrai"
+	panelClass="overflow-y-auto border-e border-sidebar-line"
+>
 	<div class="py-3 px-5 flex justify-between items-center gap-x-3 border-b border-sidebar-divider">
 		<span class="font-medium text-foreground">Filtrai</span>
 		<button

@@ -191,6 +191,7 @@ export interface VariantOptionOut {
 	option_type_name: string;
 	option_value_code: string;
 	option_value_label: string;
+	option_value_sort?: number;
 }
 
 // Per-warehouse split pagal Warehouse.kind (local/remote) — PDP variantui.

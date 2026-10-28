@@ -40,11 +40,11 @@
 	type OptionGroup = {
 		code: string;
 		name: string;
-		values: { code: string; label: string }[];
+		values: { code: string; label: string; sort: number }[];
 	};
 
 	const optionGroups = $derived.by<OptionGroup[]>(() => {
-		const groups = new Map<string, OptionGroup & { seen: Set<string> }>();
+		const groups = new Map<string, OptionGroup & { seen: Map<string, number> }>();
 		for (const v of variants) {
 			for (const o of v.options) {
 				let g = groups.get(o.option_type_code);
@@ -53,15 +53,22 @@
 						code: o.option_type_code,
 						name: o.option_type_name,
 						values: [],
-						seen: new Set()
+						seen: new Map()
 					};
 					groups.set(o.option_type_code, g);
 				}
 				if (!g.seen.has(o.option_value_code)) {
-					g.seen.add(o.option_value_code);
-					g.values.push({ code: o.option_value_code, label: o.option_value_label });
+					const sort = o.option_value_sort ?? 0;
+					g.seen.set(o.option_value_code, sort);
+					g.values.push({ code: o.option_value_code, label: o.option_value_label, sort });
 				}
 			}
+		}
+		// Reikšmės rikiuojamos pagal OptionValue.sort_order (admin), fallback — label
+		const natural = (a: string, b: string) =>
+			a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+		for (const g of groups.values()) {
+			g.values.sort((x, y) => x.sort - y.sort || natural(x.label, y.label));
 		}
 		return [...groups.values()];
 	});

@@ -89,7 +89,7 @@
 		</div>
 
 		{#if product.has_video}
-			<div class="absolute top-9 end-2 pointer-events-none" title="Video">
+			<div class="absolute bottom-2 start-2 pointer-events-none" title="Video">
 				<span
 					class="size-7 inline-flex items-center justify-center rounded-lg bg-[#FF0000] text-white shadow-sm"
 				>

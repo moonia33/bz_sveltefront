@@ -3,6 +3,7 @@
 	import Footer from '#lib/components/layout/Footer.svelte';
 	import BackToTop from '#lib/components/ui/BackToTop.svelte';
 	import NavProgress from '#lib/components/ui/NavProgress.svelte';
+	import Toasts from '#lib/components/ui/Toasts.svelte';
 	import './layout.css';
 
 	let { data, children } = $props();
@@ -23,4 +24,5 @@
 	<Footer categories={data.categories} navigation={data.navigation} />
 	<BackToTop />
 	<NavProgress />
+	<Toasts />
 </div>

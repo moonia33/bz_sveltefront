@@ -10,6 +10,7 @@
 	import AnimatedStopwatch from '#lib/components/icons/AnimatedStopwatch.svelte';
 	import AnimatedTrolley from '#lib/components/icons/AnimatedTrolley.svelte';
 	import { formatMoney } from '#lib/money';
+	import { pushToast } from '#lib/toast';
 	import { jsonLd } from '#lib/seo';
 	import { browser } from '$app/env';
 	import 'photoswipe/dist/photoswipe.css';
@@ -79,6 +80,8 @@
 	let selectedSku = $state<string | null>(page.url.searchParams.get('v'));
 	let qty = $state(1);
 	let addedFlash = $state(false);
+	let addBusy = $state(false);
+	let favBusy = $state(false);
 
 	function matchesAll(v: VariantOut, sel: Record<string, string>): boolean {
 		return Object.entries(sel).every(
@@ -947,16 +950,48 @@
 				<form
 					method="POST"
 					action="?/add"
-					use:enhance={() => {
+					use:enhance={({ submitter }) => {
+						const favAction =
+							submitter instanceof HTMLButtonElement &&
+							submitter.getAttribute('formaction') === '?/fav';
+						const wasFav = isFav;
+						if (favAction) favBusy = true;
+						else addBusy = true;
 						return async ({ result }) => {
+							favBusy = false;
+							addBusy = false;
 							if (result.type === 'success') {
-								addedFlash = true;
-								setTimeout(() => (addedFlash = false), 3000);
+								if (favAction) {
+									pushToast(
+										wasFav ? 'Pašalinta iš mėgstamų' : 'Pridėta prie mėgstamų',
+										'success'
+									);
+								} else {
+									addedFlash = true;
+									setTimeout(() => (addedFlash = false), 3000);
+									pushToast('Prekė įdėta į krepšelį', 'success');
+								}
 								await invalidateAll();
+							} else if (result.type === 'failure') {
+								pushToast(
+									(result.data?.addError as string) ??
+										(result.data?.favError as string) ??
+										'Veiksmas nepavyko',
+									'error'
+								);
 							}
 						};
 					}}
 				>
+					{#if optionGroups.length > 0 && !selectionComplete}
+						<div
+							class="mt-5 rounded-lg border border-teal-200 bg-teal-100 p-4 text-sm text-teal-800 dark:border-teal-900 dark:bg-teal-500/20 dark:text-teal-400"
+							role="alert"
+						>
+							<span class="font-bold">Pasirinkite:</span>
+							{missingGroups.map((g) => g.name).join(', ')}
+						</div>
+					{/if}
 					{#each optionGroups as group, gi (group.code)}
 						<div class={gi === 0 ? 'mt-5' : 'mt-6'}>
 							<div class="flex flex-wrap justify-between items-center gap-3">
@@ -1160,11 +1195,6 @@
 
 						{#if optionGroups.length > 0}
 							<div class="mb-2 flex items-center justify-center gap-3 text-xs">
-								{#if !selectionComplete}
-									<span class="text-amber-700">
-										Pasirinkite: {missingGroups.map((g) => g.name).join(', ')}
-									</span>
-								{/if}
 								{#if Object.keys(selection).length > 0}
 									<button
 										type="button"
@@ -1176,10 +1206,23 @@
 						{/if}
 						<button
 							type="submit"
-							disabled={!selectedVariant || !selectionComplete || (!product.is_gift_card && totalQty <= 0)}
+							disabled={addBusy || !selectedVariant || !selectionComplete || (!product.is_gift_card && totalQty <= 0)}
 							class="py-3 px-4 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-secondary border border-secondary-line text-secondary-foreground hover:bg-secondary-hover focus:outline-hidden focus:bg-secondary-focus disabled:opacity-50 disabled:pointer-events-none"
 						>
-							{#if addedFlash}
+							{#if addBusy}
+								<span
+									class="relative flex size-4 items-center justify-center"
+									aria-hidden="true"
+								>
+									<span
+										class="absolute inline-flex size-4 animate-ping rounded-full border border-current opacity-60"
+									></span>
+									<span
+										class="inline-flex size-3.5 rounded-full border border-current"
+									></span>
+								</span>
+								Pridedama…
+							{:else if addedFlash}
 								<Check class="shrink-0 size-4" /> Pridėta!
 							{:else}
 								<ShoppingCart class="shrink-0 size-4" /> Į krepšelį
@@ -1189,18 +1232,32 @@
 						<button
 							type="submit"
 							formaction="?/fav"
-							disabled={!selectedVariant}
+							disabled={!selectedVariant || favBusy}
 							title={isFav ? 'Pašalinti iš mėgstamų' : 'Į mėgstamas'}
 							aria-pressed={isFav}
 							class="py-3 px-4 relative inline-flex justify-center items-center gap-x-1.5 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<input type="hidden" name="is_fav" value={isFav ? '1' : '0'} />
 							<span class="sr-only">Mėgstamiausi</span>
-							<Heart
-								class="shrink-0 size-4 transition-colors {isFav
-									? 'fill-current text-destructive'
-									: ''}"
-							/>
+							{#if favBusy}
+								<span
+									class="relative flex size-4 items-center justify-center"
+									aria-hidden="true"
+								>
+									<span
+										class="absolute inline-flex size-4 animate-ping rounded-full border border-current opacity-60"
+									></span>
+									<span
+										class="inline-flex size-3.5 rounded-full border border-current"
+									></span>
+								</span>
+							{:else}
+								<Heart
+									class="shrink-0 size-4 transition-colors {isFav
+										? 'fill-current text-destructive'
+										: ''}"
+								/>
+							{/if}
 						</button>
 					</div>
 					<!-- End Button Group -->

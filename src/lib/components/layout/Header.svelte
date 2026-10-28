@@ -65,18 +65,28 @@
 	// hardkodintam meniu, kad storefront niekada neliktų be navigacijos.
 	const FALLBACK_ITEMS: NavItemOut[] = [
 		{
-			id: -1, kind: 'preset', label: 'Nuolaidos',
-			url: '/katalogas?sort=discounted', icon: 'percent', badge: '',
+			id: -1, kind: 'preset', label: 'Akcijos',
+			url: '/akcijos', icon: 'percent', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -2, kind: 'preset', label: 'Populiariausios',
-			url: '/katalogas?sort=best_selling', icon: 'thumbs-up', badge: '',
+			id: -2, kind: 'preset', label: 'Naujienos',
+			url: '/naujienos', icon: 'package', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -3, kind: 'preset', label: 'Naujienos',
-			url: '/katalogas?sort=-created', icon: 'package', badge: '',
+			id: -6, kind: 'preset', label: 'Išpardavimas',
+			url: '/ispardavimas', icon: 'tag', badge: '',
+			highlight: true, new_tab: false, show_in: 'all', children: []
+		},
+		{
+			id: -7, kind: 'preset', label: 'Gamintojai',
+			url: '/gamintojai', icon: 'star', badge: '',
+			highlight: false, new_tab: false, show_in: 'all', children: []
+		},
+		{
+			id: -8, kind: 'preset', label: 'Kolekcijos',
+			url: '/kolekcijos', icon: 'layers', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{

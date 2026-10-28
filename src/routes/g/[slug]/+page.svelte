@@ -71,5 +71,4 @@
 		{ name: 'Gamintojai', href: '/gamintojai' },
 		{ name: brand.name }
 	]}
-	categoryChips={data.categoryChips}
 />

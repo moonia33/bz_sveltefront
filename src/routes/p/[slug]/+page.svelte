@@ -125,6 +125,20 @@
 		);
 	}
 
+	// Reikšmės „perkraunamumas" — ar bent vienas variantas su tokia reikšme
+	// (derinant su kitais pasirinkimais) yra perkamas. OOS reikšmės rodomos
+	// perbrauktos, bet lieka spaudžiamos (kad neužstrigtų kombinacijos).
+	const sellable = (v: VariantOut) =>
+		product.is_gift_card || v.stock_available > 0;
+	function valueInStock(typeCode: string, valueCode: string): boolean {
+		return variants.some(
+			(v) => sellable(v) && matchesAll(v, { ...selection, [typeCode]: valueCode })
+		);
+	}
+
+	const strikeDiag =
+		'after:absolute after:inset-0 after:bg-[linear-gradient(to_right_bottom,transparent_calc(50%-1px),var(--color-line-2)_calc(50%-1px),var(--color-line-2)_50%,transparent_50%)]';
+
 	const images = $derived.by(() => {
 		const imgs = [...(selectedVariant?.images ?? []), ...product.images];
 		const seen = new Set<string>();
@@ -1009,6 +1023,7 @@
 									{#each group.values as v (v.code)}
 										{@const active = selection[group.code] === v.code}
 										{@const avail = valueAvailable(group.code, v.code)}
+										{@const inStock = valueInStock(group.code, v.code)}
 										<button
 											type="button"
 											disabled={!avail}
@@ -1017,9 +1032,11 @@
 											title={v.label}
 											onclick={() =>
 												(selection = { ...selection, [group.code]: v.code })}
-											class="size-7 rounded-md flex flex-col justify-center items-center text-center {active
+											class="relative size-7 rounded-md flex flex-col justify-center items-center text-center {active
 												? 'ring-2 ring-offset-2 ring-primary-checked'
-												: ''} {avail ? '' : 'opacity-50 cursor-not-allowed'}"
+												: ''} {avail ? '' : 'opacity-50 cursor-not-allowed'} {avail && inStock
+												? ''
+												: strikeDiag}"
 										>
 											<span
 												class="size-7 rounded-md border border-line-2"
@@ -1047,6 +1064,7 @@
 									{#each group.values as v (v.code)}
 										{@const active = selection[group.code] === v.code}
 										{@const avail = valueAvailable(group.code, v.code)}
+										{@const inStock = valueInStock(group.code, v.code)}
 										{@const thumb = valueThumbs.get(`${group.code}:${v.code}`)}
 										<button
 											type="button"
@@ -1059,9 +1077,12 @@
 												? 'flex-col gap-y-1 p-2 w-20'
 												: 'justify-center gap-x-3 p-2.5 text-center'} text-xs {active
 												? 'border-primary-checked text-primary-checked ring-1 ring-primary-checked'
-												: avail
-													? 'border-layer-line text-layer-foreground hover:bg-muted-hover'
-													: 'border-layer-line text-line-2 opacity-70 cursor-not-allowed after:absolute after:inset-0 after:bg-[linear-gradient(to_right_bottom,transparent_calc(50%-1px),var(--color-line-2)_calc(50%-1px),var(--color-line-2)_50%,transparent_50%)]'}"
+												: !avail
+													? 'border-layer-line text-line-2 opacity-70 cursor-not-allowed ' +
+														strikeDiag
+													: !inStock
+														? 'border-layer-line text-muted-foreground-1 ' + strikeDiag
+														: 'border-layer-line text-layer-foreground hover:bg-muted-hover'}"
 										>
 											{#if thumb}
 												<img
@@ -1107,11 +1128,13 @@
 												alt=""
 												loading="lazy"
 												decoding="async"
-												class="size-10 shrink-0 rounded-md object-cover"
+												class="size-10 shrink-0 rounded-md object-cover {avail ? '' : 'opacity-60'}"
 											/>
 										{/if}
 										<span class="flex min-w-0 flex-col gap-y-0.5">
-											<span class="block truncate text-sm font-medium">
+											<span
+												class="block truncate text-sm font-medium {avail ? '' : 'line-through text-muted-foreground-1'}"
+											>
 												{v.name || v.sku}
 											</span>
 											<span

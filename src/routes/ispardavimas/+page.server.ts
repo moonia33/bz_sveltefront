@@ -25,8 +25,9 @@ export const load: PageServerLoad = async (event) => {
 	]);
 
 	const q = sp.get('q') ?? '';
-	const noindex = ['brand_slug','group_code','feature','option','range','in_stock_only','category_slug']
-		.some((k) => sp.has(k)) || !!q || filters.page > 1;
+	const nofollow = ['brand_slug','group_code','feature','option','range','in_stock_only','category_slug']
+		.some((k) => sp.has(k)) || !!q;
+	const noindex = nofollow || filters.page > 1;
 
 	return {
 		products,
@@ -36,6 +37,7 @@ export const load: PageServerLoad = async (event) => {
 		title: 'Išpardavimas',
 		description: 'Outlet prekės už išskirtines kainas.',
 		noindex,
+		nofollow,
 		origin: event.url.origin,
 		pathname: event.url.pathname
 	};

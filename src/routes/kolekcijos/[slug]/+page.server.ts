@@ -35,12 +35,12 @@ export const load: PageServerLoad = async (event) => {
 	]);
 
 	const q = sp.get('q') ?? '';
-	const noindex =
+	const nofollow =
 		['category_slug', 'brand_slug', 'feature', 'option', 'range', 'in_stock_only'].some((k) =>
 			sp.has(k)
 		) ||
-		!!q ||
-		filters.page > 1;
+		!!q;
+	const noindex = nofollow || filters.page > 1;
 
 	return {
 		group,
@@ -51,6 +51,7 @@ export const load: PageServerLoad = async (event) => {
 		title: group.name,
 		description: group.description || `Kolekcija: ${group.name}`,
 		noindex,
+		nofollow,
 		origin: event.url.origin,
 		pathname: event.url.pathname
 	};

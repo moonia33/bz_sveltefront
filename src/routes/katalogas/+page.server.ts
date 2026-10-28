@@ -33,7 +33,8 @@ export const load: PageServerLoad = async (event) => {
 		'in_stock_only',
 		'category_slug'
 	];
-	const noindex = filterParams.some((k) => sp.has(k)) || !!q || filters.page > 1;
+	const nofollow = filterParams.some((k) => sp.has(k)) || !!q;
+	const noindex = nofollow || filters.page > 1;
 
 	return {
 		products,
@@ -42,6 +43,7 @@ export const load: PageServerLoad = async (event) => {
 		categoryChips: (parent.categories ?? []).filter((c) => !c.parent_id),
 		title: q ? `Paieška: „${q}“` : 'Visos prekės',
 		noindex,
+		nofollow,
 		origin: event.url.origin,
 		pathname: event.url.pathname
 	};

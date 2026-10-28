@@ -35,12 +35,12 @@ export const load: PageServerLoad = async (event) => {
 	]);
 
 	const q = sp.get('q') ?? '';
-	const noindex =
+	const nofollow =
 		['category_slug', 'group_code', 'feature', 'option', 'range', 'in_stock_only'].some((k) =>
 			sp.has(k)
 		) ||
-		!!q ||
-		filters.page > 1;
+		!!q;
+	const noindex = nofollow || filters.page > 1;
 
 	return {
 		brand,
@@ -54,6 +54,7 @@ export const load: PageServerLoad = async (event) => {
 		seoTitle: brand.seo_title || '',
 		logoUrl: brand.logo_url || '',
 		noindex,
+		nofollow,
 		origin: event.url.origin,
 		pathname: event.url.pathname
 	};

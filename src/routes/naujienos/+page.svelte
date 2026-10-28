@@ -28,7 +28,7 @@
 	<meta name="description" content={data.description} />
 	<link rel="canonical" href={canonical} />
 	{#if data.noindex}
-		<meta name="robots" content="noindex, follow" />
+		<meta name="robots" content={data.nofollow ? 'noindex, nofollow' : 'noindex, follow'} />
 	{/if}
 	<meta property="og:title" content={title} />
 	<meta property="og:url" content={canonical} />

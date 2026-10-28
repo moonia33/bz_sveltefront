@@ -31,7 +31,7 @@
 		Warehouse,
 		ZoomIn
 	} from '@lucide/svelte';
-	import type { DeliveryWindowOut, ProductFeatureOut, VariantOut } from '#lib/api/types';
+	import type { DeliveryWindowOut, MoneyOut, ProductFeatureOut, VariantOut } from '#lib/api/types';
 
 	let { data, form } = $props();
 	const product = $derived(data.product);
@@ -110,6 +110,11 @@
 		// Partial selection → first variant matching chosen options.
 		return variants.find((v) => matchesAll(v, selection)) ?? null;
 	});
+
+	const missingGroups = $derived(
+		optionGroups.filter((g) => !selection[g.code])
+	);
+	const selectionComplete = $derived(missingGroups.length === 0);
 
 	function valueAvailable(typeCode: string, valueCode: string): boolean {
 		return variants.some((v) =>
@@ -241,6 +246,19 @@
 	});
 
 	const price = $derived(selectedVariant?.price ?? variants[0]?.price);
+	// Nepilnai pasirinkus — rodome minimalią kainą su „nuo" prefiksu
+	const priceRange = $derived.by(() => {
+		if (selectionComplete || !variants.length) return null;
+		const priced = variants
+			.filter((v) => matchesAll(v, selection))
+			.map((v) => v.price)
+			.filter((p): p is MoneyOut => p != null);
+		if (!priced.length) return null;
+		const grosses = priced.map((p) => p.gross);
+		const minG = Math.min(...grosses);
+		const maxG = Math.max(...grosses);
+		return { min: priced[grosses.indexOf(minG)], max: maxG !== minG ? priced[grosses.indexOf(maxG)] : null };
+	});
 	const cheapestGross = $derived(
 		variants.length ? Math.min(...variants.map((v) => v.price?.gross ?? Infinity)) : 0
 	);
@@ -887,7 +905,12 @@
 				{/if}
 
 				<p class="mt-1 font-medium text-lg text-foreground">
-					{formatMoney(price)}
+					{#if priceRange}
+						nuo {formatMoney(priceRange.min)}
+						{#if priceRange.max}– {formatMoney(priceRange.max)}{/if}
+					{:else}
+						{formatMoney(price)}
+					{/if}
 					{#if selectedVariant?.compare_at_price}
 						<s class="text-muted-foreground-1"
 							>{formatMoney(selectedVariant.compare_at_price)}</s
@@ -1135,9 +1158,14 @@
 							{/if}
 						{/if}
 
+						{#if optionGroups.length > 0 && !selectionComplete}
+							<p class="mb-2 text-center text-xs text-amber-700">
+								Pasirinkite: {missingGroups.map((g) => g.name).join(', ')}
+							</p>
+						{/if}
 						<button
 							type="submit"
-							disabled={!selectedVariant || (!product.is_gift_card && totalQty <= 0)}
+							disabled={!selectedVariant || !selectionComplete || (!product.is_gift_card && totalQty <= 0)}
 							class="py-3 px-4 w-full inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-secondary border border-secondary-line text-secondary-foreground hover:bg-secondary-hover focus:outline-hidden focus:bg-secondary-focus disabled:opacity-50 disabled:pointer-events-none"
 						>
 							{#if addedFlash}

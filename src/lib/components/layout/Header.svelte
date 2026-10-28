@@ -28,7 +28,8 @@
 		CategoryOut,
 		MeOut,
 		NavItemOut,
-		NavigationOut
+		NavigationOut,
+		ShopConfigOut
 	} from '#lib/api/types';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
 	import CatalogMenu from './CatalogMenu.svelte';
@@ -42,14 +43,20 @@
 		cart = null,
 		me = null,
 		favoriteCount = 0,
-		navigation = null
+		navigation = null,
+		shopConfig = null
 	}: {
 		categories?: CategoryOut[];
 		cart?: CartOut | null;
 		me?: MeOut | null;
 		favoriteCount?: number;
 		navigation?: NavigationOut | null;
+		shopConfig?: ShopConfigOut | null;
 	} = $props();
+
+	const FALLBACK_LOGO = 'https://baltijoszvynas.lt/img/logo-1715070576.jpg';
+	const logoUrl = $derived(shopConfig?.logo_url || FALLBACK_LOGO);
+	const shopName = $derived(shopConfig?.name || 'Baltijos Žvynas');
 
 	let cartOpen = $state(false);
 	let drawerOpen = $state(false);
@@ -174,11 +181,11 @@
 				<a
 					href="/"
 					class="flex items-center rounded-md font-semibold focus:outline-hidden focus:opacity-80"
-					aria-label="Baltijos Žvynas"
+					aria-label={shopName}
 				>
 					<img
-						src="https://baltijoszvynas.lt/img/logo-1715070576.jpg"
-						alt="Baltijos Žvynas"
+						src={logoUrl}
+						alt={shopName}
 						width="72"
 						height="72"
 						class="h-18 w-auto rounded-sm bg-white object-contain"

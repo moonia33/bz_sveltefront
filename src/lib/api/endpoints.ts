@@ -7,6 +7,7 @@ import type {
 	CatalogFacetsOut,
 	CategoryOut,
 	CmsCategoryOut,
+	ShopConfigOut,
 	CmsPageListOut,
 	CmsPageOut,
 	FavoritesOut,
@@ -69,6 +70,10 @@ export function getProductFacets(ctx: Ctx, p: Omit<ProductListParams, 'page' | '
 
 export function getCategories(ctx: Ctx) {
 	return apiFetch<CategoryOut[]>(ctx, '/catalog/categories');
+}
+
+export function getShopConfig(ctx: Ctx) {
+	return apiFetch<ShopConfigOut>(ctx, '/shop/config');
 }
 
 export function getBrands(ctx: Ctx) {

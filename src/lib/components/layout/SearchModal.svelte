@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { Loader2, Search } from '@lucide/svelte';
 	import Overlay from '#lib/components/ui/Overlay.svelte';
 	import { formatMoney } from '#lib/money';
-	import type { CategoryOut, SuggestItemOut } from '#lib/api/types';
+	import { shopLogoUrl } from '#lib/shop';
+	import type { CategoryOut, ShopConfigOut, SuggestItemOut } from '#lib/api/types';
 
 	let {
 		open = $bindable(false),
@@ -23,6 +25,9 @@
 
 	const topCategories = $derived(categories.filter((c) => !c.parent_id).slice(0, 8));
 	const term = $derived(q.trim());
+	const logoUrl = $derived(
+		shopLogoUrl(page.data.shopConfig as ShopConfigOut | undefined)
+	);
 
 	$effect(() => {
 		if (!open) return;
@@ -143,7 +148,17 @@
 									class="size-10 shrink-0 rounded-lg bg-surface object-cover"
 								/>
 							{:else}
-								<span class="size-10 shrink-0 rounded-lg bg-surface"></span>
+								<span
+									class="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface"
+								>
+									<img
+										src={logoUrl}
+										alt=""
+										loading="lazy"
+										decoding="async"
+										class="max-h-7 max-w-7 object-contain opacity-80"
+									/>
+								</span>
 							{/if}
 							<span class="min-w-0 grow">
 								<span class="block truncate text-sm text-foreground [&>mark]:bg-primary-100 [&>mark]:text-primary-800 [&>mark]:rounded-sm [&>mark]:px-0.5">{@html p.name_html || p.name}</span>

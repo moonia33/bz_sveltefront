@@ -32,6 +32,7 @@
 		ShopConfigOut
 	} from '#lib/api/types';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
+	import { shopLogoUrl } from '#lib/shop';
 	import CatalogMenu from './CatalogMenu.svelte';
 	import BottomTabBar from './BottomTabBar.svelte';
 	import MiniCart from './MiniCart.svelte';
@@ -54,8 +55,7 @@
 		shopConfig?: ShopConfigOut | null;
 	} = $props();
 
-	const FALLBACK_LOGO = 'https://baltijoszvynas.lt/img/logo-1715070576.jpg';
-	const logoUrl = $derived(shopConfig?.logo_url || FALLBACK_LOGO);
+	const logoUrl = $derived(shopLogoUrl(shopConfig));
 	const shopName = $derived(shopConfig?.name || 'Baltijos Žvynas');
 
 	let cartOpen = $state(false);

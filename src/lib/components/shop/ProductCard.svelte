@@ -3,7 +3,8 @@
 	import { page } from '$app/state';
 	import { Heart } from '@lucide/svelte';
 	import { formatMoney } from '#lib/money';
-	import type { ProductListOut } from '#lib/api/types';
+	import { shopLogoUrl } from '#lib/shop';
+	import type { ProductListOut, ShopConfigOut } from '#lib/api/types';
 
 	let {
 		product,
@@ -13,6 +14,9 @@
 
 	const img = $derived(product.images?.[0]);
 	const href = $derived(`/p/${product.slug}`);
+	const logoUrl = $derived(
+		shopLogoUrl(page.data.shopConfig as ShopConfigOut | undefined)
+	);
 	const srcset = (s?: { url: string; width: number }[]) =>
 		s?.map((i) => `${i.url} ${i.width}w`).join(', ') ?? '';
 
@@ -63,16 +67,15 @@
 				</picture>
 			{:else}
 				<div
-					class="flex aspect-square w-full items-center justify-center rounded-xl bg-surface text-muted-foreground"
+					class="flex aspect-square w-full items-center justify-center rounded-xl bg-surface p-8"
 				>
-					<svg class="size-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.5"
-							d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-						/>
-					</svg>
+					<img
+						src={logoUrl}
+						alt={product.name}
+						loading="lazy"
+						decoding="async"
+						class="max-h-full max-w-full object-contain opacity-80"
+					/>
 				</div>
 			{/if}
 		</a>

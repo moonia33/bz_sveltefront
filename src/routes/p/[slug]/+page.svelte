@@ -11,6 +11,7 @@
 	import AnimatedTrolley from '#lib/components/icons/AnimatedTrolley.svelte';
 	import { formatMoney } from '#lib/money';
 	import { pushToast } from '#lib/toast';
+	import { shopLogoUrl } from '#lib/shop';
 	import { jsonLd } from '#lib/seo';
 	import { browser } from '$app/env';
 	import 'photoswipe/dist/photoswipe.css';
@@ -36,6 +37,7 @@
 
 	let { data, form } = $props();
 	const product = $derived(data.product);
+	const logoUrl = $derived(shopLogoUrl(data.shopConfig));
 	const variants = $derived(product.variants.filter((v: VariantOut) => v.is_active));
 
 	type OptionGroup = {
@@ -136,8 +138,10 @@
 		);
 	}
 
+	// Perbraukimas „Nėra" reikšmėms — X-formos dvi įstrižainės, storesnės ir
+	// tamsesnės nei rėmelis (--muted-foreground-1), kad ryškėtų ir ant thumb'ų.
 	const strikeDiag =
-		'after:absolute after:inset-0 after:bg-[linear-gradient(to_right_bottom,transparent_calc(50%-1px),var(--color-line-2)_calc(50%-1px),var(--color-line-2)_50%,transparent_50%)]';
+		'after:absolute after:inset-0 after:bg-[linear-gradient(to_right_bottom,transparent_calc(50%-1.5px),var(--muted-foreground-1)_calc(50%-1.5px),var(--muted-foreground-1)_50%,transparent_50%),linear-gradient(to_left_bottom,transparent_calc(50%-1.5px),var(--muted-foreground-1)_calc(50%-1.5px),var(--muted-foreground-1)_50%,transparent_50%)]';
 
 	const images = $derived.by(() => {
 		const imgs = [...(selectedVariant?.images ?? []), ...product.images];
@@ -680,9 +684,13 @@
 									{/if}
 								{:else}
 									<div
-										class="flex size-full items-center justify-center text-muted-foreground"
+										class="flex size-full items-center justify-center bg-surface"
 									>
-										<ImageIcon class="size-16" />
+										<img
+											src={logoUrl}
+											alt={product.name}
+											class="max-h-32 max-w-[60%] object-contain opacity-80"
+										/>
 									</div>
 								{/if}
 							{/key}
@@ -1133,7 +1141,7 @@
 										{/if}
 										<span class="flex min-w-0 flex-col gap-y-0.5">
 											<span
-												class="block truncate text-sm font-medium {avail ? '' : 'line-through text-muted-foreground-1'}"
+												class="block truncate text-sm font-medium {avail ? '' : 'line-through decoration-2 text-muted-foreground-1'}"
 											>
 												{v.name || v.sku}
 											</span>

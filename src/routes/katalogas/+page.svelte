@@ -67,5 +67,4 @@
 		{ name: 'Pradžia', href: '/' },
 		{ name: data.title }
 	]}
-	categoryChips={data.categoryChips}
 />

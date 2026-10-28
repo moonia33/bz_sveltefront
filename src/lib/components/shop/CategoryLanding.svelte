@@ -135,7 +135,7 @@
 						<div class="flex flex-wrap gap-2">
 							{#each brands as b (b.id)}
 								<a
-									href="/g/{b.slug}"
+									href="/k/{category.slug}?brand_slug={b.slug}"
 									class="inline-flex items-center gap-x-2 py-1.5 px-3.5 bg-layer border border-layer-line rounded-full text-sm text-layer-foreground hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
 								>
 									{#if b.logo_thumb_url || b.logo_url}

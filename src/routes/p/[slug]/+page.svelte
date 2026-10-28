@@ -254,10 +254,10 @@
 			.map((v) => v.price)
 			.filter((p): p is MoneyOut => p != null);
 		if (!priced.length) return null;
-		const grosses = priced.map((p) => p.gross);
-		const minG = Math.min(...grosses);
-		const maxG = Math.max(...grosses);
-		return { min: priced[grosses.indexOf(minG)], max: maxG !== minG ? priced[grosses.indexOf(maxG)] : null };
+		const sorted = [...priced].sort((a, b) => Number(a.gross) - Number(b.gross));
+		const min = sorted[0];
+		const max = sorted[sorted.length - 1];
+		return { min, max: Number(max.gross) !== Number(min.gross) ? max : null };
 	});
 	const cheapestGross = $derived(
 		variants.length ? Math.min(...variants.map((v) => v.price?.gross ?? Infinity)) : 0
@@ -1158,10 +1158,21 @@
 							{/if}
 						{/if}
 
-						{#if optionGroups.length > 0 && !selectionComplete}
-							<p class="mb-2 text-center text-xs text-amber-700">
-								Pasirinkite: {missingGroups.map((g) => g.name).join(', ')}
-							</p>
+						{#if optionGroups.length > 0}
+							<div class="mb-2 flex items-center justify-center gap-3 text-xs">
+								{#if !selectionComplete}
+									<span class="text-amber-700">
+										Pasirinkite: {missingGroups.map((g) => g.name).join(', ')}
+									</span>
+								{/if}
+								{#if Object.keys(selection).length > 0}
+									<button
+										type="button"
+										class="text-muted-foreground-1 underline underline-offset-2 hover:text-foreground"
+										onclick={() => (selection = {})}
+									>Išvalyti pasirinkimą</button>
+								{/if}
+							</div>
 						{/if}
 						<button
 							type="submit"

@@ -15,6 +15,7 @@
 		me={data.me}
 		favoriteCount={data.favorite_count}
 		navigation={data.navigation}
+		shopConfig={data.shopConfig}
 	/>
 	<main id="content" class="grow">
 		{@render children()}

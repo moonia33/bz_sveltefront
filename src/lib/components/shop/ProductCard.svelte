@@ -5,7 +5,11 @@
 	import { formatMoney } from '#lib/money';
 	import type { ProductListOut } from '#lib/api/types';
 
-	let { product, priority = false }: { product: ProductListOut; priority?: boolean } = $props();
+	let {
+		product,
+		priority = false,
+		lcp = false
+	}: { product: ProductListOut; priority?: boolean; lcp?: boolean } = $props();
 
 	const img = $derived(product.images?.[0]);
 	const href = $derived(`/p/${product.slug}`);
@@ -53,7 +57,7 @@
 						height="560"
 						decoding="async"
 						loading={priority ? 'eager' : 'lazy'}
-						fetchpriority={priority ? 'high' : 'auto'}
+						fetchpriority={lcp ? 'high' : 'auto'}
 						class="aspect-square w-full rounded-xl bg-surface object-cover"
 					/>
 				</picture>

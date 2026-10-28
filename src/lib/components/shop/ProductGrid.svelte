@@ -13,6 +13,6 @@
 
 <div class="grid grid-cols-2 gap-y-10 gap-x-4 md:grid-cols-3 xl:grid-cols-4">
 	{#each products as product, i (product.id)}
-		<ProductCard {product} priority={priorityFirst && i < 4} />
+		<ProductCard {product} priority={priorityFirst && i < 4} lcp={priorityFirst && i === 0} />
 	{/each}
 </div>

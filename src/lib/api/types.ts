@@ -84,6 +84,19 @@ export interface SuggestItemOut {
 	price: MoneyOut | null;
 }
 
+export interface ShopConfigOut {
+	code: string;
+	name: string;
+	site_name: string;
+	logo_url: string | null;
+	default_title: string;
+	default_description: string;
+	terms_url: string;
+	privacy_url: string;
+	enable_checkout: boolean;
+	enable_catalog: boolean;
+}
+
 export interface CategoryOut {
 	id: number;
 	slug: string;

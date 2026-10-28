@@ -52,15 +52,10 @@
 	{@html brandLd}
 </svelte:head>
 
-{#if data.logoUrl}
-	<div class="mx-auto max-w-6xl px-4 pt-6">
-		<img src={data.logoUrl} alt={brand.name} class="h-12 w-auto object-contain" loading="lazy" />
-	</div>
-{/if}
-
 <CatalogPage
 	bind:this={catalog}
 	title={data.title}
+	logoUrl={data.logoUrl ?? undefined}
 	description={data.description}
 	products={data.products}
 	facets={data.facets}

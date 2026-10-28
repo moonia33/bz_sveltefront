@@ -21,10 +21,12 @@
 		categoryLinks = [],
 		categorySlug,
 		listTemplate = 'grid',
-		pageSize = 20
+		pageSize = 20,
+		logoUrl
 	}: {
 		title: string;
 		description?: string;
+		logoUrl?: string;
 		products: Paginated<ProductListOut>;
 		facets: CatalogFacetsOut;
 		params: URLSearchParams;
@@ -188,11 +190,22 @@
 				</nav>
 			{/if}
 
-			<div class="mb-4">
-				<h1 class="font-medium text-xl text-foreground">{title}</h1>
-				{#if description}
-					<p class="mt-1 text-sm text-muted-foreground-1">{description}</p>
+			<div class="mb-4 flex items-center gap-x-3">
+				{#if logoUrl}
+					<img
+						src={logoUrl}
+						alt={title}
+						loading="lazy"
+						decoding="async"
+						class="h-10 w-auto shrink-0 object-contain"
+					/>
 				{/if}
+				<div class="min-w-0">
+					<h1 class="font-medium text-xl text-foreground">{title}</h1>
+					{#if description}
+						<p class="mt-1 text-sm text-muted-foreground-1">{description}</p>
+					{/if}
+				</div>
 			</div>
 
 			{#if categoryChips.length}

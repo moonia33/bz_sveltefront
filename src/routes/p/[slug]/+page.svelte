@@ -138,10 +138,10 @@
 		);
 	}
 
-	// Perbraukimas „Nėra" reikšmėms — X-formos dvi įstrižainės, storesnės ir
-	// tamsesnės nei rėmelis (--muted-foreground-1), kad ryškėtų ir ant thumb'ų.
+	// Perbraukimas „Nėra" reikšmėms — X-formos dvi įstrižainės (gray-400,
+	// Preline storefront stilius), ryškios ir ant thumb'ų.
 	const strikeDiag =
-		'after:absolute after:inset-0 after:bg-[linear-gradient(to_right_bottom,transparent_calc(50%-1.5px),var(--muted-foreground-1)_calc(50%-1.5px),var(--muted-foreground-1)_50%,transparent_50%),linear-gradient(to_left_bottom,transparent_calc(50%-1.5px),var(--muted-foreground-1)_calc(50%-1.5px),var(--muted-foreground-1)_50%,transparent_50%)]';
+		'after:absolute after:inset-0 after:bg-[linear-gradient(to_right_bottom,transparent_calc(50%-1.5px),var(--border-line-4)_calc(50%-1.5px),var(--border-line-4)_50%,transparent_50%),linear-gradient(to_left_bottom,transparent_calc(50%-1.5px),var(--border-line-4)_calc(50%-1.5px),var(--border-line-4)_50%,transparent_50%)]';
 
 	const images = $derived.by(() => {
 		const imgs = [...(selectedVariant?.images ?? []), ...product.images];
@@ -1141,7 +1141,7 @@
 										{/if}
 										<span class="flex min-w-0 flex-col gap-y-0.5">
 											<span
-												class="block truncate text-sm font-medium {avail ? '' : 'line-through decoration-2 text-muted-foreground-1'}"
+												class="block truncate text-sm font-medium {avail ? '' : 'line-through decoration-2 text-zvynas-gray-400'}"
 											>
 												{v.name || v.sku}
 											</span>

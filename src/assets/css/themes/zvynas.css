@@ -184,7 +184,7 @@
   
   --sidebar: var(--background-plain);
   --sidebar-line: var(--border);
-  --sidebar-divider: var(--border);
+  --sidebar-divider: var(--border-line-4);
   --sidebar-nav-foreground: var(--foreground);
   --sidebar-nav-hover: var(--muted-hover);
   --sidebar-nav-focus: var(--muted-hover);
@@ -515,7 +515,7 @@
   /* SIDEBAR */
   --sidebar: var(--background);
   --sidebar-line: var(--border);
-  --sidebar-divider: var(--border);
+  --sidebar-divider: var(--border-line-4);
   --sidebar-nav-foreground: var(--foreground);
   --sidebar-nav-hover: var(--muted-hover);
   --sidebar-nav-focus: var(--muted-hover);

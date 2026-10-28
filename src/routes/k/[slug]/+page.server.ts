@@ -65,7 +65,8 @@ export const load: PageServerLoad = async (event) => {
 	const facets = listingFacets;
 
 	const filterParams = ['brand_slug', 'group_code', 'feature', 'option', 'range', 'in_stock_only', 'q'];
-	const noindex = filterParams.some((k) => sp.has(k)) || filters.page > 1;
+	const nofollow = filterParams.some((k) => sp.has(k));
+	const noindex = nofollow || filters.page > 1;
 
 	return {
 		...common,
@@ -74,6 +75,7 @@ export const load: PageServerLoad = async (event) => {
 		categoryChips: children,
 		categoryLinks: children.map((c) => ({ slug: c.slug, name: c.name })),
 		mode: 'listing' as const,
-		noindex
+		noindex,
+		nofollow
 	};
 };

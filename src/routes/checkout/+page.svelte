@@ -86,6 +86,10 @@
 			firstName = firstName || me.first_name || '';
 			lastName = lastName || me.last_name || '';
 			phone = phone || me.phones?.find((p) => p.is_primary)?.phone || '';
+			// Guest→user krepšelio sujungimas backend'e vyksta pirmu cart GET
+			// po login'o — darome jį čia, kol session cookie tikrai galioja.
+			// Kitaip invalidateAll → load → tuščias cart → redirect /krepselis.
+			await getJson('/checkout/cart').catch(() => null);
 			await invalidateAll();
 		} catch (e) {
 			contactError = e instanceof Error ? e.message : 'Neteisingas kodas.';
@@ -200,9 +204,19 @@
 			refreshPreview();
 		}
 	});
-	let addrMode = $state<'saved' | 'new'>('saved');
+	let addrMode = $state<'saved' | 'new'>(
+		(data.me?.addresses?.length ?? 0) ? 'saved' : 'new'
+	);
+	let addrModeManual = $state(false);
 	let addrSelectedId = $state<number | null>(null);
 	let newAddr = $state({ full_name: '', line1: '', city: '', postal_code: '', phone: '' });
+
+	$effect(() => {
+		// Režimas seka ar yra išsaugotų adresų (pvz. po OTP), kol
+		// vartotojas pats neperjungė — naujui vartotojui be adresų
+		// forma rodo naujo adreso laukus ir režimas turi būti 'new'.
+		if (!addrModeManual) addrMode = savedAddresses.length ? 'saved' : 'new';
+	});
 
 	$effect(() => {
 		// Prefill naujo adreso formos kontaktiniais duomenimis.
@@ -694,7 +708,7 @@
 												</span>
 											</label>
 										{/each}
-										<button type="button" onclick={() => (addrMode = 'new')} class="text-xs text-primary underline">+ Naujas adresas</button>
+										<button type="button" onclick={() => { addrMode = 'new'; addrModeManual = true; }} class="text-xs text-primary underline">+ Naujas adresas</button>
 									</div>
 								{:else}
 									<div class="grid grid-cols-2 gap-3">
@@ -705,7 +719,7 @@
 										<input type="tel" bind:value={newAddr.phone} placeholder="Telefonas" class="col-span-2 rounded-lg border border-gray-200 px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-800" />
 									</div>
 									{#if savedAddresses.length}
-										<button type="button" onclick={() => (addrMode = 'saved')} class="mt-2 text-xs text-primary underline">← Išsaugoti adresai</button>
+										<button type="button" onclick={() => { addrMode = 'saved'; addrModeManual = true; }} class="mt-2 text-xs text-primary underline">← Išsaugoti adresai</button>
 									{/if}
 								{/if}
 								<button

@@ -5,6 +5,7 @@
 	import CategoryNav from '#lib/components/shop/CategoryNav.svelte';
 	import CategoryCardGrid from '#lib/components/shop/CategoryCardGrid.svelte';
 	import ProductRow from '#lib/components/ui/ProductRow.svelte';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		category,
@@ -49,13 +50,13 @@
 					class="inline-flex items-center gap-x-2 py-1.5 px-3 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover focus:outline-hidden focus:bg-layer-focus"
 				>
 					<PanelLeft class="shrink-0 size-4" />
-					Kategorijos
+					{m.cat_categories()}
 				</button>
 			</div>
 
 			<div class="pt-4 lg:pt-10">
 				{#if breadcrumbs.length}
-					<nav aria-label="Naršymo kelias" class="mb-4">
+					<nav aria-label={m.breadcrumb_aria()} class="mb-4">
 						<ol class="flex items-center gap-x-1.5 text-sm">
 							{#each breadcrumbs as crumb, i (i)}
 								<li class="flex items-center gap-x-1.5">
@@ -100,7 +101,7 @@
 								<a
 									href={catalogHref}
 									class="mt-3 text-sm md:text-base text-white underline underline-offset-4 hover:text-white/80 focus:outline-hidden focus:text-white/80"
-									>Žiūrėti visas kategorijos prekės</a
+									>{m.cat_view_all()}</a
 								>
 							</div>
 						</div>
@@ -112,7 +113,7 @@
 							<a
 								href={catalogHref}
 								class="mt-2 text-sm md:text-base text-white underline underline-offset-4 hover:text-white/80 focus:outline-hidden focus:text-white/80"
-								>Žiūrėti visas kategorijos prekės</a
+								>{m.cat_view_all()}</a
 							>
 						</div>
 					{/if}
@@ -159,7 +160,7 @@
 					<div class="pb-10 lg:pb-16">
 						<ProductRow
 							products={topProducts}
-							title="Populiariausios"
+							title={m.sort_best_selling()}
 							href="{catalogHref}&sort=best_selling"
 						/>
 					</div>

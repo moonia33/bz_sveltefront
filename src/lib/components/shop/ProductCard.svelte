@@ -5,6 +5,7 @@
 	import { formatMoney } from '#lib/money';
 	import { shopLogoUrl } from '#lib/shop';
 	import type { ProductListOut, ShopConfigOut } from '#lib/api/types';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		product,
@@ -87,11 +88,11 @@
 				onclick={toggleFav}
 				disabled={favBusy}
 				aria-pressed={isFav}
-				title={isFav ? 'Pašalinti iš mėgstamų' : 'Į mėgstamas'}
+				title={isFav ? m.fav_remove() : m.fav_add()}
 				class="size-6 flex justify-center items-center gap-x-1 rounded-full text-xs bg-layer text-layer-foreground hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none"
 			>
 				<Heart class="shrink-0 size-3.5 {isFav ? 'fill-current text-destructive' : ''}" />
-				<span class="sr-only">Mėgstamiausi</span>
+				<span class="sr-only">{m.nav_favorites()}</span>
 			</button>
 		</div>
 

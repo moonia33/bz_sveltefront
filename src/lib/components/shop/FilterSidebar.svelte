@@ -3,6 +3,7 @@
 	import type { CatalogFacetsOut } from '#lib/api/types';
 	import Overlay from '#lib/components/ui/Overlay.svelte';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		facets,
@@ -118,20 +119,20 @@
 		if (brandSlug) {
 			const b = facets.brands.find((x) => x.slug === brandSlug);
 			list.push({
-				label: `Gamintojas: ${b?.name ?? brandSlug}`,
+				label: m.filter_brand_chip({ name: b?.name ?? brandSlug }),
 				href: href((p) => p.delete('brand_slug'))
 			});
 		}
 		if (groupCode) {
 			const g = facets.product_groups.find((x) => x.code === groupCode);
 			list.push({
-				label: `Grupė: ${g?.name ?? groupCode}`,
+				label: m.filter_group_chip({ name: g?.name ?? groupCode }),
 				href: href((p) => p.delete('group_code'))
 			});
 		}
 		if (inStock) {
 			list.push({
-				label: 'Tik turimos sandėlyje',
+				label: m.filter_in_stock_only(),
 				href: href((p) => p.delete('in_stock_only'))
 			});
 		}
@@ -164,7 +165,7 @@
 			});
 		}
 		if (q) {
-			list.push({ label: `Paieška: „${q}“`, href: href((p) => p.delete('q')) });
+			list.push({ label: m.filter_search_chip({ q }), href: href((p) => p.delete('q')) });
 		}
 		return list;
 	});
@@ -265,7 +266,7 @@
 				onclick={() => toggleExpanded(key)}
 				class="inline-flex items-center gap-x-1.5 text-[13px] text-foreground underline underline-offset-4 hover:text-primary-hover focus:outline-hidden focus:text-primary-focus"
 			>
-				{expanded.has(key) ? 'Rodyti mažiau' : `Rodyti daugiau (${total - 8})`}
+				{expanded.has(key) ? m.ui_show_less() : m.show_more_count({ count: total - 8 })}
 				<ChevronDown
 					class="shrink-0 size-3.5 transition-transform {expanded.has(key) ? 'rotate-180' : ''}"
 				/>
@@ -284,7 +285,7 @@
 						href={clearAll}
 						data-sveltekit-noscroll
 						class="text-xs text-muted-foreground-1 underline underline-offset-4 hover:text-foreground"
-						>Išvalyti viską</a
+						>{m.filters_clear_all()}</a
 					>
 				</div>
 				<div class="flex flex-wrap gap-1.5">
@@ -298,7 +299,7 @@
 								data-sveltekit-noscroll
 								data-sveltekit-keepfocus
 								rel="nofollow"
-								aria-label="Pašalinti filtrą {chip.label}"
+								aria-label={m.filter_remove({ label: chip.label })}
 								class="inline-flex shrink-0 justify-center items-center size-5 rounded-md text-muted-foreground-2 hover:bg-surface-hover focus:outline-hidden focus:bg-surface-focus"
 							>
 								<X class="shrink-0 size-4" />
@@ -355,7 +356,7 @@
 				: facets.product_groups.slice(0, 8)}
 			<div class="pb-6 mb-6 border-b border-sidebar-divider last:pb-0 last:mb-0 last:border-b-0">
 				<div class="mb-3">
-					<span class="font-medium text-sm text-foreground">Prekių grupė</span>
+					<span class="font-medium text-sm text-foreground">{m.filter_group_title()}</span>
 				</div>
 				<div class="space-y-0.5">
 					{#each groups as g (g.id)}
@@ -382,7 +383,7 @@
 						? href((p) => p.delete('in_stock_only'))
 						: href((p) => p.set('in_stock_only', '1')),
 					inStock,
-					'Tik turimos sandėlyje'
+					m.filter_in_stock_only()
 				)}
 			</div>
 		</div>
@@ -499,7 +500,7 @@
 <!-- Desktop: statinis sidebar -->
 <aside
 	class="hidden lg:block lg:w-72 lg:shrink-0 lg:pe-8 border-e border-sidebar-line bg-sidebar"
-	aria-label="Filtrai"
+	aria-label={m.filters_title()}
 >
 	{@render content()}
 </aside>
@@ -508,7 +509,7 @@
 <Overlay
 	bind:open
 	side="start"
-	label="Filtrai"
+	label={m.filters_title()}
 	panelClass="overflow-y-auto border-e border-sidebar-line"
 >
 	<div class="py-3 px-5 flex justify-between items-center gap-x-3 border-b border-sidebar-divider">
@@ -517,7 +518,7 @@
 			type="button"
 			onclick={() => (open = false)}
 			class="size-6 inline-flex justify-center items-center gap-x-2 rounded-full bg-surface border border-surface-line text-surface-foreground hover:bg-surface-hover focus:outline-hidden"
-			aria-label="Uždaryti filtrus"
+			aria-label={m.filters_close()}
 		>
 			<X class="shrink-0 size-4" />
 		</button>

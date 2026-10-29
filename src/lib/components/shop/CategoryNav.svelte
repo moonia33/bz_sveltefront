@@ -2,6 +2,7 @@
 	import { ChevronDown, X } from '@lucide/svelte';
 	import type { CategoryOut } from '#lib/api/types';
 	import Overlay from '#lib/components/ui/Overlay.svelte';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		all = [],
@@ -76,7 +77,7 @@
 						<button
 							type="button"
 							aria-expanded={isOpen}
-							aria-label="{isOpen ? 'Suskleisti' : 'Išskleisti'} {cat.name}"
+							aria-label="{(isOpen ? m.ui_collapse() : m.ui_expand()) + ' ' + cat.name}"
 							onclick={() => toggle(cat.id)}
 							class="me-1.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md text-sidebar-nav-foreground hover:bg-sidebar-nav-hover focus:outline-hidden focus:bg-sidebar-nav-focus"
 						>
@@ -112,12 +113,12 @@
 {/snippet}
 
 <!-- Desktop: statinis sidebar -->
-<aside class="hidden lg:block" aria-label="Kategorijų medis">
+<aside class="hidden lg:block" aria-label={m.cat_tree_aria()}>
 	{@render content()}
 </aside>
 
 <!-- Mobile: overlay -->
-<Overlay bind:open side="start" label="Kategorijos" panelClass="overflow-y-auto">
+<Overlay bind:open side="start" label={m.cat_categories()} panelClass="overflow-y-auto">
 	<div
 		class="py-3 px-5 flex justify-between items-center gap-x-3 border-b border-sidebar-divider"
 	>
@@ -126,7 +127,7 @@
 			type="button"
 			onclick={() => (open = false)}
 			class="size-6 inline-flex justify-center items-center gap-x-2 rounded-full bg-surface border border-surface-line text-surface-foreground hover:bg-surface-hover focus:outline-hidden focus:bg-surface-focus"
-			aria-label="Uždaryti kategorijas"
+			aria-label={m.cat_close_categories()}
 		>
 			<X class="shrink-0 size-4" />
 		</button>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CategoryOut } from '#lib/api/types';
-	import { pluralLt } from '#lib/i18n';
+	import { unit } from '#lib/i18n/units';
 
 	let {
 		categories = [],
@@ -58,7 +58,7 @@
 			{#if subs}
 				<p class="mt-0.5 text-sm text-muted-foreground-1">
 					{subs}
-					{pluralLt(subs, ['sub-kategorija', 'sub-kategorijos', 'sub-kategorijų'])}
+					{unit('subcategory', subs)}
 				</p>
 			{/if}
 		</a>

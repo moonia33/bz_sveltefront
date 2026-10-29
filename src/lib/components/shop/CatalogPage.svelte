@@ -5,9 +5,10 @@
 	import FilterSidebar from '#lib/components/shop/FilterSidebar.svelte';
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
 	import ProductList from '#lib/components/shop/ProductList.svelte';
-	import { pluralLt } from '#lib/i18n';
 	import type { CatalogFacetsOut, CategoryOut, Paginated, ProductListOut } from '#lib/api/types';
 	import { onDestroy, onMount } from 'svelte';
+	import { m } from '#lib/paraglide/messages';
+	import { unit } from '#lib/i18n/units';
 
 	let {
 		title,
@@ -124,7 +125,7 @@
 				replace: true
 			});
 		} catch {
-			loadError = 'Nepavyko užkrauti daugiau prekių.';
+			loadError = m.cat_load_more_error();
 		} finally {
 			loading = false;
 		}
@@ -154,10 +155,10 @@
 	onDestroy(() => observer?.disconnect());
 
 	const sorts: [string, string][] = [
-		['', 'Rekomenduojama'],
-		['best_selling', 'Populiariausios'],
-		['price', 'Kaina: nuo mažiausios'],
-		['-price', 'Kaina: nuo didžiausios'],
+		['', m.sort_recommended()],
+		['best_selling', m.sort_best_selling()],
+		['price', m.sort_price_asc()],
+		['-price', m.sort_price_desc()],
 		['-created', 'Naujausios'],
 		['discounted', 'Su nuolaida'],
 		['name', 'Pavadinimas A–Ž']
@@ -170,7 +171,7 @@
 
 		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">
 			{#if breadcrumbs.length}
-				<nav aria-label="Naršymo kelias" class="mb-4">
+				<nav aria-label={m.breadcrumb_aria()} class="mb-4">
 					<ol class="flex items-center gap-x-1.5 text-sm">
 						{#each breadcrumbs as crumb, i (i)}
 							<li class="flex items-center gap-x-1.5">
@@ -252,21 +253,21 @@
 						class="flex items-center gap-x-2 text-xs sm:text-sm text-start text-foreground rounded-lg underline-offset-4 hover:underline focus:outline-hidden"
 					>
 						<SlidersHorizontal class="shrink-0 size-3.5" />
-						Filtrai
+						{m.filters_title()}
 					</button>
 				</div>
 
 				<div class="flex flex-wrap lg:justify-between lg:grow items-center">
 					<span class="me-1 text-xs sm:text-sm text-foreground"
-						>{total} {pluralLt(total, ['prekė', 'prekės', 'prekių'])}</span
+						>{total} {unit('product', total)}</span
 					>
 
 					<div class="lg:hidden mx-3 w-px h-3 bg-surface-2"></div>
 
 					<div class="relative min-h-7.5 inline-flex items-center">
-						<span class="me-1 text-xs sm:text-sm text-foreground">Rūšiuoti:</span>
+						<span class="me-1 text-xs sm:text-sm text-foreground">{m.sort_by()}</span>
 						<select
-							aria-label="Rūšiavimas"
+							aria-label={m.sort_label()}
 							class="appearance-none py-1 ps-1.5 pe-7 text-xs sm:text-sm bg-transparent border-transparent text-foreground rounded-lg focus:ring-0 cursor-pointer"
 							onchange={(e) => {
 								const v = (e.target as HTMLSelectElement).value;
@@ -291,7 +292,7 @@
 						href={fromStartHref}
 						data-sveltekit-noscroll
 						class="text-sm text-foreground underline underline-offset-4 hover:text-primary-hover"
-						>← Rodyti nuo pradžios</a
+						>{m.cat_back_to_start()}</a
 					>
 				</p>
 			{/if}
@@ -304,14 +305,14 @@
 				{/if}
 			{:else}
 				<div class="py-16 text-center">
-					<p class="font-medium text-foreground">Prekių nerasta</p>
+					<p class="font-medium text-foreground">{m.cat_no_products()}</p>
 					<p class="mt-1 text-sm text-muted-foreground-1">
-						Pabandykite pakeisti filtrus arba paieškos frazę.
+						{m.cat_empty_hint()}
 					</p>
 					<a
 						href={pathname}
 						class="mt-4 inline-flex items-center text-sm text-foreground underline underline-offset-4 hover:text-primary-hover"
-						>Išvalyti filtrus</a
+						>{m.filters_clear()}</a
 					>
 				</div>
 			{/if}
@@ -346,7 +347,7 @@
 						type="button"
 						onclick={retry}
 						class="mt-3 py-2 px-4 inline-flex justify-center items-center text-sm font-medium rounded-lg bg-secondary border border-secondary-line text-secondary-foreground hover:bg-secondary-hover focus:outline-hidden"
-						>Bandyti dar kartą</button
+						>{m.ui_retry()}</button
 					>
 				</div>
 			{:else if hasMore && !loading}
@@ -360,7 +361,7 @@
 							loadMore();
 						}}
 						class="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
-						>Rodyti daugiau</a
+						>{m.ui_show_more()}</a
 					>
 				</div>
 			{/if}

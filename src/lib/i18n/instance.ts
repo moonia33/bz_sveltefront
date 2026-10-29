@@ -18,3 +18,15 @@ export function instanceLocale(): Locale {
 // Paraglide locale source of truth — instance env. Cookie/baseLocale
 // strategijos lieka tik kaip fallback jei šis modulis dar neregistruotas.
 overwriteGetLocale(() => instanceLocale());
+
+import { localizeHref } from '#lib/paraglide/runtime';
+
+// Vidinių link'ų lokalizacija: '/krepselis' → '/cart' ne-LT instancuose.
+// External/mailto/tel/anchor URL'ai paliekami nepakitę; query/hash
+// išsaugomi (paraglide dirba tik su pathname dalimi).
+export function lh(url: string | null | undefined): string {
+	if (!url || !url.startsWith('/')) return url ?? '';
+	const hashIdx = url.search(/[?#]/);
+	if (hashIdx === -1) return localizeHref(url);
+	return localizeHref(url.slice(0, hashIdx)) + url.slice(hashIdx);
+}

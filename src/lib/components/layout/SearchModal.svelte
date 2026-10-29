@@ -6,6 +6,7 @@
 	import { formatMoney } from '#lib/money';
 	import { shopLogoUrl } from '#lib/shop';
 	import type { CategoryOut, ShopConfigOut, SuggestItemOut } from '#lib/api/types';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		open = $bindable(false),
@@ -82,7 +83,7 @@
 	}
 </script>
 
-<Overlay bind:open side="center" label="Paieška">
+<Overlay bind:open side="center" label={m.nav_search()}>
 	<form
 		class="p-3 sm:p-4 border-b border-overlay-line"
 		role="search"
@@ -100,9 +101,9 @@
 				bind:value={q}
 				oninput={onInput}
 				onkeydown={onKeydown}
-				placeholder="Ieškoti prekių, gamintojų, kodų…"
+				placeholder={m.nav_search_placeholder()}
 				autocomplete="off"
-				aria-label="Paieškos frazė"
+				aria-label={m.search_query_aria()}
 				class="block w-full rounded-full border border-layer-line bg-layer py-2.5 ps-11 pe-4 text-base text-foreground placeholder:text-muted-foreground-1 focus:border-primary-focus focus:ring-primary-focus focus:outline-hidden"
 			/>
 		</div>
@@ -125,7 +126,7 @@
 			</div>
 		{:else if loading && !suggestions.length}
 			<div class="flex items-center gap-x-2 px-2.5 py-3 text-sm text-muted-foreground-1">
-				<Loader2 class="size-4 animate-spin" /> Ieškoma…
+				<Loader2 class="size-4 animate-spin" /> {m.search_loading()}
 			</div>
 		{:else if suggestions.length}
 			<ul class="space-y-1">
@@ -180,10 +181,10 @@
 				onclick={() => (open = false)}
 				class="mt-1 block w-full rounded-lg py-2.5 text-center text-sm font-medium text-primary hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
 			>
-				Rodyti visus rezultatus „{term}“
+				{m.search_all_results({ term })}
 			</a>
 		{:else}
-			<p class="px-2.5 py-3 text-sm text-muted-foreground-1">Nieko nerasta.</p>
+			<p class="px-2.5 py-3 text-sm text-muted-foreground-1">{m.search_nothing()}</p>
 		{/if}
 	</div>
 </Overlay>

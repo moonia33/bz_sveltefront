@@ -25,6 +25,7 @@
 		X
 	} from '@lucide/svelte';
 	import type { CategoryOut, NavItemOut } from '#lib/api/types';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		open = $bindable(false),
@@ -111,7 +112,7 @@
 	// katalogas" mazgą kaip atskiras drill-down lygis.
 	const catalogNode = $derived<Node>({
 		key: 'catalog',
-		label: 'Prekių katalogas',
+		label: m.cat_menu_title(),
 		url: '',
 		icon: 'layout-grid',
 		iconUrl: '',
@@ -123,7 +124,7 @@
 	});
 
 	const rootLevel = $derived<Level>({
-		title: 'Meniu',
+		title: m.nav_menu(),
 		url: '',
 		nodes: [catalogNode]
 	});
@@ -160,7 +161,7 @@
 	<!-- Backdrop -->
 	<button
 		type="button"
-		aria-label="Uždaryti meniu"
+		aria-label={m.ui_close_menu()}
 		onclick={() => (open = false)}
 		class="fixed inset-0 z-50 bg-black/50 md:hidden"
 	></button>
@@ -192,7 +193,7 @@
 				type="button"
 				onclick={() => (open = false)}
 				class="flex min-h-11 min-w-11 items-center justify-center rounded-full text-foreground hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
-				aria-label="Uždaryti"
+				aria-label={m.ui_close()}
 			>
 				<X class="size-5" />
 			</button>
@@ -259,7 +260,7 @@
 								onclick={() => (open = false)}
 								class="mb-1 flex min-h-12 items-center gap-x-3 rounded-lg bg-primary px-3 font-semibold text-primary-foreground focus:outline-hidden"
 							>
-								Visos „{current.title}“
+								{m.all_of_title({ title: current.title })}
 							</a>
 						{/if}
 						{#each current.nodes as node (node.key)}

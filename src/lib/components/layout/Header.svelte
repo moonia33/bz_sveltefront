@@ -24,6 +24,7 @@
 		User
 	} from '@lucide/svelte';
 	import { m } from '#lib/paraglide/messages';
+	import { lh } from '#lib/i18n/instance';
 	import type {
 		CartOut,
 		CategoryOut,
@@ -73,37 +74,37 @@
 	// hardkodintam meniu, kad storefront niekada neliktų be navigacijos.
 	const FALLBACK_ITEMS: NavItemOut[] = [
 		{
-			id: -1, kind: 'preset', label: 'Akcijos',
+			id: -1, kind: 'preset', label: m.nav_deals(),
 			url: '/akcijos', icon: 'percent', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -2, kind: 'preset', label: 'Naujienos',
+			id: -2, kind: 'preset', label: m.nav_news(),
 			url: '/naujienos', icon: 'package', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -6, kind: 'preset', label: 'Išpardavimas',
+			id: -6, kind: 'preset', label: m.nav_outlet(),
 			url: '/ispardavimas', icon: 'tag', badge: '',
 			highlight: true, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -7, kind: 'preset', label: 'Gamintojai',
+			id: -7, kind: 'preset', label: m.nav_brands(),
 			url: '/gamintojai', icon: 'star', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -8, kind: 'preset', label: 'Kolekcijos',
+			id: -8, kind: 'preset', label: m.nav_collections(),
 			url: '/kolekcijos', icon: 'layers', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -4, kind: 'preset', label: 'Pagalba',
+			id: -4, kind: 'preset', label: m.nav_help(),
 			url: '/pagalba', icon: 'info', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		},
 		{
-			id: -5, kind: 'preset', label: 'Parduotuvės',
+			id: -5, kind: 'preset', label: m.nav_stores(),
 			url: '/parduotuves', icon: 'map-pin', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []
 		}
@@ -117,7 +118,7 @@
 		navItems.filter((i) => i.show_in !== 'mobile')
 	);
 	const promoText = $derived(
-		navigation?.promo?.label || 'Nemokamas pristatymas užsakymams nuo 50 €'
+		navigation?.promo?.label || m.promo_free_shipping({ amount: '50 €' })
 	);
 	const promoUrl = $derived(navigation?.promo?.url || '');
 
@@ -229,11 +230,11 @@
 					<button
 						type="button"
 						onclick={() => (searchOpen = true)}
-						aria-label="Paieška"
+						aria-label={m.nav_search()}
 						class="{widgetBtn} md:hidden"
 					>
 						<Search class="shrink-0 size-4" />
-						<span class="hidden sm:inline">Paieška</span>
+						<span class="hidden sm:inline">{m.nav_search()}</span>
 					</button>
 					{#if me}
 						<div class="relative" bind:this={accountBox}>
@@ -245,7 +246,7 @@
 								class={widgetBtn}
 							>
 								<User class="shrink-0 size-4" />
-								<span class="hidden max-w-20 truncate sm:inline">{me.first_name || 'Paskyra'}</span>
+								<span class="hidden max-w-20 truncate sm:inline">{me.first_name || m.nav_account()}</span>
 							</button>
 							{#if accountOpen}
 								<div
@@ -254,7 +255,7 @@
 									<div class="p-2">
 										<a
 											class="py-2 px-2.5 flex items-center gap-3 rounded-lg hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
-											href="/paskyra"
+											href={lh('/paskyra')}
 											onclick={() => (accountOpen = false)}
 										>
 											<span
@@ -263,7 +264,7 @@
 											>
 											<span class="grow min-w-0">
 												<span class="block font-medium text-sm text-foreground"
-													>{me.first_name || 'Mano paskyra'}</span
+													>{me.first_name || m.nav_my_account()}</span
 												>
 												<span class="block truncate text-xs text-muted-foreground-1"
 													>{me.email}</span
@@ -275,15 +276,15 @@
 											<li>
 												<a
 													class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-foreground rounded-lg hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
-													href="/paskyra"
+													href={lh("/paskyra")}
 													onclick={() => (accountOpen = false)}>Paskyra</a
 												>
 											</li>
 											<li>
 												<a
 													class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-foreground rounded-lg hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
-													href="/paskyra#uzsakymai"
-													onclick={() => (accountOpen = false)}>Užsakymai</a
+													href={lh("/paskyra#uzsakymai")}
+													onclick={() => (accountOpen = false)}>{m.nav_orders()}</a
 												>
 											</li>
 										</ul>
@@ -292,22 +293,22 @@
 							{/if}
 						</div>
 					{:else}
-						<a href="/prisijungti" class={widgetBtn}>
+						<a href={lh('/prisijungti')} class={widgetBtn}>
 							<User class="shrink-0 size-4" />
-							<span class="hidden sm:inline">Prisijungti</span>
+							<span class="hidden sm:inline">{m.nav_login()}</span>
 						</a>
 					{/if}
 
-					<a href="/megstamos" class="relative {widgetBtn} hidden sm:flex">
+					<a href={lh('/megstamos')} class="relative {widgetBtn} hidden sm:flex">
 						<Heart class="shrink-0 size-4" />
-						<span class="hidden sm:inline">Mėgstamiausi</span>
+						<span class="hidden sm:inline">{m.nav_favorites()}</span>
 						{#if favoriteCount > 0}
 							<span class="flex absolute top-0 inset-e-0 z-10 -mt-1 -me-1">
 								<span
 									class="relative min-w-4.5 min-h-4.5 inline-flex justify-center items-center text-[10px] bg-secondary text-secondary-foreground rounded-full px-1"
 								>
 									{favoriteCount > 99 ? '99' : favoriteCount}
-									<span class="sr-only">prekės mėgstamose</span>
+									<span class="sr-only">{m.nav_favorites_items_sr()}</span>
 								</span>
 							</span>
 						{/if}
@@ -319,14 +320,14 @@
 						class="relative {widgetBtn}"
 					>
 						<ShoppingCart class="shrink-0 size-4" />
-						<span class="hidden sm:inline">Krepšelis</span>
+						<span class="hidden sm:inline">{m.nav_cart()}</span>
 						{#if cartCount > 0}
 							<span class="flex absolute top-0 inset-e-0 z-10 -mt-1 -me-1">
 								<span
 									class="relative min-w-4.5 min-h-4.5 inline-flex justify-center items-center text-[10px] bg-secondary text-secondary-foreground rounded-full px-1"
 								>
 									{cartCount > 99 ? '99' : cartCount}
-									<span class="sr-only">prekės krepšelyje</span>
+									<span class="sr-only">{m.nav_cart_items_sr()}</span>
 								</span>
 							</span>
 						{/if}
@@ -378,7 +379,7 @@
 						</button>
 					{:else}
 						<a
-							href={item.url || '#'}
+							href={lh(item.url) || '#'}
 							target={item.new_tab ? '_blank' : undefined}
 							rel={item.new_tab ? 'noopener noreferrer' : undefined}
 							class="{navPill} w-full lg:w-auto text-start {item.highlight
@@ -405,7 +406,7 @@
 									{@const ChildIcon = ICONS[child.icon]}
 									<a
 										class="py-2 px-3 flex items-center gap-x-3 text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover rounded-lg focus:outline-hidden focus:bg-navbar-nav-focus"
-										href={child.url || '#'}
+										href={lh(child.url) || '#'}
 										target={child.new_tab ? '_blank' : undefined}
 										rel={child.new_tab ? 'noopener noreferrer' : undefined}
 										onclick={() => (openNavId = null)}
@@ -430,12 +431,12 @@
 		<button
 			type="button"
 			onclick={toggleTheme}
-			aria-label="Perjungti temą"
+			aria-label={m.nav_toggle_theme()}
 			class="{navPill} shrink-0"
 		>
 			<Moon class="shrink-0 size-3.5 dark:hidden" />
 			<Sun class="hidden shrink-0 size-3.5 dark:block" />
-			<span class="sr-only">Perjungti temą</span>
+			<span class="sr-only">{m.nav_toggle_theme()}</span>
 		</button>
 	</div>
 	<!-- End Bottom nav -->

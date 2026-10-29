@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { CategoryOut, NavItemOut, NavigationOut } from '#lib/api/types';
 	import { Check } from '@lucide/svelte';
+	import { m } from '#lib/paraglide/messages';
+	import { lh } from '#lib/i18n/instance';
 
 	let {
 		categories = [],
@@ -20,42 +22,42 @@
 	// naudojamas tik kai /cms/navigation nepasiekiamas.
 	const FALLBACK_COLS: NavItemOut[] = [
 		{
-			id: -1, kind: 'link', label: 'Pagalba', url: '', icon: '',
+			id: -1, kind: 'link', label: m.nav_help(), url: '', icon: '',
 			badge: '', highlight: false, new_tab: false, show_in: 'all',
 			children: [
-				{ id: -11, kind: 'link', label: 'Pagalbos centras', url: '/pagalba', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -12, kind: 'link', label: 'Keitimas ir grąžinimas', url: '/grazinimas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -13, kind: 'link', label: 'Parduotuvės', url: '/parduotuves', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -14, kind: 'link', label: 'DUK', url: '/info/duk', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+				{ id: -11, kind: 'link', label: m.footer_help_center(), url: '/pagalba', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -12, kind: 'link', label: m.footer_returns(), url: '/grazinimas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -13, kind: 'link', label: m.nav_stores(), url: '/parduotuves', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -14, kind: 'link', label: m.footer_faq(), url: '/info/duk', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
 			]
 		},
 		{
-			id: -2, kind: 'link', label: 'Informacija', url: '', icon: '',
+			id: -2, kind: 'link', label: m.footer_info(), url: '', icon: '',
 			badge: '', highlight: false, new_tab: false, show_in: 'all',
 			children: [
-				{ id: -21, kind: 'link', label: 'Apie mus', url: '/info/apie-mus', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -22, kind: 'link', label: 'Taisyklės', url: '/info/taisykles', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -23, kind: 'link', label: 'Privatumas', url: '/info/privatumas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+				{ id: -21, kind: 'link', label: m.footer_about(), url: '/info/apie-mus', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -22, kind: 'link', label: m.footer_terms(), url: '/info/taisykles', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+				{ id: -23, kind: 'link', label: m.footer_privacy(), url: '/info/privatumas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
 			]
 		},
 		{
-			id: -3, kind: 'link', label: 'Katalogas', url: '', icon: '',
+			id: -3, kind: 'link', label: m.nav_catalog(), url: '', icon: '',
 			badge: '', highlight: false, new_tab: false, show_in: 'all',
 			children: []
 		},
 		{
-			id: -4, kind: 'link', label: 'Kontaktai', url: '', icon: '',
+			id: -4, kind: 'link', label: m.footer_contacts(), url: '', icon: '',
 			badge: '', highlight: false, new_tab: false, show_in: 'all',
 			children: [
 				{ id: -41, kind: 'link', label: '+370 600 00000', url: 'tel:+37060000000', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
 				{ id: -42, kind: 'link', label: 'info@baltijoszvynas.lt', url: 'mailto:info@baltijoszvynas.lt', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-				{ id: -43, kind: 'link', label: 'Parduotuvių kontaktai', url: '/parduotuves', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+				{ id: -43, kind: 'link', label: m.footer_store_contacts(), url: '/parduotuves', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
 			]
 		}
 	];
 	const FALLBACK_BOTTOM: NavItemOut[] = [
-		{ id: -91, kind: 'link', label: 'Taisyklės', url: '/info/taisykles', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
-		{ id: -92, kind: 'link', label: 'Privatumas', url: '/info/privatumas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
+		{ id: -91, kind: 'link', label: m.footer_terms(), url: '/info/taisykles', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] },
+		{ id: -92, kind: 'link', label: m.footer_privacy(), url: '/info/privatumas', icon: '', badge: '', highlight: false, new_tab: false, show_in: 'all', children: [] }
 	];
 
 	// Stulpeliai: tiesiogiai iš 'footer' meniu (root = antraštė,
@@ -88,11 +90,11 @@
 			const b = await res.json().catch(() => ({}));
 			if (!res.ok) throw new Error(b?.detail || 'Klaida');
 			nlState = 'ok';
-			nlMsg = 'Prenumerata aktyvuota.';
+			nlMsg = m.newsletter_ok();
 			nlEmail = '';
 		} catch (e) {
 			nlState = 'err';
-			nlMsg = e instanceof Error ? e.message : 'Nepavyko užregistruoti';
+			nlMsg = e instanceof Error ? e.message : m.newsletter_fail();
 		}
 	}
 </script>
@@ -103,7 +105,7 @@
 			<div class="max-w-md">
 				<div class="mb-2 flex items-center gap-x-2">
 					<label for="footer-newsletter" class="font-medium text-foreground"
-						>Prenumeruokite naujienas</label
+						>{m.footer_newsletter_label()}</label
 					>
 				</div>
 				<form
@@ -118,7 +120,7 @@
 						type="email"
 						required
 						bind:value={nlEmail}
-						placeholder="El. pašto adresas"
+						placeholder={m.footer_email_ph()}
 						class="py-3 px-4 block w-full bg-transparent border border-layer-line rounded-lg sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:border-line-3"
 					/>
 					<button
@@ -127,7 +129,7 @@
 						class="py-3 px-4 whitespace-nowrap inline-flex justify-center items-center gap-x-2 sm:text-sm font-medium rounded-lg bg-secondary border border-secondary-line text-secondary-foreground hover:bg-secondary-hover focus:outline-hidden focus:bg-secondary-focus disabled:opacity-50"
 					>
 						{#if nlState === 'ok'}<Check class="size-4" />{/if}
-						{nlState === 'busy' ? 'Siunčiama…' : 'Prenumeruoti'}
+						{nlState === 'busy' ? m.ui_sending() : m.ui_subscribe()}
 					</button>
 				</form>
 				{#if nlMsg}
@@ -142,7 +144,7 @@
 			{#each columns as col (col.id)}
 				<div>
 					{#if col.url}
-						<a class="mb-3 block font-medium text-sm text-foreground hover:text-primary-hover" href={col.url}>{col.label}</a>
+						<a class="mb-3 block font-medium text-sm text-foreground hover:text-primary-hover" href={lh(col.url)}>{col.label}</a>
 					{:else}
 						<p class="mb-3 font-medium text-sm text-foreground">{col.label}</p>
 					{/if}
@@ -151,7 +153,7 @@
 							<li>
 								<a
 									class={linkClass}
-									href={link.url || '#'}
+									href={lh(link.url) || '#'}
 									target={link.new_tab ? '_blank' : undefined}
 									rel={link.new_tab ? 'noopener noreferrer' : undefined}
 								>{link.label}</a>
@@ -159,9 +161,9 @@
 						{/each}
 						{#if !navigation?.footers?.length && col.label === 'Katalogas'}
 							{#each topCategories as c (c.id)}
-								<li><a class={linkClass} href="/k/{c.slug}">{c.name}</a></li>
+								<li><a class={linkClass} href={lh('/k/' + c.slug)}>{c.name}</a></li>
 							{/each}
-							<li><a class={linkClass} href="/katalogas">Visos prekės</a></li>
+							<li><a class={linkClass} href={lh('/katalogas')}>{m.all_products()}</a></li>
 						{/if}
 					</ul>
 				</div>
@@ -174,7 +176,7 @@
 			<p class="text-xs text-muted-foreground-1">© {year} Baltijos Žvynas</p>
 			<div class="flex items-center gap-x-4">
 				{#each bottomLinks as link (link.id)}
-					<a class="text-xs {linkClass}" href={link.url || '#'}>{link.label}</a>
+					<a class="text-xs {linkClass}" href={lh(link.url) || '#'}>{link.label}</a>
 				{/each}
 			</div>
 		</div>

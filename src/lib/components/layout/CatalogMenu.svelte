@@ -2,6 +2,7 @@
 	import { ChevronDown, ChevronRight, Folder, Menu, X } from '@lucide/svelte';
 	import type { CategoryOut, MegaMenuFeatureOut } from '#lib/api/types';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		categories = [],
@@ -187,7 +188,7 @@
 																	onclick={() => toggleList(child.id)}
 																	class="flex items-center gap-x-1 font-medium text-[13px] text-primary text-start hover:text-primary-hover focus:outline-hidden focus:text-primary-focus"
 																>
-																	{expanded ? 'Rodyti mažiau' : 'Rodyti daugiau'}
+																	{expanded ? m.ui_show_less() : m.ui_show_more()}
 																	<ChevronDown
 																		class="shrink-0 size-4 transition-transform {expanded
 																			? 'rotate-180'
@@ -231,7 +232,7 @@
 														href="/katalogas?category_slug={activeCat.slug}"
 														onclick={() => (open = false)}
 														class="text-[13px] text-muted-foreground-1 underline-offset-4 hover:text-navbar-nav-foreground focus:outline-hidden focus:text-navbar-nav-foreground"
-														>Visos „{activeCat.name}“ prekės</a
+														>{m.all_products_of({ name: activeCat.name })}</a
 													>
 												</div>
 											</div>

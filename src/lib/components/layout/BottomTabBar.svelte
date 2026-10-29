@@ -8,6 +8,7 @@
 	} from '@lucide/svelte';
 	import { page } from '$app/state';
 	import type { MeOut } from '#lib/api/types';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		cartCount = 0,
@@ -35,11 +36,11 @@
 
 <nav
 	class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-navbar-line bg-navbar pb-[env(safe-area-inset-bottom)] md:hidden"
-	aria-label="Pagrindinė navigacija"
+	aria-label={m.ui_main_nav()}
 >
 	<a href="/" class="{tab} {isActive('/') ? activeCls : ''}">
 		<House class="size-5" />
-		Pradžia
+		{m.ui_home()}
 	</a>
 
 	<button type="button" onclick={onCatalog} class={tab}>
@@ -58,7 +59,7 @@
 				</span>
 			{/if}
 		</span>
-		Krepšelis
+		{m.nav_cart()}
 	</button>
 
 	<a href="/megstamos" class="relative {tab} {isActive('/megstamos') ? activeCls : ''}">
@@ -72,7 +73,7 @@
 				</span>
 			{/if}
 		</span>
-		Mėgstamos
+		{m.nav_favorites()}
 	</a>
 
 	<a
@@ -80,6 +81,6 @@
 		class="{tab} {isActive('/paskyra') ? activeCls : ''}"
 	>
 		<User class="size-5" />
-		{me ? 'Paskyra' : 'Prisijungti'}
+		{me ? m.nav_account() : m.nav_login()}
 	</a>
 </nav>

@@ -1,19 +1,67 @@
-# Daugiakalbių domenų rollout planas (PL → vėliau LV/EE/EN)
+# Daugiakalbių domenų rollout planas (lt, pl, en, de, lv, et)
 
-**Architektūrinis sprendimas (patvirtinta):** vienas git repo + vienas kodas →
-atskirai deploy'inami instance'ai per kalbą/domeną. Tas pats backend'as visiems.
+**Architektūrinis sprendimas (implementuota 2025-10-29):** vienas git repo +
+vienas kodas → atskiri deploy instance'ai per kalbą. **Vienas instance =
+viena kalba (`SITE_LOCALE` runtime env)** — domenai nefiksuoti code'e.
 
 ```
-Coolify app #1: baltijoszvynas.lt     → SITE_LOCALE=lt
-Coolify app #2: baltijoszvynas.pl     → SITE_LOCALE=pl
-                ↑ tas pats repo, tas pats branch
-Backend:        vienas Django — kalba per host/shop context
+Coolify app #1: <lt domenas>   → SITE_LOCALE=lt
+Coolify app #2: <pl domenas>   → SITE_LOCALE=pl
+Coolify app #3: <en domenas>   → SITE_LOCALE=en
+                ↑ tas pats repo, tas pats branch, runtime env skiria
+Backend:        vienas Django — kalba per Accept-Language (proxy set'ina)
 ```
 
-Kodėl NE atskiras repo: per mėnesį instance'ai diverguotų, kiekvienas fix —
-dvigubas darbas. Kodėl atskiri instance'ai (ne vienas instance abiems
-domenams): deploy izoliacija, galima laikinai prisegti versijas migracijos
-metu, paprastesnis cache/CDN skyriumas.
+Kodėl NE compile-time domenai: domenai dar nebaigtiniai/keičiami —
+locale resolution yra `src/lib/i18n/instance.ts` → `SITE_LOCALE` env
+(`src/env.ts` deklaracija, `static:false` → runtime, ne inlined).
+
+### Kas jau implementuota (frontend pamatas)
+
+- `@inlang/paraglide-js` + `project.inlang` — locales: `lt` (base), `pl`,
+  `en`, `de`, `lv`, `et`; messages `messages/{locale}.json`
+- `vite.config.ts` — plugin + `urlPatterns` iš `ROUTE_ALIASES` lentelės
+- `src/lib/i18n/instance.ts` — `overwriteGetLocale` → `SITE_LOCALE` env
+- `src/hooks.ts` — `reroute` → `deLocalizeUrl` (localized path → canonical)
+- `src/hooks.server.ts` — `paraglideMiddleware` + `%lang%`/`%dir%`/`%theme%`
+- `src/hooks.client.ts` — instance locale registracija
+- `app.html` — `lang="%lang%" dir="%dir%"`
+- `/api/v1` proxy — `Accept-Language: {locale}` header'is upstream'ui
+- `package.json` `imports` — `#lib/paraglide/*` → `*.js` mapping
+- Patikrinta end-to-end: `SITE_LOCALE=pl` → `<html lang="pl">`, PL tekstai
+  SSR, `/cart`→200, `/account`→303
+
+### Route lokalizacija — EN-stiliaus path'ai ne-LT kalboms
+
+Canonical vidiniai route'ai lieka LT (`src/routes/` nekeičiami).
+`ROUTE_ALIASES` (`vite.config.ts`) map'ina ne-LT lokalizacijas:
+
+| Canonical | Ne-LT path |
+|---|---|
+| `/krepselis` | `/cart` |
+| `/paskyra` | `/account` |
+| `/uzsakymas` | `/order` |
+| `/prisijungti` | `/login` |
+| `/megstamos` | `/favorites` |
+| `/katalogas` `/kategorijos` `/kolekcijos` | `/catalog` `/categories` `/collections` |
+| `/akcijos` `/ispardavimas` `/naujienos` | `/deals` `/outlet` `/news` |
+| `/gamintojai` `/parduotuves` | `/brands` `/stores` |
+| `/pagalba` `/grazinimas` | `/help` `/returns` |
+
+`/k` `/g` `/p` `/info` `/checkout` — simboliniai, nepakitę visoms kalboms.
+Konkrečios kalbos vėliau gali gauti savus path'us (pvz. PL `/koszyk`) —
+pakanka redaguoti `ROUTE_ALIASES` į per-locale map'ą.
+
+**Dėmesio:** visi vidiniai link'ai `.svelte` failuose (`href="/krepselis"`)
+turi eiti per `localizeHref()` — kitaip ne-LT instance'uose link'ai ves į
+LT path'us (veikia, bet URL'ai nelokalizuoti).
+
+### Kalbos switcher'is — backend API (domenai admin-valdomi)
+
+Frontend'as neturi žinoti domenų compile-time. Backend endpoint'as
+(grąžina aktyvias kalbas + jų domenus — iš Shop/ShopDomain config'o):
+`GET /api/v1/site/locales` → `[{code, name, domain, is_default}]`.
+Switcher link'as: `https://{domain}{localizeHref(currentPath,{locale})}`.
 
 ---
 
@@ -42,48 +90,35 @@ metu, paprastesnis cache/CDN skyriumas.
   `/gamintojai` `/kolekcijos` `/akcijos` `/ispardavimas` `/naujienos`
   `/megstamos` `/grazinimas` `/pagalba` `/parduotuves` `/uzsakymas`)
 
-### Sprendimas dėl route'ų (rekomendacija)
+### Sprendimas dėl route'ų (implementuota)
 
-**v1 — palikti tuos pačius path'us visuose domenuse.** `/k`, `/g`, `/p` —
-simboliniai. LT žodiniai route'ai (`/krepselis` ir t.t.) liks kaip techniniai
-path'ai — veikia, bet PL domene atrodo svetimkalbiškai. SEO kritiška dalis —
-*slug'ai*, o jie lokalizuoti per `*Translation.slug`.
-
-**v2 (opcionalu, vėliau)** — SvelteKit `reroute` hook'as: PL domeno
-`/koszyk` → vidinis `/krepselis`. Fiksuota ~15 route'ų lentelė + `route()`
-helper'is link'ams. Atskiri task'ai, neužblokuoja rollout'o.
+Canonical vidiniai route'ai — LT; ne-LT instance'ai serve'ina EN-stiliaus
+path'us per `urlPatterns` + `reroute` (žr. lentelę aukščiau). Visiškai
+lokalizuoti per-kalbos path'ai (PL `/koszyk`, DE `/warenkorb`) — galima
+vėliau išplėsti `ROUTE_ALIASES` į per-locale struktūrą; slug'ai ir taip
+lokalizuoti per `*Translation.slug`.
 
 ---
 
-## Phase A — Frontend i18n pamatai (didžiausias mechaniškas darbas)
+## Phase A — Frontend i18n pamatai
 
-### A1. paraglide-js setup
+### A1–A2 ✅ paraglide setup + locale resolution — ĮGYVENDINTA
 
-```bash
-npx @inlang/paraglide-js init   # arba rankinis setup
-```
-
-- `project.inlang/` + `messages/lt.json` (source of truth) + `messages/pl.json`
-- `vite.config.ts` — paraglide plugin
-- `package.json` — postbuild machine-translate hook opcionalu
-- Struktūra: `messages/{locale}.json` → `m.message_key()` iškvietimai kode
+- `@inlang/paraglide-js@2.29.1` + `project.inlang` (6 locales)
+- `src/lib/i18n/instance.ts` — `overwriteGetLocale` → `SITE_LOCALE`
+- `src/env.ts` — `SITE_LOCALE` (`public`, runtime)
+- hooks/server/client + `app.html` `%lang%`/`%dir%`
+- `messages/{lt,pl,en,de,lv,et}.json` — seed raktai, pipeline patikrintas
 
 **Konvencija raktams:** `page_section_purpose`, pvz.
 `pdp_add_to_cart`, `checkout_continue`, `nav_catalog`, `toast_added_to_cart`.
 
-### A2. Locale resolution (`hooks.server.ts`)
+### A3. Tekstų iškėlimas (52 failai) — mechaninis, didžiausia dalis darbo
 
-```ts
-const locale = process.env.SITE_LOCALE           // 1) env (per-instance)
-  ?? hostToLocale(event.url.hostname)            // 2) host fallback
-  ?? 'lt';
-```
-
-- `hostToLocale`: `baltijoszvynas.pl`→`pl`, `.lt`→`lt`, `.lv`→`lv`...
-- `event.locals.locale` + `setLocale()`/`getLocale()` paraglide pattern
-- `transformPageChunk`: `%lang%` → locale (app.html `<html lang="%lang%">`)
-
-### A3. Tekstų iškėlimas (52 failai)
+Kartu su tekstais — **vidiniai link'ai**: `href="/krepselis"` →
+`href={localizeHref('/krepselis')}` (importuojama iš
+`#lib/paraglide/runtime`). Canonical path per `localizeHref` išeis į
+lokalizuotą (`/cart` PL/de/lv/et/en instancuose).
 
 Darbo eilutė — **ne viskas iškart**, sekcijomis:
 
@@ -103,48 +138,43 @@ Taisyklės:
 **Kontrolinis sąrašas prieš merge:** `svelte-check` 0 err, `npm run build` OK,
 `messages/pl.json` be trūkstamų raktų (paraglide meta build error'ą).
 
-### A4. Kalbos perdavimas backend'ui
+### A4. Kalbos perdavimas backend'ui ✅ ĮGYVENDINTA
 
-`src/lib/api/client.ts` + proxy `src/routes/api/v1/[...path]/+server.ts`:
-- `Accept-Language: {locale}` header'į įstatyti visoms upstream užklausoms
-  (backend'as jau turi `get_request_language_code` → `Accept-Language` šaka)
-- Form actions (`use:enhance` → server `mutate`) — tas pats header'is
+`/api/v1` proxy set'ina `Accept-Language: {instanceLocale()}` visoms
+upstream užklausoms — ir server-side `event.fetch`, ir client-side
+browser fetch'ai eina per tą patį proxy → viena vieta dengia viską.
+Instance locale laimi prieš browser header'į (domenas yra autoritetas).
 
-Rezultatas: `product.name`, `category.name`, `option_value.label` ateina PL.
+### A5. Kalbos selector'ius — backend-driven
 
-### A5. Kalbos selector'ius
-
-- Header'e: `LT | PL` switcher'as → `href` į kitą domeną (TAS PATS path +
-  query), `site_pref` cookie
-- Mobile meniu irgi
+- Backend `GET /api/v1/site/locales` → `[{code, name, domain, is_default}]`
+  iš Shop/ShopDomain config (admin-editable)
+- Header'e + mobile meniu: switcher → `https://{domain}{localizeHref(path,{locale})}`
+- `site_pref` cookie — geo-redirect'ui (E fazė)
 
 ---
 
-## Phase B — Backend per-domeno kalba
+## Phase B — Backend kalba/domenai
 
-### B1. Domain ↔ locale binding (patikrinta: `api/models.py`)
+### B1. Locales/domains API (naujas sprendimas — domenai admin-valdomi)
 
-`Shop` turi `primary_domain` + `additional_domains` (comma-separated) —
-**vienas Shop aptarnauja kelis domenus**. Bet `default_language_code` yra
-per-shop → reikalinga per-domain kalba, Naujas Shop įrašas `.pl` domenui
-BLOGAS sprendimas (dubliuotų policies, `shop_ids` scop'ą, katalogą).
+Frontend kalba NĖRA pririšta prie domeno backend'e — ji ateina iš
+`Accept-Language` (proxy). Kas lieka backend'e:
 
-**Sprendimas:** domain→language map'as. Variantai:
-- `ShopDomain` modelis (domain, language_code, is_primary) — admin-editable,
-  rekomenduoju
-- arba `Shop.domain_languages` JSONField `{"baltijoszvynas.pl": "pl"}`
-- arba `additional_domains` sintaksė `"domain:lang"` — pigu, bet hacky
+- **`GET /api/v1/site/locales`** — grąžina aktyvias kalbas + domenus
+  switcher'iui. Šaltinis: `ShopDomain` modelis (domain, language_code,
+  is_active, sort_order) arba `Shop.locales` JSON — admin-editable, domenų
+  keitimui nereikia deploy'o.
+- `Shop` `additional_domains` — `.pl` ir kiti domenai priregistruojami
+  tam pačiam Shop'ui (katalogas/policies bendri). `default_language_code`
+  lieka tik *paskutinis* fallback'as — realiai Accept-Language laimi.
+- `get_request_language_code` grandinė (jau yra): path prefix → `?lang=` →
+  Accept-Language → shop.default → `'lt'` — papildymų nereikia, gal tik
+  domain→language šaka prieš shop.default jei norėsim.
 
-`get_request_language_code` fallback grandinė tampa:
-path prefix → `?lang=` → Accept-Language → **domain language** →
-shop.default → `'lt'`.
+### B2. Accept-Language propagation ✅ ĮGYVENDINTA (frontend proxy)
 
-### B2. Accept-Language propagation
-
-- Proxy jau forward'ina header'ius — užtikrinti kad `Accept-Language`
-  NEdingsta (frontend jį SET'ina, ne tik forward'ina browserio — browserio
-  PL vartotojas gali turėti `lt` Accept-Language, bet domenas turi laimėti)
-- Server-side `event.fetch` — tas pats
+Proxy set'ina `Accept-Language: {SITE_LOCALE}` — užtenka.
 
 ### B3. Transakciniai laiškai
 
@@ -162,7 +192,19 @@ Patikrinti serializatoriuose: jei `pl` translation tuščias → grąžina `lt`
 
 ---
 
-## Phase C — Turinio vertimai (PL)
+## Phase C — Turinio vertimai
+
+**Šaltinių realija:** didžioji dalis prekių normalyzer'yje turi **EN
+šaltinį**; dalis tiekėjų duoda ir **PL, DE** translations iškart.
+Strategija:
+
+- **EN** — pirminis vertimo šaltinis kur jis yra (EN→PL/DE/LV/ET MT kokybė
+  geresnė nei LT→X; EN→LT irgi naudinga LT turinio tobulinimui)
+- **PL/DE** — seed'inti iš tiekėjų duomenų kur yra (nemokamas profesionalus
+  šaltinis), likusį — MT
+- **LV/ET** — beveik visada MT iš EN/LT
+- **LT** — bazinė kalba; kur EN šaltinis geresnis — galima papildyti LT
+  translations iš EN
 
 ### C1. Kategorijos / Brand'ai / Navigacija
 

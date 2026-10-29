@@ -23,6 +23,7 @@
 		Truck,
 		User
 	} from '@lucide/svelte';
+	import { m } from '#lib/paraglide/messages';
 	import type {
 		CartOut,
 		CategoryOut,
@@ -205,10 +206,10 @@
 						<button
 							type="button"
 							onclick={() => (searchOpen = true)}
-							aria-label="Paieška"
+							aria-label={m.nav_search()}
 							class="relative flex w-full items-center py-1.5 sm:py-2.5 ps-4 pe-10 bg-layer border border-layer-line rounded-full text-base sm:text-sm text-start text-muted-foreground-1 hover:bg-muted-hover focus:outline-hidden focus:border-primary-focus focus:ring-primary-focus"
 						>
-							Ieškoti prekių, gamintojų, kodų…
+							{m.nav_search_placeholder()}
 							<span class="absolute inset-y-0 inset-e-0 z-10 flex items-center pe-1 sm:pe-1.5">
 								<span
 									class="inline-flex shrink-0 justify-center items-center w-10 h-8 rounded-full bg-primary border border-primary-line text-primary-foreground"

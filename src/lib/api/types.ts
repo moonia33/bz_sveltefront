@@ -63,6 +63,7 @@ export interface ProductListOut {
 	discount_percent: number | null;
 	has_video?: boolean;
 	labels?: string[];
+	badges?: BadgeOut[];
 }
 
 export interface Paginated<T> {
@@ -284,6 +285,7 @@ export interface ProductDetailOut {
 	features: ProductFeatureOut[];
 	delivery_window: DeliveryWindowOut | null;
 	content_blocks: ContentBlockOut[];
+	badges?: BadgeOut[];
 	variants: VariantOut[];
 }
 
@@ -673,4 +675,11 @@ export interface NavigationOut {
 	footers: NavItemOut[];
 	bottom_links: NavItemOut[];
 	mega_features: Record<string, MegaMenuFeatureOut>;
+}
+
+export interface BadgeOut {
+	code: string;
+	name: string;
+	style: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'dark' | string;
+	color: string;
 }

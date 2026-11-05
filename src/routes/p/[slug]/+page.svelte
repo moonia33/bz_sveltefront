@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ProductBadges from '#lib/components/shop/ProductBadges.svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
@@ -906,6 +907,12 @@
 					<p class="mb-1 text-sm text-muted-foreground-1">
 						{product.category.name}
 					</p>
+				{/if}
+
+				{#if product.badges?.length}
+					<div class="mb-2 flex flex-wrap gap-1.5">
+						<ProductBadges badges={product.badges} />
+					</div>
 				{/if}
 
 				<h1 class="font-semibold text-3xl text-foreground">

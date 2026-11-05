@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ProductBadges from './ProductBadges.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Heart } from '@lucide/svelte';
@@ -109,10 +110,11 @@
 			</div>
 		{/if}
 
-		{#if product.discount_percent || product.labels?.length}
+		{#if product.discount_percent || product.labels?.length || product.badges?.length}
 			<div class="absolute top-0 inset-s-0 pt-2 ps-2 pointer-events-none">
 				<div class="flex flex-col items-start gap-y-1">
-					{#if product.labels?.includes('new')}
+					<ProductBadges badges={product.badges} />
+					{#if product.labels?.includes('new') && !product.badges?.length}
 						<p>
 							<span
 								class="py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs font-medium bg-primary-100 text-primary-800 rounded-full dark:bg-primary-600 dark:text-white"

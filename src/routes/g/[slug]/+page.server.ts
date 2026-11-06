@@ -47,7 +47,6 @@ export const load: PageServerLoad = async (event) => {
 		products,
 		facets,
 		params: Object.fromEntries(sp),
-		categoryChips: (parent.categories ?? []).filter((c) => !c.parent_id),
 		// Visas kategorijų sąrašas — pasirinktos kategorijos chip'o
 		// pavadinimui sidebar'e (facets.categories rodo tik drill-down lygį).
 		allCategories: parent.categories ?? [],

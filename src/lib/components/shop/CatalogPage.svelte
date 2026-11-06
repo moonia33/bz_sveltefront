@@ -10,11 +10,6 @@
 	import { m } from '#lib/paraglide/messages';
 	import { unit } from '#lib/i18n/units';
 
-	type ChipItem = Pick<CategoryOut, 'slug' | 'name'> & {
-		menu_icon_url?: string | null;
-		count?: number;
-	};
-
 	let {
 		title,
 		description,
@@ -25,7 +20,6 @@
 		breadcrumbs = [],
 		categoryChips = [],
 		categoryLinks = [],
-		chipMode = 'nav',
 		categoryFilter = false,
 		categoryPool = [],
 		hiddenFacets = [],
@@ -43,11 +37,8 @@
 		params: URLSearchParams;
 		pathname: string;
 		breadcrumbs?: { name: string; href?: string }[];
-		categoryChips?: ChipItem[];
+		categoryChips?: CategoryOut[];
 		categoryLinks?: { slug: string; name: string }[];
-		// 'filter' — chip'ai filtruoja per ?category_slug (brand shelf);
-		// 'nav' — chip'ai veda į /k/<slug> (kategorijos vaikai).
-		chipMode?: 'nav' | 'filter';
 		// Sidebar'e rodomas kategorijų facet'as (brand "parduotuvė" režimas).
 		categoryFilter?: boolean;
 		// Slug→name žemėlapis pasirinktos kategorijos chip'ui (visos kategorijos).
@@ -244,15 +235,10 @@
 			{#if categoryChips.length}
 				<div class="mb-10">
 					<div class="flex flex-wrap gap-1 sm:gap-3">
-						{#each categoryChips as c (c.slug)}
+						{#each categoryChips as c (c.id)}
 							<a
 								class="p-1 group flex items-center rounded-full bg-layer border border-layer-line hover:border-line-3 focus:outline-hidden focus:border-line-3"
-								href={chipMode === 'filter'
-									? href({ category_slug: c.slug })
-									: `/k/${c.slug}`}
-								data-sveltekit-noscroll={chipMode === 'filter' ? true : undefined}
-								data-sveltekit-keepfocus={chipMode === 'filter' ? true : undefined}
-								rel={chipMode === 'filter' ? 'nofollow' : undefined}
+								href="/k/{c.slug}"
 							>
 								{#if c.menu_icon_url}
 									<img
@@ -274,9 +260,6 @@
 										class="text-[13px] font-medium text-layer-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
 										>{c.name}</span
 									>
-									{#if c.count != null}
-										<span class="ms-1 text-[12px] text-muted-foreground-2">{c.count}</span>
-									{/if}
 								</span>
 							</a>
 						{/each}

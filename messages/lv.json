@@ -71,6 +71,7 @@
 	"filter_search_chip": "Meklēt: \"{q}\"",
 	"filter_remove": "Noņemt filtru {label}",
 	"filter_brand_chip": "Ražotājs: {name}",
+	"filter_category_chip": "Kategorija: {name}",
 	"filter_group_chip": "Grupa: {name}",
 	"ui_retry": "Mēģināt vēlreiz",
 	"ui_collapse": "Sakļaut",

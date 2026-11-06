@@ -9,17 +9,28 @@
 		facets,
 		params,
 		open = $bindable(false),
-		categoryLinks = []
+		categoryLinks = [],
+		categoryFilter = false,
+		categoryPool = [],
+		hiddenFacets = []
 	}: {
 		facets: CatalogFacetsOut;
 		params: URLSearchParams;
 		open?: boolean;
 		categoryLinks?: { slug: string; name: string }[];
+		// Rodyti kategorijų filtro sekciją (facets.categories → ?category_slug).
+		categoryFilter?: boolean;
+		// Slug→name pasirinktos kategorijos chip'ui.
+		categoryPool?: { slug: string; name: string }[];
+		hiddenFacets?: ('brands' | 'groups' | 'categories')[];
 	} = $props();
 
 	const selectedFeatures = $derived(new Set((params.get('feature') ?? '').split(',').filter(Boolean)));
 	const selectedOptions = $derived(new Set((params.get('option') ?? '').split(',').filter(Boolean)));
 	const brandSlug = $derived(params.get('brand_slug') ?? '');
+	const categorySel = $derived(params.get('category_slug') ?? '');
+	const hideBrands = $derived(hiddenFacets.includes('brands'));
+	const hideGroups = $derived(hiddenFacets.includes('groups'));
 	const groupCode = $derived(params.get('group_code') ?? '');
 	const inStock = $derived(params.get('in_stock_only') === '1');
 	const q = $derived(params.get('q') ?? '');
@@ -116,6 +127,13 @@
 
 	const chips = $derived.by(() => {
 		const list: Chip[] = [];
+		if (categoryFilter && categorySel) {
+			const c = categoryPool.find((x) => x.slug === categorySel);
+			list.push({
+				label: m.filter_category_chip({ name: c?.name ?? categorySel }),
+				href: href((p) => p.delete('category_slug'))
+			});
+		}
 		if (brandSlug) {
 			const b = facets.brands.find((x) => x.slug === brandSlug);
 			list.push({
@@ -172,7 +190,16 @@
 
 	const clearAll = $derived(
 		href((p) => {
-			for (const k of ['brand_slug', 'group_code', 'feature', 'option', 'range', 'in_stock_only', 'q'])
+			for (const k of [
+				'brand_slug',
+				'category_slug',
+				'group_code',
+				'feature',
+				'option',
+				'range',
+				'in_stock_only',
+				'q'
+			])
 				p.delete(k);
 		})
 	);
@@ -329,7 +356,30 @@
 			</div>
 		{/if}
 
-		{#if facets.brands?.length}
+		{#if categoryFilter && facets.categories?.length}
+			{@const cats = expanded.has('categories')
+				? facets.categories
+				: facets.categories.slice(0, 8)}
+			<div class="pb-6 mb-6 border-b border-sidebar-divider last:pb-0 last:mb-0 last:border-b-0">
+				<div class="mb-3">
+					<span class="font-medium text-sm text-foreground">{m.cat_categories()}</span>
+				</div>
+				<div class="space-y-0.5">
+					{#each cats as c (c.id)}
+						{@render row(
+							categorySel === c.slug
+								? href((p) => p.delete('category_slug'))
+								: href((p) => p.set('category_slug', c.slug)),
+							categorySel === c.slug,
+							c.name
+						)}
+					{/each}
+				</div>
+				{@render moreButton('categories', facets.categories.length)}
+			</div>
+		{/if}
+
+		{#if facets.brands?.length && !hideBrands}
 			{@const shown = expanded.has('brands') ? facets.brands : facets.brands.slice(0, 8)}
 			<div class="pb-6 mb-6 border-b border-sidebar-divider last:pb-0 last:mb-0 last:border-b-0">
 				<div class="mb-3">
@@ -350,7 +400,7 @@
 			</div>
 		{/if}
 
-		{#if facets.product_groups?.length}
+		{#if facets.product_groups?.length && !hideGroups}
 			{@const groups = expanded.has('groups')
 				? facets.product_groups
 				: facets.product_groups.slice(0, 8)}

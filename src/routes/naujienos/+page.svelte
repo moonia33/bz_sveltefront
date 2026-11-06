@@ -43,6 +43,8 @@
 	facets={data.facets}
 	params={new URLSearchParams(data.params)}
 	pathname={data.pathname}
+	fixedParams={{ collection: 'new' }}
+	defaultParams={{ sort: '-created' }}
 	breadcrumbs={[
 		{ name: 'Pradžia', href: '/' },
 		{ name: data.title }

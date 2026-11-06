@@ -61,6 +61,16 @@
 	facets={data.facets}
 	params={new URLSearchParams(data.params)}
 	pathname={data.pathname}
+	fixedParams={{ brand_slug: brand.slug }}
+	categoryFilter
+	categoryPool={data.allCategories}
+	hiddenFacets={['brands']}
+	chipMode="filter"
+	categoryChips={(brand.categories ?? []).map((c) => ({
+		slug: c.slug,
+		name: c.name,
+		count: c.product_count
+	}))}
 	breadcrumbs={[
 		{ name: 'Pradžia', href: '/' },
 		{ name: 'Gamintojai', href: '/gamintojai' },

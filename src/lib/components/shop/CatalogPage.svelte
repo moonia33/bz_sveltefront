@@ -10,6 +10,11 @@
 	import { m } from '#lib/paraglide/messages';
 	import { unit } from '#lib/i18n/units';
 
+	type ChipItem = Pick<CategoryOut, 'slug' | 'name'> & {
+		menu_icon_url?: string | null;
+		count?: number;
+	};
+
 	let {
 		title,
 		description,
@@ -20,9 +25,14 @@
 		breadcrumbs = [],
 		categoryChips = [],
 		categoryLinks = [],
-		categorySlug,
+		chipMode = 'nav',
+		categoryFilter = false,
+		categoryPool = [],
+		hiddenFacets = [],
 		listTemplate = 'grid',
 		pageSize = 20,
+		fixedParams = {},
+		defaultParams = {},
 		logoUrl
 	}: {
 		title: string;
@@ -33,11 +43,24 @@
 		params: URLSearchParams;
 		pathname: string;
 		breadcrumbs?: { name: string; href?: string }[];
-		categoryChips?: CategoryOut[];
+		categoryChips?: ChipItem[];
 		categoryLinks?: { slug: string; name: string }[];
-		categorySlug?: string;
+		// 'filter' — chip'ai filtruoja per ?category_slug (brand shelf);
+		// 'nav' — chip'ai veda į /k/<slug> (kategorijos vaikai).
+		chipMode?: 'nav' | 'filter';
+		// Sidebar'e rodomas kategorijų facet'as (brand "parduotuvė" režimas).
+		categoryFilter?: boolean;
+		// Slug→name žemėlapis pasirinktos kategorijos chip'ui (visos kategorijos).
+		categoryPool?: { slug: string; name: string }[];
+		// Facet sekcijų slėpimas (pvz. 'brands' brand puslapyje).
+		hiddenFacets?: ('brands' | 'groups' | 'categories')[];
 		listTemplate?: 'grid' | 'list';
 		pageSize?: number;
+		// Path-implied filtrai: visada pridedami prie load-more užklausos
+		// (brand_slug, group_code, collection, channel, category_slug).
+		fixedParams?: Record<string, string>;
+		// Puslapio default'ai — tik jei URL neturi tokio parametro (sort).
+		defaultParams?: Record<string, string>;
 	} = $props();
 
 	let items = $state<ProductListOut[]>(products.items ?? []);
@@ -103,7 +126,8 @@
 		try {
 			const p = new URLSearchParams(params);
 			p.set('page', String(lastPage + 1));
-			if (categorySlug) p.set('category_slug', categorySlug);
+			for (const [k, v] of Object.entries(defaultParams)) if (!p.has(k)) p.set(k, v);
+			for (const [k, v] of Object.entries(fixedParams)) p.set(k, v);
 			const res = await fetch(`/api/v1/catalog/products?${p.toString()}`, {
 				credentials: 'include',
 				headers: { Accept: 'application/json' }
@@ -167,7 +191,15 @@
 
 <div class="w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">
 	<div class="lg:flex">
-		<FilterSidebar {facets} {params} bind:open={filtersOpen} {categoryLinks} />
+		<FilterSidebar
+			{facets}
+			{params}
+			bind:open={filtersOpen}
+			{categoryLinks}
+			{categoryFilter}
+			{categoryPool}
+			{hiddenFacets}
+		/>
 
 		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">
 			{#if breadcrumbs.length}
@@ -212,10 +244,15 @@
 			{#if categoryChips.length}
 				<div class="mb-10">
 					<div class="flex flex-wrap gap-1 sm:gap-3">
-						{#each categoryChips as c (c.id)}
+						{#each categoryChips as c (c.slug)}
 							<a
 								class="p-1 group flex items-center rounded-full bg-layer border border-layer-line hover:border-line-3 focus:outline-hidden focus:border-line-3"
-								href="/k/{c.slug}"
+								href={chipMode === 'filter'
+									? href({ category_slug: c.slug })
+									: `/k/${c.slug}`}
+								data-sveltekit-noscroll={chipMode === 'filter' ? true : undefined}
+								data-sveltekit-keepfocus={chipMode === 'filter' ? true : undefined}
+								rel={chipMode === 'filter' ? 'nofollow' : undefined}
 							>
 								{#if c.menu_icon_url}
 									<img
@@ -237,6 +274,9 @@
 										class="text-[13px] font-medium text-layer-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
 										>{c.name}</span
 									>
+									{#if c.count != null}
+										<span class="ms-1 text-[12px] text-muted-foreground-2">{c.count}</span>
+									{/if}
 								</span>
 							</a>
 						{/each}

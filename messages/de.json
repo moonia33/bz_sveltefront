@@ -71,6 +71,7 @@
 	"filter_search_chip": "Suche: \"{q}\"",
 	"filter_remove": "Filter {label} entfernen",
 	"filter_brand_chip": "Marke: {name}",
+	"filter_category_chip": "Kategorie: {name}",
 	"filter_group_chip": "Gruppe: {name}",
 	"ui_retry": "Erneut versuchen",
 	"ui_collapse": "Einklappen",

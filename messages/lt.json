@@ -71,6 +71,7 @@
 	"filter_search_chip": "Paieška: „{q}“",
 	"filter_remove": "Pašalinti filtrą {label}",
 	"filter_brand_chip": "Gamintojas: {name}",
+	"filter_category_chip": "Kategorija: {name}",
 	"filter_group_chip": "Grupė: {name}",
 	"ui_retry": "Bandyti dar kartą",
 	"ui_collapse": "Suskleisti",

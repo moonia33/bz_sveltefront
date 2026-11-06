@@ -71,6 +71,7 @@
 	"filter_search_chip": "Otsing: \"{q}\"",
 	"filter_remove": "Eemalda filter {label}",
 	"filter_brand_chip": "Tootja: {name}",
+	"filter_category_chip": "Kategooria: {name}",
 	"filter_group_chip": "Grupp: {name}",
 	"ui_retry": "Proovi uuesti",
 	"ui_collapse": "Ahenda",

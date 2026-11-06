@@ -77,6 +77,6 @@
 	{breadcrumbs}
 	categoryChips={data.categoryChips}
 	categoryLinks={data.categoryLinks}
-	categorySlug={cat.slug}
+	fixedParams={{ category_slug: cat.slug }}
 	listTemplate={cat.list_template}
 />

@@ -44,6 +44,8 @@
 	facets={data.facets}
 	params={new URLSearchParams(data.params)}
 	pathname={data.pathname}
+	fixedParams={{ group_code: data.group.code }}
+	hiddenFacets={['groups']}
 	breadcrumbs={[
 		{ name: 'Pradžia', href: '/' },
 		{ name: data.title }

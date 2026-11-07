@@ -74,6 +74,7 @@ export const load: PageServerLoad = async (event) => {
 		facets,
 		categoryChips: children,
 		categoryLinks: children.map((c) => ({ slug: c.slug, name: c.name })),
+		chipPool: all,
 		mode: 'listing' as const,
 		noindex,
 		nofollow

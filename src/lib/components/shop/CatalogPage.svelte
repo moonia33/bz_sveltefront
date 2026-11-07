@@ -5,6 +5,7 @@
 	import FilterSidebar from '#lib/components/shop/FilterSidebar.svelte';
 	import CategoryNav from '#lib/components/shop/CategoryNav.svelte';
 	import CategoryCardGrid from '#lib/components/shop/CategoryCardGrid.svelte';
+	import CategoryCircleRow from '#lib/components/shop/CategoryCircleRow.svelte';
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
 	import ProductList from '#lib/components/shop/ProductList.svelte';
 	import type { CatalogFacetsOut, CategoryOut, Paginated, ProductListOut } from '#lib/api/types';
@@ -30,7 +31,9 @@
 		pageSize = 20,
 		fixedParams = {},
 		defaultParams = {},
-		logoUrl
+		logoUrl,
+		heroUrl,
+		chipPool
 	}: {
 		title: string;
 		description?: string;
@@ -58,6 +61,11 @@
 		fixedParams?: Record<string, string>;
 		// Puslapio default'ai — tik jei URL neturi tokio parametro (sort).
 		defaultParams?: Record<string, string>;
+		// Hero banneris virš pavadinimo (kategorijos hero_image).
+		heroUrl?: string;
+		// Pilnas kategorijų sąrašas — nusprendžia ar chip'as turi vaikų
+		// (su vaikais → kortelės, be vaikų → apvalūs chips'ai).
+		chipPool?: CategoryOut[];
 	} = $props();
 
 	let items = $state<ProductListOut[]>(products.items ?? []);
@@ -66,6 +74,19 @@
 	let loading = $state(false);
 	let loadError = $state<string | null>(null);
 	let filtersOpen = $state(false);
+
+	// Chip'ai: tėvai (su vaikais) → kortelės, lapiniai → apvalūs.
+	// Be chipPool nežinom ar chip'as turi vaikų → viskas kortelėse.
+	const circleChips = $derived(
+		(chipPool ?? []).length
+			? categoryChips.filter(
+					(c) => !(chipPool ?? []).some((k) => k.parent_id === c.id)
+				)
+			: []
+	);
+	const cardChips = $derived(
+		categoryChips.filter((c) => !circleChips.includes(c))
+	);
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let observer: IntersectionObserver | null = null;
 
@@ -205,6 +226,19 @@
 		{/if}
 
 		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">
+			{#if heroUrl}
+				<div class="mb-6 overflow-hidden rounded-xl bg-surface">
+					<img
+						src={heroUrl}
+						alt={title}
+						width="1600"
+						height="500"
+						decoding="async"
+						fetchpriority="high"
+						class="aspect-[16/5] w-full object-cover"
+					/>
+				</div>
+			{/if}
 			{#if breadcrumbs.length}
 				<nav aria-label={m.breadcrumb_aria()} class="mb-4">
 					<ol class="flex items-center gap-x-1.5 text-sm">
@@ -239,14 +273,23 @@
 				<div class="min-w-0">
 					<h1 class="font-medium text-xl text-foreground">{title}</h1>
 					{#if description}
-						<div class="mt-1 text-sm text-muted-foreground-1">{@html description}</div>
+						<div
+							class="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground-1 [&_p]:mb-2 [&_strong]:font-medium [&_strong]:text-foreground [&_b]:font-medium [&_b]:text-foreground [&_a]:underline [&_a]:underline-offset-2 [&_ul]:list-disc [&_ul]:ps-5 [&_h2]:mt-3 [&_h2]:text-base [&_h2]:font-medium [&_h2]:text-foreground [&_h3]:mt-3 [&_h3]:font-medium [&_h3]:text-foreground"
+						>
+							{@html description}
+						</div>
 					{/if}
 				</div>
 			</div>
 
-			{#if categoryChips.length}
+			{#if cardChips.length}
 				<div class="mb-10">
-					<CategoryCardGrid categories={categoryChips} />
+					<CategoryCardGrid categories={cardChips} />
+				</div>
+			{/if}
+			{#if circleChips.length}
+				<div class="mb-10">
+					<CategoryCircleRow categories={circleChips} />
 				</div>
 			{/if}
 

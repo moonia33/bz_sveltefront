@@ -31,19 +31,24 @@
 	{#each categories as cat (cat.id)}
 		{@const subs = childrenCount(cat.id)}
 		{@const imgs = cat.image_urls ?? []}
+		{@const kids = all.filter((c) => c.parent_id === cat.id)}
 		{@const bigImg =
 			cat.card_image_url ?? cat.hero_image_url ?? imgs[0] ?? cat.menu_icon_url}
-		{@const smallImgs = all
-			.filter((c) => c.parent_id === cat.id)
-			.map((k) => k.card_image_url ?? k.image_urls?.[0] ?? '')
-			.filter((u) => u !== '')
-			.slice(0, 2)}
+		<!-- Mažieji slotai: vaikų card_image → ikona → hero → card → prekės -->
+		{@const smallPool = [
+			...kids.map((k) => k.card_image_url ?? k.image_urls?.[0] ?? ''),
+			cat.menu_icon_url ?? '',
+			cat.hero_image_url ?? '',
+			cat.card_image_url ?? '',
+			...imgs
+		].filter((u) => u !== '' && u !== bigImg)}
+		{@const smallImgs = smallPool.slice(0, 2)}
 		<a
 			href="/k/{cat.slug}"
 			class="group block rounded-xl border border-layer-line bg-layer p-2 pb-4 transition-shadow hover:shadow-md focus:outline-hidden focus:shadow-md"
 		>
 			<div class="overflow-hidden rounded-lg bg-surface">
-				{#if bigImg && smallImgs.length === 2}
+				{#if bigImg && smallImgs.length > 0}
 					<div class="grid aspect-[5/4] w-full grid-cols-[3fr_2fr] gap-0.5">
 						<img
 							src={bigImg}
@@ -66,6 +71,13 @@
 									class="h-full w-full object-cover"
 								/>
 							{/each}
+							{#if smallImgs.length < 2}
+								<div
+									class="flex h-full w-full items-center justify-center bg-linear-to-br from-primary-800 to-primary-950 font-semibold text-xl text-white"
+								>
+									{initials(cat.name)}
+								</div>
+							{/if}
 						</div>
 					</div>
 				{:else if bigImg}

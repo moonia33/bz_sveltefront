@@ -227,7 +227,7 @@
 
 		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">
 			{#if heroUrl}
-				<div class="mb-6 overflow-hidden rounded-xl bg-surface">
+				<div class="relative mb-6 overflow-hidden rounded-xl bg-surface">
 					<img
 						src={heroUrl}
 						alt={title}
@@ -237,6 +237,11 @@
 						fetchpriority="high"
 						class="aspect-[16/5] w-full object-cover"
 					/>
+					<span
+						class="absolute bottom-4 right-5 sm:bottom-5 sm:right-6 font-semibold text-2xl sm:text-3xl text-white [text-shadow:-1.5px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_1.5px_0_#000,1.5px_1.5px_0_#000,0_3px_8px_rgb(0_0_0/0.5)]"
+					>
+						{title}
+					</span>
 				</div>
 			{/if}
 			{#if breadcrumbs.length}
@@ -271,7 +276,7 @@
 					/>
 				{/if}
 				<div class="min-w-0">
-					<h1 class="font-medium text-xl text-foreground">{title}</h1>
+					<h1 class={heroUrl ? 'sr-only' : 'font-medium text-xl text-foreground'}>{title}</h1>
 					{#if description}
 						<div
 							class="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground-1 [&_p]:mb-2 [&_strong]:font-medium [&_strong]:text-foreground [&_b]:font-medium [&_b]:text-foreground [&_a]:underline [&_a]:underline-offset-2 [&_ul]:list-disc [&_ul]:ps-5 [&_h2]:mt-3 [&_h2]:text-base [&_h2]:font-medium [&_h2]:text-foreground [&_h3]:mt-3 [&_h3]:font-medium [&_h3]:text-foreground"

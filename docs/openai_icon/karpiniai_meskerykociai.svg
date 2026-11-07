@@ -1,0 +1,42 @@
+<svg viewBox="0 0 1536 1024" fill="none" xmlns="http://www.w3.org/2000/svg" width="1536" height="1024">
+  <title>Karpiniai meškerykočiai</title>
+  <desc>Dvi karpinės meškerės su ritėmis. Skaidrus fonas; spalva keičiama pagrindinės grupės stroke atributu.</desc>
+  <g id="carp-rods" stroke="#000000" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <g id="upper-rod">
+      <path id="upper-grip" d="M301 824 447 662 Q461 647 477 662 Q492 676 478 692 L331 853 Q317 869 301 854 Q286 840 301 824Z" />
+      <path id="upper-blank" d="M465 675 570 546 C761 351 1118 91 1310 93" />
+      <path id="upper-joint" d="m557 535 27 25" />
+      <g id="upper-guides">
+        <path d="m844 341 25 12 C883 360 883 377 872 385 C861 394 845 389 840 378 L831 360" />
+        <path d="m1060 197 22 8 C1095 211 1097 225 1087 234 C1077 243 1063 238 1058 228 L1052 212" />
+        <path d="m1274 97 26 20 C1311 125 1308 140 1298 147 C1287 154 1274 149 1270 138 L1266 121" />
+      </g>
+      <g id="upper-reel">
+        <path d="m521 613 29 28 21 16" />
+        <circle cx="568" cy="703" r="46" />
+        <circle cx="568" cy="703" r="12" />
+        <path d="m588 661 35-28 Q632 626 639 636 L660 666 Q666 676 656 683 L614 710" />
+        <path d="m615 638 34 47" />
+        <path d="m539 739-28 28h-29" />
+      </g>
+    </g>
+    <g id="lower-rod">
+      <path id="lower-grip" d="m494 940 146-162 Q654 762 670 777 Q685 792 671 807 L524 969 Q510 985 494 970 Q479 955 494 940Z" />
+      <path id="lower-blank" d="m658 790 96-108 C948 489 1201 247 1362 248" />
+      <path id="lower-joint" d="m741 671 27 25" />
+      <g id="lower-guides">
+        <path d="m976 464 23 10 C1014 481 1016 497 1005 506 C993 516 978 511 973 499 L965 482" />
+        <path d="m1140 342 23 9 C1177 357 1179 373 1169 382 C1158 392 1143 387 1138 376 L1131 360" />
+        <path d="m1324 252 25 18 C1360 278 1358 293 1348 300 C1338 307 1324 302 1320 291 L1316 276" />
+      </g>
+      <g id="lower-reel">
+        <path d="m709 734 29 28 12 12" />
+        <circle cx="745" cy="821" r="46" />
+        <circle cx="745" cy="821" r="12" />
+        <path d="m765 779 35-28 Q809 744 816 754 L837 784 Q843 794 833 801 L791 828" />
+        <path d="m792 756 34 47" />
+        <path d="m716 857-27 29h-29" />
+      </g>
+    </g>
+  </g>
+</svg>

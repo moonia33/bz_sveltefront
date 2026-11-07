@@ -63,6 +63,8 @@
 	facets={data.facets}
 	params={new URLSearchParams(data.params)}
 	pathname={data.pathname}
+	categoryChips={data.categoryChips}
+	navTree={data.navTree}
 	breadcrumbs={[
 		{ name: 'Pradžia', href: '/' },
 		{ name: data.title }

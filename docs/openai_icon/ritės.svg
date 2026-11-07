@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1536 1024" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" width="1536" height="1024">
+  <title>Žūklės ritė</title>
+  <desc>Subtili linijinė žūklės ritės kategorijos ikona. Spalva keičiama per currentColor; numatytoji – juoda.</desc>
+  <g id="mount">
+    <rect x="600" y="86" width="432" height="40" rx="20" />
+    <path d="M786 126v116c0 32 10 58 31 83l265 243c36 33 42 78 12 115l-66 77H878c-29 0-50 12-68 34l-34 42c-13 17-33 26-55 26H552" />
+  </g>
+  <g id="bail">
+    <path d="M394 429c0-94 44-163 119-163 83 0 151 56 191 126l76 130" />
+  </g>
+  <g id="spool">
+    <ellipse cx="420" cy="636" rx="112" ry="210" />
+    <path d="M420 426h258c51 0 92 41 92 92v236c0 51-41 92-92 92H420" />
+    <path d="M536 478h139M553 530h140M553 742h140M536 794h139" />
+    <ellipse cx="420" cy="636" rx="38" ry="78" />
+  </g>
+  <g id="reel-body">
+    <path d="M770 522l78-64" />
+    <circle cx="920" cy="626" r="38" />
+  </g>
+  <g id="handle">
+    <path d="M951 649l108 132c9 11 14 24 14 38v29" />
+    <rect x="982" y="848" width="238" height="96" rx="48" />
+  </g>
+</svg>

@@ -3,6 +3,8 @@
 	import { page } from '$app/state';
 	import { ChevronDown, ChevronRight, Loader2, SlidersHorizontal } from '@lucide/svelte';
 	import FilterSidebar from '#lib/components/shop/FilterSidebar.svelte';
+	import CategoryNav from '#lib/components/shop/CategoryNav.svelte';
+	import CategoryCardGrid from '#lib/components/shop/CategoryCardGrid.svelte';
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
 	import ProductList from '#lib/components/shop/ProductList.svelte';
 	import type { CatalogFacetsOut, CategoryOut, Paginated, ProductListOut } from '#lib/api/types';
@@ -23,6 +25,7 @@
 		categoryFilter = false,
 		categoryPool = [],
 		hiddenFacets = [],
+		navTree,
 		listTemplate = 'grid',
 		pageSize = 20,
 		fixedParams = {},
@@ -45,6 +48,9 @@
 		categoryPool?: { slug: string; name: string }[];
 		// Facet sekcijų slėpimas (pvz. 'brands' brand puslapyje).
 		hiddenFacets?: ('brands' | 'groups' | 'categories')[];
+		// Jei nurodytas — sidebar'as rodo kategorijų medį vietoj facet'ų
+		// (pilnas /katalogas: medis užtenka, facet'ų užklausa atšaukiama).
+		navTree?: CategoryOut[];
 		listTemplate?: 'grid' | 'list';
 		pageSize?: number;
 		// Path-implied filtrai: visada pridedami prie load-more užklausos
@@ -182,15 +188,21 @@
 
 <div class="w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">
 	<div class="lg:flex">
-		<FilterSidebar
-			{facets}
-			{params}
-			bind:open={filtersOpen}
-			{categoryLinks}
-			{categoryFilter}
-			{categoryPool}
-			{hiddenFacets}
-		/>
+		{#if navTree}
+			<div class="lg:w-72 lg:shrink-0 lg:pe-8 border-e border-sidebar-line bg-sidebar">
+				<CategoryNav all={navTree} bind:open={filtersOpen} />
+			</div>
+		{:else}
+			<FilterSidebar
+				{facets}
+				{params}
+				bind:open={filtersOpen}
+				{categoryLinks}
+				{categoryFilter}
+				{categoryPool}
+				{hiddenFacets}
+			/>
+		{/if}
 
 		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">
 			{#if breadcrumbs.length}
@@ -227,43 +239,14 @@
 				<div class="min-w-0">
 					<h1 class="font-medium text-xl text-foreground">{title}</h1>
 					{#if description}
-						<p class="mt-1 text-sm text-muted-foreground-1">{description}</p>
+						<div class="mt-1 text-sm text-muted-foreground-1">{@html description}</div>
 					{/if}
 				</div>
 			</div>
 
 			{#if categoryChips.length}
 				<div class="mb-10">
-					<div class="flex flex-wrap gap-1 sm:gap-3">
-						{#each categoryChips as c (c.id)}
-							<a
-								class="p-1 group flex items-center rounded-full bg-layer border border-layer-line hover:border-line-3 focus:outline-hidden focus:border-line-3"
-								href="/k/{c.slug}"
-							>
-								{#if c.menu_icon_url}
-									<img
-										src={c.menu_icon_url}
-										alt=""
-										width="32"
-										height="32"
-										loading="lazy"
-										class="shrink-0 size-8 object-cover rounded-full"
-									/>
-								{:else}
-									<span
-										class="shrink-0 size-8 rounded-full bg-surface inline-flex items-center justify-center text-xs text-surface-foreground"
-										>{c.name.slice(0, 1)}</span
-									>
-								{/if}
-								<span class="grow py-1 ps-2 pe-3">
-									<span
-										class="text-[13px] font-medium text-layer-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
-										>{c.name}</span
-									>
-								</span>
-							</a>
-						{/each}
-					</div>
+					<CategoryCardGrid categories={categoryChips} />
 				</div>
 			{/if}
 
@@ -276,7 +259,7 @@
 						class="flex items-center gap-x-2 text-xs sm:text-sm text-start text-foreground rounded-lg underline-offset-4 hover:underline focus:outline-hidden"
 					>
 						<SlidersHorizontal class="shrink-0 size-3.5" />
-						{m.filters_title()}
+						{navTree ? m.cat_categories() : m.filters_title()}
 					</button>
 				</div>
 

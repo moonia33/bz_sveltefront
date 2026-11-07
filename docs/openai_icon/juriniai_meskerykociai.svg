@@ -1,0 +1,34 @@
+<svg width="1536" height="1024" viewBox="0 0 1536 1024" fill="none" stroke="#000000" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+  <title>Jūriniai meškerykočiai</title>
+  <desc>Linijinė jūrinio meškerykočio su rite ir bangomis piktograma. Spalva keičiama pagrindiniu stroke atributu.</desc>
+  <g id="rod">
+    <path d="M602 516C827 265 1084 100 1310 102C1321 102 1321 105 1310 105" />
+    <path d="M1310 105C1080 147 843 316 633 557" />
+    <path d="M514 632 471 690M553 661 516 714" />
+    <path d="M508 604 578 520Q590 506 606 519L626 536Q637 545 627 558L563 649Q555 661 544 653L510 630Q500 621 508 604Z" />
+    <path d="M451 697Q460 682 475 692L511 716Q526 725 516 742L414 921Q400 945 375 936C341 926 327 903 339 878Z" />
+  </g>
+  <g id="line-guides">
+    <path d="M827 319V369" />
+    <circle cx="838" cy="402" r="27" />
+    <path d="M1026 190V242" />
+    <circle cx="1034" cy="275" r="27" />
+    <path d="M1270 113V153" />
+    <circle cx="1274" cy="185" r="27" />
+  </g>
+  <g id="reel">
+    <path d="M625 593Q645 592 661 604H733" />
+    <path d="M660 758H730" />
+    <path d="M626 604C574 599 567 753 624 768Q646 772 661 758" />
+    <path d="M649 604C588 614 591 747 649 758" />
+    <path d="M617 654H697M607 710H695" />
+    <path d="M795 727C804 711 807 695 805 676C802 627 777 590 751 592C719 594 696 636 695 682C694 728 717 762 748 762Q766 762 780 750" />
+    <path d="M760 708C744 711 738 696 742 682C746 667 763 666 772 678" />
+    <path d="M770 706 798 753" />
+    <rect x="791" y="752" width="96" height="51" rx="25.5" />
+  </g>
+  <g id="sea">
+    <path d="M507 872C548 895 578 886 620 864S685 839 726 861S796 898 841 878S909 838 952 850S1019 890 1063 885Q1096 885 1122 866" />
+    <path d="M508 956C549 980 579 970 621 947S686 922 727 945S797 980 841 960S909 920 952 932S1019 974 1062 969Q1095 969 1118 953" />
+  </g>
+</svg>

@@ -1,4 +1,5 @@
-import { getProductFacets, getProducts } from '#lib/api/endpoints';
+import { getProducts } from '#lib/api/endpoints';
+import type { CatalogFacetsOut } from '#lib/api/types';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -17,9 +18,17 @@ export const load: PageServerLoad = async (event) => {
 		page: Number(sp.get('page') ?? 1) || 1
 	};
 
-	const [products, facets, parent] = await Promise.all([
+	// Facet'ų puslapyje nėra (sidebar'e — kategorijų medis): brangi
+	// /catalog/products/facets užklausa čia visai nekviečiama.
+	const facets: CatalogFacetsOut = {
+		categories: [],
+		brands: [],
+		product_groups: [],
+		features: [],
+		option_types: []
+	};
+	const [products, parent] = await Promise.all([
 		getProducts(ctx, filters),
-		getProductFacets(ctx, filters),
 		event.parent()
 	]);
 
@@ -41,6 +50,7 @@ export const load: PageServerLoad = async (event) => {
 		facets,
 		params: Object.fromEntries(sp),
 		categoryChips: (parent.categories ?? []).filter((c) => !c.parent_id),
+		navTree: parent.categories ?? [],
 		title: q ? `Paieška: „${q}“` : 'Visos prekės',
 		noindex,
 		nofollow,

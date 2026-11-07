@@ -3,7 +3,17 @@
 @import '../../node_modules/preline/variants.css';
 @import '../../node_modules/preline/css/themes/theme.css';
 @import '../../node_modules/preline/css/themes/moon.css';
+@import '@fontsource-variable/inter';
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	/* Inter Variable (self-hosted, woff2-variations, font-display: swap).
+	   Fallback – ankstesnis sisteminis stack'as. */
+	--font-sans:
+		'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		'Helvetica Neue', 'Noto Sans', Arial, sans-serif, 'Apple Color Emoji',
+		'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
 
 .nav-progress {
 	animation: nav-progress 1.2s ease-in-out infinite;

@@ -32,12 +32,11 @@
 		{@const subs = childrenCount(cat.id)}
 		{@const imgs = cat.image_urls ?? []}
 		{@const kids = all.filter((c) => c.parent_id === cat.id)}
-		{@const bigImg =
-			cat.card_image_url ?? cat.hero_image_url ?? imgs[0] ?? cat.menu_icon_url}
-		<!-- Mažieji slotai: vaikų card_image → ikona → hero → card → prekės -->
+		{@const bigImg = cat.card_image_url ?? cat.hero_image_url ?? imgs[0]}
+		<!-- Mažieji slotai: vaikų card_image → hero → card → prekės.
+		     menu_icon kortelėse nenaudojam (sustiprintas tik meniu). -->
 		{@const smallPool = [
 			...kids.map((k) => k.card_image_url ?? k.image_urls?.[0] ?? ''),
-			cat.menu_icon_url ?? '',
 			cat.hero_image_url ?? '',
 			cat.card_image_url ?? '',
 			...imgs

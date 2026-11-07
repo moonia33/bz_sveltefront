@@ -75,18 +75,18 @@
 	let loadError = $state<string | null>(null);
 	let filtersOpen = $state(false);
 
-	// Chip'ai: tėvai (su vaikais) → kortelės, lapiniai → apvalūs.
+	// Chip'ai: tik KAI VISI lapiniai (be vaikų) → apvalūs chips'ai.
+	// Mikso nedarom — bent vienam tėvui viskas kortelėse.
 	// Be chipPool nežinom ar chip'as turi vaikų → viskas kortelėse.
-	const circleChips = $derived(
-		(chipPool ?? []).length
-			? categoryChips.filter(
-					(c) => !(chipPool ?? []).some((k) => k.parent_id === c.id)
-				)
-			: []
+	const allLeaves = $derived(
+		(chipPool ?? []).length > 0 &&
+			categoryChips.length > 0 &&
+			categoryChips.every(
+				(c) => !(chipPool ?? []).some((k) => k.parent_id === c.id)
+			)
 	);
-	const cardChips = $derived(
-		categoryChips.filter((c) => !circleChips.includes(c))
-	);
+	const circleChips = $derived(allLeaves ? categoryChips : []);
+	const cardChips = $derived(allLeaves ? [] : categoryChips);
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let observer: IntersectionObserver | null = null;
 

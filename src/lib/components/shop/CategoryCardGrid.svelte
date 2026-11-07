@@ -60,19 +60,19 @@
 						/>
 						<div class="grid grid-rows-2 gap-0.5">
 							{#each smallImgs as u (u)}
-								<img
-									src={u}
-									alt=""
-									width="370"
-									height="224"
-									loading="lazy"
-									decoding="async"
-									class="h-full w-full object-cover"
-								/>
+								<div class="relative min-h-0">
+									<img
+										src={u}
+										alt=""
+										loading="lazy"
+										decoding="async"
+										class="absolute inset-0 h-full w-full object-cover"
+									/>
+								</div>
 							{/each}
 							{#if smallImgs.length < 2}
 								<div
-									class="flex h-full w-full items-center justify-center bg-linear-to-br from-primary-800 to-primary-950 font-semibold text-xl text-white"
+									class="relative flex items-center justify-center bg-linear-to-br from-primary-800 to-primary-950 font-semibold text-xl text-white"
 								>
 									{initials(cat.name)}
 								</div>

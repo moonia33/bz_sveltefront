@@ -31,17 +31,22 @@
 	{#each categories as cat (cat.id)}
 		{@const subs = childrenCount(cat.id)}
 		{@const imgs = cat.image_urls ?? []}
-		{@const img =
+		{@const bigImg =
 			cat.card_image_url ?? cat.hero_image_url ?? imgs[0] ?? cat.menu_icon_url}
+		{@const smallImgs = all
+			.filter((c) => c.parent_id === cat.id)
+			.map((k) => k.card_image_url ?? k.image_urls?.[0] ?? '')
+			.filter((u) => u !== '')
+			.slice(0, 2)}
 		<a
 			href="/k/{cat.slug}"
 			class="group block rounded-xl border border-layer-line bg-layer p-2 pb-4 transition-shadow hover:shadow-md focus:outline-hidden focus:shadow-md"
 		>
 			<div class="overflow-hidden rounded-lg bg-surface">
-				{#if !cat.hero_image_url && imgs.length >= 3}
+				{#if bigImg && smallImgs.length === 2}
 					<div class="grid aspect-[5/4] w-full grid-cols-[3fr_2fr] gap-0.5">
 						<img
-							src={imgs[0]}
+							src={bigImg}
 							alt={cat.name}
 							width="560"
 							height="448"
@@ -50,7 +55,7 @@
 							class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 						/>
 						<div class="grid grid-rows-2 gap-0.5">
-							{#each imgs.slice(1, 3) as u (u)}
+							{#each smallImgs as u (u)}
 								<img
 									src={u}
 									alt=""
@@ -63,9 +68,9 @@
 							{/each}
 						</div>
 					</div>
-				{:else if img}
+				{:else if bigImg}
 					<img
-						src={img}
+						src={bigImg}
 						alt={cat.name}
 						width="560"
 						height="560"

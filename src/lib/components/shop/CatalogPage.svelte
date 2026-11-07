@@ -284,7 +284,7 @@
 
 			{#if cardChips.length}
 				<div class="mb-10">
-					<CategoryCardGrid categories={cardChips} />
+					<CategoryCardGrid categories={cardChips} all={chipPool ?? []} />
 				</div>
 			{/if}
 			{#if circleChips.length}

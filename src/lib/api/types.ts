@@ -107,6 +107,7 @@ export interface CategoryOut {
 	description: string;
 	hero_image_url: string | null;
 	menu_icon_url: string | null;
+	card_image_url?: string | null;
 	image_urls?: string[];
 	seo_title: string;
 	seo_description: string;

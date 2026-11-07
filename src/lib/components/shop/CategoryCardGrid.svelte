@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CategoryOut } from '#lib/api/types';
 	import { unit } from '#lib/i18n/units';
+	import { m } from '#lib/paraglide/messages';
 
 	let {
 		categories = [],
@@ -26,13 +27,17 @@
 	}
 </script>
 
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
 	{#each categories as cat (cat.id)}
 		{@const subs = childrenCount(cat.id)}
 		{@const imgs = cat.image_urls ?? []}
-		{@const img = cat.hero_image_url ?? imgs[0] ?? cat.menu_icon_url}
-		<a href="/k/{cat.slug}" class="group block focus:outline-hidden">
-			<div class="overflow-hidden rounded-xl bg-surface">
+		{@const img =
+			cat.card_image_url ?? cat.hero_image_url ?? imgs[0] ?? cat.menu_icon_url}
+		<a
+			href="/k/{cat.slug}"
+			class="group block rounded-xl border border-layer-line bg-layer p-2 pb-4 transition-shadow hover:shadow-md focus:outline-hidden focus:shadow-md"
+		>
+			<div class="overflow-hidden rounded-lg bg-surface">
 				{#if !cat.hero_image_url && imgs.length >= 3}
 					<div class="grid aspect-[5/4] w-full grid-cols-[3fr_2fr] gap-0.5">
 						<img
@@ -77,16 +82,23 @@
 				{/if}
 			</div>
 			<p
-				class="mt-3 font-medium text-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
+				class="mt-3 text-center font-medium text-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
 			>
 				{cat.name}
 			</p>
 			{#if subs}
-				<p class="mt-0.5 text-sm text-muted-foreground-1">
+				<p class="mt-0.5 text-center text-sm text-muted-foreground-1">
 					{subs}
 					{unit('subcategory', subs)}
 				</p>
 			{/if}
+			<p class="mt-2 text-center">
+				<span
+					class="inline-flex items-center gap-x-1 text-xs font-medium underline underline-offset-4 text-muted-foreground-1 group-hover:text-primary-hover group-focus:text-primary-focus"
+				>
+					{m.cat_view_all()}
+				</span>
+			</p>
 		</a>
 	{/each}
 </div>

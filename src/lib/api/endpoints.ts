@@ -23,6 +23,8 @@ import type {
 	Paginated,
 	ProductDetailOut,
 	ProductListOut,
+	ActivityDetailOut,
+	ActivityOut,
 	ReturnOut,
 	ShippingMethodOut,
 	StoreLocationOut
@@ -46,6 +48,7 @@ export interface ProductListParams {
 	country_code?: string;
 	channel?: string;
 	collection?: 'new' | 'sale';
+	activity?: string;
 }
 
 export function getProducts(ctx: Ctx, p: ProductListParams) {
@@ -70,6 +73,14 @@ export function getProductFacets(ctx: Ctx, p: Omit<ProductListParams, 'page' | '
 	if (facetsCache.size >= FACETS_MAX_KEYS) facetsCache.delete(facetsCache.keys().next().value!);
 	facetsCache.set(path, { t: Date.now(), v });
 	return v;
+}
+
+export function getActivities(ctx: Ctx) {
+	return apiFetch<ActivityOut[]>(ctx, '/catalog/activities');
+}
+
+export function getActivity(ctx: Ctx, code: string) {
+	return apiFetch<ActivityDetailOut>(ctx, `/catalog/activities/${encodeURIComponent(code)}`);
 }
 
 export function getCategories(ctx: Ctx) {

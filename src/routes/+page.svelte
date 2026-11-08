@@ -2,6 +2,7 @@
 	import { marked } from 'marked';
 	import { ShieldCheck, Truck, Undo2 } from '@lucide/svelte';
 	import HeroCarousel from '#lib/components/home/HeroCarousel.svelte';
+	import ActivityTiles from '#lib/components/shop/ActivityTiles.svelte';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
 	import ProductRow from '#lib/components/ui/ProductRow.svelte';
 	import type { HomeSlide } from '#lib/api/endpoints';
@@ -190,6 +191,18 @@
 		</div>
 	{/if}
 {/if}
+
+{#each data.activityAreas as area (area.code)}
+	<section class="pt-14 lg:pt-20 w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">
+		<div class="flex items-baseline justify-between gap-3">
+			<h2 class="font-semibold text-xl md:text-2xl text-foreground">{area.name}</h2>
+			<a href={`/veiklos/${area.code}`} class="text-sm text-muted-foreground-1 hover:text-foreground"
+				>Visos prekės</a
+			>
+		</div>
+		<ActivityTiles class="mt-4" activities={area.children.filter((c) => c.visible)} />
+	</section>
+{/each}
 
 {#if data.recentlyViewed.length}
 	<div class="pt-14 lg:pt-20 w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">

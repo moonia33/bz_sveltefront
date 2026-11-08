@@ -96,6 +96,10 @@ export interface ShopConfigOut {
 	privacy_url: string;
 	enable_checkout: boolean;
 	enable_catalog: boolean;
+	gtm_container_id?: string;
+	ga4_measurement_id?: string;
+	meta_pixel_id?: string;
+	cookie_consent_version?: number;
 }
 
 export interface CategoryOut {

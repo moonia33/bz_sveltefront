@@ -86,5 +86,21 @@
 	"sort_by": "Kārtot:",
 	"cat_no_products": "Preces netika atrastas",
 	"cat_tree_aria": "Kategoriju koks",
-	"filter_group_title": "Preču grupa"
+	"filter_group_title": "Preču grupa",
+	"cookie_title": "Sīkdatnes",
+	"cookie_text": "Mēs izmantojam nepieciešamās sīkdatnes, lai vietne darbotos. Ar jūsu piekrišanu izmantojam arī analītikas un mārketinga sīkdatnes (Google, Meta), lai uzlabotu vietni un rādītu atbilstošus piedāvājumus. Izvēli varat mainīt jebkurā laikā lapas apakšā.",
+	"cookie_accept_all": "Pieņemt visas",
+	"cookie_reject_all": "Noraidīt visas",
+	"cookie_settings": "Iestatījumi",
+	"cookie_save": "Saglabāt izvēli",
+	"cookie_necessary": "Nepieciešamās",
+	"cookie_necessary_desc": "Grozs, pieteikšanās un drošība. Vienmēr ieslēgtas.",
+	"cookie_functional": "Funkcionālās",
+	"cookie_functional_desc": "Atceras jūsu iestatījumus, piem., tēmu.",
+	"cookie_analytics": "Analītika",
+	"cookie_analytics_desc": "Palīdz saprast, kā tiek izmantota vietne (Google Analytics).",
+	"cookie_marketing": "Mārketings",
+	"cookie_marketing_desc": "Reklāmas mērīšana un personalizēšana (Google Ads, Meta).",
+	"cookie_policy": "Privātuma politika",
+	"footer_cookie_settings": "Sīkdatņu iestatījumi"
 }

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import type { BlogPostListOut } from '#lib/api/types';
+	import { lh } from '#lib/i18n/instance';
 	import { fmtBlogDate } from './date';
 
 	let { post, base = '/patarimai' }: { post: BlogPostListOut; base?: string } = $props();
-	const href = $derived(`${base}/${post.slug}`);
+	const href = $derived(lh(`${base}/${post.slug}`));
 </script>
 
 <article class="group flex flex-col">

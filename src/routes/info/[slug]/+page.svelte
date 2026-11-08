@@ -2,6 +2,8 @@
 	import { marked } from 'marked';
 	import { ChevronRight } from '@lucide/svelte';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
+	import ProductRow from '#lib/components/ui/ProductRow.svelte';
+	import type { ProductListOut } from '#lib/api/types';
 	import { jsonLd } from '#lib/seo';
 
 	let { data } = $props();
@@ -133,6 +135,11 @@
 					/>
 				{:else}
 					<MissingFeature feature="CMS blokas: image (be src/url)" />
+				{/if}
+			{:else if block.type === 'products'}
+				{@const products = (block.payload?.products ?? []) as ProductListOut[]}
+				{#if products.length}
+					<ProductRow {products} title={String(block.payload?.title ?? '') || undefined} />
 				{/if}
 			{:else}
 				<MissingFeature feature={'CMS blokas: ' + block.type} />

@@ -2,6 +2,9 @@ import { browser } from '$app/env';
 import { apiFetch, qs, type ApiError } from './client';
 import type {
 	AddressOut,
+	BlogCategoryOut,
+	BlogPostOut,
+	BlogPostPageOut,
 	BrandOut,
 	CartOut,
 	CatalogFacetsOut,
@@ -335,6 +338,27 @@ export function getRecentlyViewed(ctx: Ctx) {
 export function getCmsPage(ctx: Ctx, slug: string, version?: string | null) {
 	const q = version ? `?version=${encodeURIComponent(version)}` : '';
 	return apiFetch<CmsPageOut>(ctx, `/cms/pages/${encodeURIComponent(slug)}${q}`);
+}
+
+export interface BlogListParams {
+	category?: string;
+	product?: number;
+	catalog_category?: number;
+	featured?: boolean;
+	page?: number;
+	page_size?: number;
+}
+
+export function getBlogPosts(ctx: Ctx, p: BlogListParams = {}) {
+	return apiFetch<BlogPostPageOut>(ctx, `/cms/blog/posts${qs({ ...p })}`);
+}
+
+export function getBlogPost(ctx: Ctx, slug: string) {
+	return apiFetch<BlogPostOut>(ctx, `/cms/blog/posts/${encodeURIComponent(slug)}`);
+}
+
+export function getBlogCategories(ctx: Ctx) {
+	return apiFetch<BlogCategoryOut[]>(ctx, '/cms/blog/categories');
 }
 
 export type { ApiError };

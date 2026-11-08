@@ -24,6 +24,7 @@ const ROUTE_ALIASES: Record<string, string> = {
 	'/megstamos': '/favorites',
 	'/naujienos': '/news',
 	'/pagalba': '/help',
+	'/patarimai': '/blog',
 	'/parduotuves': '/stores',
 	'/paskyra': '/account',
 	'/prisijungti': '/login',

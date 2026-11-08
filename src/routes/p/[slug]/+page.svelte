@@ -7,6 +7,7 @@
 	import { marked } from 'marked';
 	import MissingFeature from '#lib/components/ui/MissingFeature.svelte';
 	import ProductRow from '#lib/components/ui/ProductRow.svelte';
+	import RelatedPosts from '#lib/components/blog/RelatedPosts.svelte';
 	import AnimatedShop from '#lib/components/icons/AnimatedShop.svelte';
 	import AnimatedStopwatch from '#lib/components/icons/AnimatedStopwatch.svelte';
 	import AnimatedTrolley from '#lib/components/icons/AnimatedTrolley.svelte';
@@ -1415,6 +1416,8 @@
 	</div>
 	<!-- End Complete the look -->
 {/if}
+
+<RelatedPosts posts={data.related_posts} />
 
 <!-- Atsiliepimai sąmoningai nerodomi — kol kas nėra review funkcionalumo.
 Galimas variantas vėliau: Google atsiliepimų insertas. -->

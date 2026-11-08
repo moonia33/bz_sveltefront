@@ -1,5 +1,6 @@
 import { browser } from '$app/env';
 import { apiFetch, qs, type ApiError } from './client';
+import { instanceLocale } from '#lib/i18n/instance';
 import type {
 	AddressOut,
 	BlogCategoryOut,
@@ -350,15 +351,24 @@ export interface BlogListParams {
 }
 
 export function getBlogPosts(ctx: Ctx, p: BlogListParams = {}) {
-	return apiFetch<BlogPostPageOut>(ctx, `/cms/blog/posts${qs({ ...p })}`);
+	return apiFetch<BlogPostPageOut>(
+		ctx,
+		`/cms/blog/posts${qs({ ...p, language_code: instanceLocale() })}`
+	);
 }
 
 export function getBlogPost(ctx: Ctx, slug: string) {
-	return apiFetch<BlogPostOut>(ctx, `/cms/blog/posts/${encodeURIComponent(slug)}`);
+	return apiFetch<BlogPostOut>(
+		ctx,
+		`/cms/blog/posts/${encodeURIComponent(slug)}${qs({ language_code: instanceLocale() })}`
+	);
 }
 
 export function getBlogCategories(ctx: Ctx) {
-	return apiFetch<BlogCategoryOut[]>(ctx, '/cms/blog/categories');
+	return apiFetch<BlogCategoryOut[]>(
+		ctx,
+		`/cms/blog/categories${qs({ language_code: instanceLocale() })}`
+	);
 }
 
 export type { ApiError };

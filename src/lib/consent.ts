@@ -98,7 +98,10 @@ export function saveConsent(
 	if (w.gtag && w.__bzConsentSignals) w.gtag('consent', 'update', w.__bzConsentSignals(choice));
 	w.dataLayer?.push({ event: 'consent_update', ...choice });
 	if (choice.marketing) {
-		if (w.fbq) w.fbq('consent', 'grant');
+		if (w.fbq) {
+			w.fbq('consent', 'grant');
+			w.fbq('track', 'PageView');
+		}
 		else w.__bzLoadMeta?.();
 	} else if (w.fbq) {
 		w.fbq('consent', 'revoke');

@@ -26,7 +26,7 @@
 		marketing: consent?.marketing ?? false
 	});
 
-	const visible = $derived(consent === null || $cookieSettingsOpen);
+	const visible = $derived(consent?.v !== version || $cookieSettingsOpen);
 
 	$effect(() => {
 		if ($cookieSettingsOpen) detailed = true;
@@ -68,7 +68,7 @@
 		class="fixed inset-x-0 bottom-0 z-[80] p-3 md:p-4 mb-14 md:mb-0"
 	>
 		<div
-			class="mx-auto max-w-3xl rounded-xl border border-card-line bg-card p-4 md:p-5 shadow-xl text-sm"
+			class="mx-auto max-w-3xl max-h-[calc(100dvh-5.5rem)] overflow-y-auto rounded-xl border border-card-line bg-card p-4 md:p-5 shadow-xl text-sm"
 		>
 			<h2 id="cookie-banner-title" class="font-medium text-base text-foreground">{m.cookie_title()}</h2>
 			<p class="mt-1 text-muted-foreground-1">

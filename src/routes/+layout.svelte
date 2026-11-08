@@ -6,6 +6,7 @@
 	import Toasts from '#lib/components/ui/Toasts.svelte';
 	import CookieBanner from '#lib/components/consent/CookieBanner.svelte';
 	import { consentHeadScript, trackingConfig } from '#lib/consent';
+	import LegalReconsent from '#lib/components/account/LegalReconsent.svelte';
 	import './layout.css';
 
 	let { data, children } = $props();
@@ -38,4 +39,7 @@
 		initial={data.cookieConsent}
 		privacyUrl={data.shopConfig?.privacy_url || '/info/privatumas'}
 	/>
+	{#if data.me?.legal_pending?.length}
+		<LegalReconsent pending={data.me.legal_pending} account={data.me.email} />
+	{/if}
 </div>

@@ -332,8 +332,9 @@ export function getRecentlyViewed(ctx: Ctx) {
 	return apiFetch<ProductListOut[]>(ctx, '/catalog/recently-viewed');
 }
 
-export function getCmsPage(ctx: Ctx, slug: string) {
-	return apiFetch<CmsPageOut>(ctx, `/cms/pages/${encodeURIComponent(slug)}`);
+export function getCmsPage(ctx: Ctx, slug: string, version?: string | null) {
+	const q = version ? `?version=${encodeURIComponent(version)}` : '';
+	return apiFetch<CmsPageOut>(ctx, `/cms/pages/${encodeURIComponent(slug)}${q}`);
 }
 
 export type { ApiError };

@@ -21,6 +21,19 @@
 	const topCategories = $derived(a.top_categories.filter((c) => c.slug !== 'nepriskirta'));
 	const selectedCategory = $derived(data.params.category_slug ?? '');
 
+	function categoryHref(slug: string): string {
+		const p = new URLSearchParams(data.params);
+		p.delete('page');
+		if (selectedCategory === slug) p.delete('category_slug');
+		else p.set('category_slug', slug);
+		const q = p.toString();
+		return `${data.pathname}${q ? `?${q}` : ''}`;
+	}
+
+	// short_description – paprastas tekstas, o CatalogPage aprašymą rodo per {@html}.
+	const escapeHtml = (t: string) =>
+		t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
 	const breadcrumbs = $derived([
 		{ name: 'Pradžia', href: '/' },
 		{ name: 'Veiklos', href: '/veiklos' },
@@ -67,7 +80,7 @@
 				{#each topCategories.slice(0, 12) as c (c.slug)}
 					{@const active = selectedCategory === c.slug}
 					<a
-						href={active ? data.pathname : `${data.pathname}?category_slug=${encodeURIComponent(c.slug)}`}
+						href={categoryHref(c.slug)}
 						aria-current={active ? 'true' : undefined}
 						class="shrink-0 rounded-full border px-3.5 py-1.5 text-sm transition {active
 							? 'border-primary-checked bg-primary-checked text-white'
@@ -86,7 +99,7 @@
 <CatalogPage
 	bind:this={catalog}
 	title={a.name}
-	description={a.short_description || undefined}
+	description={a.short_description ? escapeHtml(a.short_description) : undefined}
 	heroUrl={a.image_url || undefined}
 	products={data.products}
 	facets={data.facets}

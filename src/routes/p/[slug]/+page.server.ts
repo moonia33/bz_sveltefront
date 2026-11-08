@@ -1,5 +1,10 @@
 import { apiFetch, apiFetchRaw, forwardCookies } from '#lib/api/client';
-import { getFavoriteIds, getRecommendations, getShippingMethods } from '#lib/api/endpoints';
+import {
+	getBlogPosts,
+	getFavoriteIds,
+	getRecommendations,
+	getShippingMethods
+} from '#lib/api/endpoints';
 import type { CartOut, ProductDetailOut, ShippingMethodOut } from '#lib/api/types';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -28,13 +33,19 @@ export const load: PageServerLoad = async (event) => {
 	if (product.slug && product.slug !== slug) {
 		throw redirect(301, `/p/${encodeURIComponent(product.slug)}${event.url.search}`);
 	}
-	const [recommendations, shipping_methods, favoriteIds] = await recsP;
+	const [[recommendations, shipping_methods, favoriteIds], relatedPosts] = await Promise.all([
+		recsP,
+		getBlogPosts(ctx, { product: product.id, page_size: 3 })
+			.then((r) => r.results)
+			.catch(() => [])
+	]);
 
 	return {
 		product,
 		recommendations,
 		shipping_methods,
 		favorite_ids: favoriteIds.variant_ids,
+		related_posts: relatedPosts,
 		origin: event.url.origin
 	};
 };

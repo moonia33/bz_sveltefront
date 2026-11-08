@@ -720,3 +720,43 @@ export interface BadgeOut {
 	style: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'dark' | string;
 	color: string;
 }
+
+// --- Blog (/cms/blog/*) ---
+export interface BlogCategoryOut {
+	slug: string;
+	name: string;
+	description: string;
+	post_count: number;
+}
+
+export interface BlogPostListOut {
+	id: number;
+	slug: string;
+	language_code: string;
+	title: string;
+	excerpt: string;
+	cover_image: string;
+	cover_image_alt: string;
+	published_at: string | null;
+	reading_minutes: number;
+	author_name: string;
+	categories: BlogCategoryOut[];
+	is_featured: boolean;
+}
+
+export interface BlogPostOut extends BlogPostListOut {
+	seo_title: string;
+	seo_description: string;
+	updated_at: string;
+	content_blocks: CmsContentBlockOut[];
+	alternates: { language_code: string; slug: string }[];
+	related_products: ProductListOut[];
+	redirect_to_slug: string;
+}
+
+export interface BlogPostPageOut {
+	page: number;
+	page_size: number;
+	total_count: number;
+	results: BlogPostListOut[];
+}

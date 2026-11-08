@@ -302,6 +302,36 @@ export interface CmsPageOut {
 	seo_title: string;
 	seo_description: string;
 	content_blocks: CmsContentBlockOut[];
+	legal?: LegalInfoOut | null;
+}
+
+// Versijuojami teisiniai dokumentai (taisyklės, privatumas): /cms/pages/{slug}?version=
+export interface LegalVersionRefOut {
+	version: string;
+	effective_from: string;
+	is_current: boolean;
+}
+
+export interface LegalInfoOut {
+	kind: string;
+	version: string;
+	effective_from: string;
+	is_current: boolean;
+	is_upcoming?: boolean;
+	change_summary: string;
+	upcoming: LegalVersionRefOut | null;
+	versions: LegalVersionRefOut[];
+}
+
+// Laukiantys pakartotiniai sutikimai: /auth/me → legal_pending, POST /legal/accept.
+export interface LegalPendingOut {
+	kind: string;
+	slug: string;
+	url: string;
+	title: string;
+	version: string;
+	effective_from: string;
+	change_summary: string;
 }
 
 export interface CartItemOptionOut {
@@ -398,6 +428,7 @@ export interface MeOut {
 	customer_groups: CustomerGroupOut[];
 	primary_customer_group: CustomerGroupOut | null;
 	consents: ConsentOut[];
+	legal_pending?: LegalPendingOut[];
 	phones: PhoneOut[];
 	addresses: AddressOut[];
 	primary_pickup_point: PickupPointOut | null;

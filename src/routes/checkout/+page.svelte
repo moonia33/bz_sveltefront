@@ -403,6 +403,13 @@
 				})
 			});
 			const d = await res.json().catch(() => ({}));
+			if (res.status === 409 && String(d?.detail ?? '').includes('/checkout/consents')) {
+				consents = await getJson<ConsentDefinitionOut[]>('/checkout/consents').catch(() => consents);
+				consentsChecked = false;
+				throw new Error(
+					'Pasikeitė pirkimo taisyklės arba privatumo politika. Peržiūrėkite naujas redakcijas ir pažymėkite sutikimą dar kartą.'
+				);
+			}
 			if (!res.ok) throw new Error(d?.detail ?? `Klaida (${res.status})`);
 			confirmed = d as CheckoutConfirmOut;
 			await invalidateAll();

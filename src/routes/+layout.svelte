@@ -4,6 +4,7 @@
 	import BackToTop from '#lib/components/ui/BackToTop.svelte';
 	import NavProgress from '#lib/components/ui/NavProgress.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
+	import LegalReconsent from '#lib/components/account/LegalReconsent.svelte';
 	import './layout.css';
 
 	let { data, children } = $props();
@@ -25,4 +26,7 @@
 	<BackToTop />
 	<NavProgress />
 	<Toasts />
+	{#if data.me?.legal_pending?.length}
+		<LegalReconsent pending={data.me.legal_pending} account={data.me.email} />
+	{/if}
 </div>

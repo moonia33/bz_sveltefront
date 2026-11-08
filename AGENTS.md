@@ -20,3 +20,14 @@ Kalba su vartotoju – lietuviškai. Nemerginti be vartotojo patvirtinimo.
   rodo `src/lib/components/shop/ProductBadges.svelte` (`ProductCard.svelte`, `src/routes/p/[slug]/+page.svelte`).
   Badge'ai kuriami BE admine (`docs/badges.md` BE repo). Senas `labels.includes('new')` – tik fallback.
 - Katalogo filtras pagal badge: `?collection=<badge kodas>`.
+
+## Blogas ir CMS turinys
+
+- Blogas: `/patarimai` (ne-LT instance – `/blog`, alias `ROUTE_ALIASES` `vite.config.ts`). `/naujienos` – naujos prekės, ne blogas.
+  Failai: `src/routes/patarimai/`, `src/routes/sitemap-patarimai.xml/`, `src/lib/components/blog/`.
+- Turinys ateina iš BE kaip `content_blocks`: `html` (BE jau išvalytas, rodyti `{@html}`) ir `products`
+  (prekių kortelės su BE kainomis – rodyti per `ProductRow`). Tas pats formatas `/info/[slug]`.
+- Turinio endpoint'ams siųsk `language_code: instanceLocale()` – `apiFetch` persiunčia naršyklės
+  `Accept-Language`. Vidinės nuorodos – per `lh()` (`#lib/i18n/instance`).
+- Detail atsakymo `redirect_to_slug` → 301. Prekės puslapyje „Susiję straipsniai“ (`getBlogPosts({ product })`).
+- BE aprašas: `docs/blog_cms.md` (ecommercebackend).

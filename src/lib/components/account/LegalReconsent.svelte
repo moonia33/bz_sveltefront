@@ -6,10 +6,10 @@
 	import { pushToast } from '#lib/toast';
 	import type { LegalPendingOut } from '#lib/api/types';
 
-	let { pending = [] }: { pending?: LegalPendingOut[] } = $props();
+	let { pending = [], account = '' }: { pending?: LegalPendingOut[]; account?: string } = $props();
 
 	const SNOOZE_KEY = 'legal_reconsent_snooze';
-	const key = $derived(pending.map((p) => `${p.kind}:${p.version}`).join(','));
+	const key = $derived(`${account}|` + pending.map((p) => `${p.kind}:${p.version}`).join(','));
 
 	let snoozed = $state<string | null>(browser ? sessionStorage.getItem(SNOOZE_KEY) : null);
 	let busy = $state(false);
@@ -26,7 +26,12 @@
 	});
 
 	const fmtDate = (iso: string) =>
-		new Date(iso).toLocaleDateString('lt-LT', { year: 'numeric', month: '2-digit', day: '2-digit' });
+		new Date(iso).toLocaleDateString('lt-LT', {
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			timeZone: 'Europe/Vilnius'
+		});
 
 	function later() {
 		sessionStorage.setItem(SNOOZE_KEY, key);

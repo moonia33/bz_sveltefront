@@ -27,6 +27,6 @@
 	<NavProgress />
 	<Toasts />
 	{#if data.me?.legal_pending?.length}
-		<LegalReconsent pending={data.me.legal_pending} />
+		<LegalReconsent pending={data.me.legal_pending} account={data.me.email} />
 	{/if}
 </div>

@@ -13,7 +13,12 @@
 	const legal = $derived(cms.legal ?? null);
 
 	const fmtDate = (iso: string) =>
-		new Date(iso).toLocaleDateString('lt-LT', { year: 'numeric', month: '2-digit', day: '2-digit' });
+		new Date(iso).toLocaleDateString('lt-LT', {
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			timeZone: 'Europe/Vilnius'
+		});
 
 	const breadcrumbLd = $derived(
 		jsonLd({
@@ -74,9 +79,16 @@
 
 	{#if legal}
 		<p class="mt-2 text-sm text-muted-foreground-1">
-			Redakcija {legal.version}, galioja nuo {fmtDate(legal.effective_from)}
+			Redakcija {legal.version}, {legal.is_upcoming ? 'įsigalios' : 'galioja'} nuo {fmtDate(legal.effective_from)}
 		</p>
-		{#if !legal.is_current}
+		{#if legal.is_upcoming}
+			<div
+				class="mt-4 rounded-lg border border-card-line bg-surface px-4 py-3 text-sm text-foreground"
+			>
+				Tai būsima dokumento redakcija, dar neįsigaliojusi.
+				<a href={data.pathname} class="font-medium text-primary underline">Žiūrėti galiojančią</a>
+			</div>
+		{:else if !legal.is_current}
 			<div
 				class="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
 			>

@@ -317,6 +317,7 @@ export interface LegalInfoOut {
 	version: string;
 	effective_from: string;
 	is_current: boolean;
+	is_upcoming?: boolean;
 	change_summary: string;
 	upcoming: LegalVersionRefOut | null;
 	versions: LegalVersionRefOut[];

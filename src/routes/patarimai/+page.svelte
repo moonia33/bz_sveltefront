@@ -13,10 +13,6 @@
 	const description = $derived(
 		activeCategory?.description || 'Žvejybos patarimai, gidai ir naujienos iš Baltijos Žvyno.'
 	);
-	const canonical = $derived(
-		`${data.origin}${data.pathname}${data.category ? `?kategorija=${encodeURIComponent(data.category)}` : ''}`
-	);
-
 	function pageHref(p: number) {
 		const sp = new URLSearchParams();
 		if (data.category) sp.set('kategorija', data.category);
@@ -24,6 +20,8 @@
 		const q = sp.toString();
 		return q ? `${data.pathname}?${q}` : data.pathname;
 	}
+
+	const canonical = $derived(`${data.origin}${pageHref(data.posts.page)}`);
 
 	const breadcrumbLd = $derived(
 		jsonLd({

@@ -41,6 +41,7 @@ export const load: LayoutServerLoad = async (event) => {
 		favorite_count: favorites.count,
 		favorite_product_ids: favorites.product_ids,
 		navigation,
-		shopConfig
+		shopConfig,
+		cookieConsent: event.cookies.get('bz_consent') ?? null
 	};
 };

@@ -3,6 +3,7 @@
 	import { Check } from '@lucide/svelte';
 	import { m } from '#lib/paraglide/messages';
 	import { lh } from '#lib/i18n/instance';
+	import { cookieSettingsOpen } from '#lib/consent';
 
 	let {
 		categories = [],
@@ -178,6 +179,9 @@
 				{#each bottomLinks as link (link.id)}
 					<a class="text-xs {linkClass}" href={lh(link.url) || '#'}>{link.label}</a>
 				{/each}
+				<button type="button" class="text-xs {linkClass}" onclick={() => cookieSettingsOpen.set(true)}>
+					{m.footer_cookie_settings()}
+				</button>
 			</div>
 		</div>
 	</div>

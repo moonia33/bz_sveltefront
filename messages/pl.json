@@ -86,5 +86,21 @@
 	"sort_by": "Sortuj:",
 	"cat_no_products": "Nie znaleziono produktów",
 	"cat_tree_aria": "Drzewo kategorii",
-	"filter_group_title": "Grupa produktów"
+	"filter_group_title": "Grupa produktów",
+	"cookie_title": "Pliki cookie",
+	"cookie_text": "Używamy niezbędnych plików cookie, aby strona działała. Za Twoją zgodą używamy też plików cookie analitycznych i marketingowych (Google, Meta), aby ulepszać stronę i pokazywać trafne oferty. Wybór możesz zmienić w każdej chwili na dole strony.",
+	"cookie_accept_all": "Akceptuj wszystkie",
+	"cookie_reject_all": "Odrzuć wszystkie",
+	"cookie_settings": "Ustawienia",
+	"cookie_save": "Zapisz wybór",
+	"cookie_necessary": "Niezbędne",
+	"cookie_necessary_desc": "Koszyk, logowanie i bezpieczeństwo. Zawsze włączone.",
+	"cookie_functional": "Funkcjonalne",
+	"cookie_functional_desc": "Zapamiętują Twoje ustawienia, np. motyw.",
+	"cookie_analytics": "Analityka",
+	"cookie_analytics_desc": "Pomagają zrozumieć, jak korzystasz ze strony (Google Analytics).",
+	"cookie_marketing": "Marketing",
+	"cookie_marketing_desc": "Pomiar i personalizacja reklam (Google Ads, Meta).",
+	"cookie_policy": "Polityka prywatności",
+	"footer_cookie_settings": "Ustawienia cookie"
 }

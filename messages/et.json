@@ -86,5 +86,21 @@
 	"sort_by": "Sorteeri:",
 	"cat_no_products": "Tooteid ei leitud",
 	"cat_tree_aria": "Kategooriate puu",
-	"filter_group_title": "Tooterühm"
+	"filter_group_title": "Tooterühm",
+	"cookie_title": "Küpsised",
+	"cookie_text": "Kasutame vajalikke küpsiseid, et sait töötaks. Teie nõusolekul kasutame ka analüütika- ja turundusküpsiseid (Google, Meta), et saiti parandada ja näidata asjakohaseid pakkumisi. Valikut saate igal ajal muuta lehe allosas.",
+	"cookie_accept_all": "Nõustu kõigiga",
+	"cookie_reject_all": "Keeldu kõigist",
+	"cookie_settings": "Seaded",
+	"cookie_save": "Salvesta valik",
+	"cookie_necessary": "Vajalikud",
+	"cookie_necessary_desc": "Ostukorv, sisselogimine ja turvalisus. Alati sees.",
+	"cookie_functional": "Funktsionaalsed",
+	"cookie_functional_desc": "Jätab meelde teie eelistused, nt teema.",
+	"cookie_analytics": "Analüütika",
+	"cookie_analytics_desc": "Aitab mõista, kuidas saiti kasutatakse (Google Analytics).",
+	"cookie_marketing": "Turundus",
+	"cookie_marketing_desc": "Reklaami mõõtmine ja isikupärastamine (Google Ads, Meta).",
+	"cookie_policy": "Privaatsuspoliitika",
+	"footer_cookie_settings": "Küpsiste seaded"
 }

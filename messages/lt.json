@@ -86,5 +86,21 @@
 	"sort_by": "Rūšiuoti:",
 	"cat_no_products": "Prekių nerasta",
 	"cat_tree_aria": "Kategorijų medis",
-	"filter_group_title": "Prekių grupė"
+	"filter_group_title": "Prekių grupė",
+	"cookie_title": "Slapukai",
+	"cookie_text": "Būtinus slapukus naudojame tam, kad svetainė veiktų. Jei sutiksite, naudosime ir analitikos bei rinkodaros slapukus (Google, Meta): jie padeda tobulinti svetainę ir rodyti aktualius pasiūlymus. Savo pasirinkimą bet kada galėsite pakeisti svetainės apačioje.",
+	"cookie_accept_all": "Priimti visus",
+	"cookie_reject_all": "Atmesti visus",
+	"cookie_settings": "Nustatymai",
+	"cookie_save": "Išsaugoti pasirinkimą",
+	"cookie_necessary": "Būtini",
+	"cookie_necessary_desc": "Krepšelis, prisijungimas ir saugumas. Visada įjungti.",
+	"cookie_functional": "Funkciniai",
+	"cookie_functional_desc": "Įsimena jūsų nustatymus, pavyzdžiui, temą.",
+	"cookie_analytics": "Analitika",
+	"cookie_analytics_desc": "Padeda suprasti, kaip naudojatės svetaine (Google Analytics).",
+	"cookie_marketing": "Rinkodara",
+	"cookie_marketing_desc": "Reklamos matavimas ir personalizavimas (Google Ads, Meta).",
+	"cookie_policy": "Privatumo politika",
+	"footer_cookie_settings": "Slapukų nustatymai"
 }

@@ -9,7 +9,7 @@
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
 	import ProductList from '#lib/components/shop/ProductList.svelte';
 	import type { CatalogFacetsOut, CategoryOut, Paginated, ProductListOut } from '#lib/api/types';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { m } from '#lib/paraglide/messages';
 	import { unit } from '#lib/i18n/units';
 
@@ -33,6 +33,7 @@
 		defaultParams = {},
 		logoUrl,
 		heroUrl,
+		intro,
 		chipPool
 	}: {
 		title: string;
@@ -63,6 +64,8 @@
 		defaultParams?: Record<string, string>;
 		// Hero banneris virš pavadinimo (kategorijos hero_image).
 		heroUrl?: string;
+		// Papildomas turinys po pavadinimu (pvz. veiklos plytelės ir kategorijų chip'ai).
+		intro?: Snippet;
 		// Pilnas kategorijų sąrašas — nusprendžia ar chip'as turi vaikų
 		// (su vaikais → kortelės, be vaikų → apvalūs chips'ai).
 		chipPool?: CategoryOut[];
@@ -287,6 +290,9 @@
 				</div>
 			</div>
 
+			{#if intro}
+				<div class="mb-8">{@render intro()}</div>
+			{/if}
 			{#if cardChips.length}
 				<div class="mb-10">
 					<CategoryCardGrid categories={cardChips} all={chipPool ?? []} />

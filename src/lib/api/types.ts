@@ -102,6 +102,28 @@ export interface ShopConfigOut {
 	cookie_consent_version?: number;
 }
 
+export interface ActivityOut {
+	id: number;
+	code: string;
+	name: string;
+	parent_code: string | null;
+	short_description: string;
+	image_url: string | null;
+	image_alt: string;
+	product_count: number;
+	visible: boolean;
+	children: ActivityOut[];
+}
+
+export interface ActivityDetailOut extends ActivityOut {
+	content_json: unknown;
+	seo_title: string;
+	seo_description: string;
+	parent: ActivityOut | null;
+	top_categories: { slug: string; name: string; product_count: number }[];
+	top_brands: { slug: string; name: string; product_count: number }[];
+}
+
 export interface CategoryOut {
 	id: number;
 	slug: string;

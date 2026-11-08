@@ -89,6 +89,11 @@
 			highlight: true, new_tab: false, show_in: 'all', children: []
 		},
 		{
+			id: -9, kind: 'preset', label: m.nav_activities(),
+			url: '/veiklos', icon: 'layers', badge: '',
+			highlight: false, new_tab: false, show_in: 'all', children: []
+		},
+		{
 			id: -7, kind: 'preset', label: m.nav_brands(),
 			url: '/gamintojai', icon: 'star', badge: '',
 			highlight: false, new_tab: false, show_in: 'all', children: []

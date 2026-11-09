@@ -96,12 +96,12 @@
 						<span class="font-semibold text-3xl text-white">{initials(cat.name)}</span>
 					</div>
 				{/if}
-				<span
-					class="absolute bottom-2.5 left-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-gray-900 shadow-sm"
-				>
-					{cat.name}{#if cat.product_count}&nbsp;· {cat.product_count}{/if}
-				</span>
 			</div>
+			<p
+				class="mt-3 text-center font-medium text-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
+			>
+				{cat.name}
+			</p>
 			{#if subs}
 				<p class="mt-2 text-center text-sm text-muted-foreground-1">
 					{subs}

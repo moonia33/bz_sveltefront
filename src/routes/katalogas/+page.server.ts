@@ -49,7 +49,11 @@ export const load: PageServerLoad = async (event) => {
 		products,
 		facets,
 		params: Object.fromEntries(sp),
-		categoryChips: (parent.categories ?? []).filter((c) => !c.parent_id),
+		// Paieškos puslapyje kategorijų kortelės nedaro prasmės — rodoma
+		// tik prekės (chips'ai tik gryname katalogo vaizde).
+		categoryChips: q
+			? []
+			: (parent.categories ?? []).filter((c) => !c.parent_id),
 		navTree: parent.categories ?? [],
 		title: q ? `Paieška: „${q}“` : 'Visos prekės',
 		noindex,

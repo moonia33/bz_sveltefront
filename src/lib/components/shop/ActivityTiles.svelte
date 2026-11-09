@@ -1,30 +1,37 @@
 <script lang="ts">
 	import type { ActivityOut } from '#lib/api/types';
+	import { lh } from '#lib/i18n/instance';
 
 	let { activities, class: klass = '' }: { activities: ActivityOut[]; class?: string } = $props();
 </script>
 
 {#if activities.length}
-	<ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 {klass}">
+	<ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 {klass}">
 		{#each activities as a (a.code)}
 			<li>
-				<a
-					href={`/veiklos/${a.code}`}
-					class="group relative flex h-full {a.image_url ? 'min-h-32' : 'min-h-20'} flex-col justify-end overflow-hidden rounded-xl border border-card-line bg-card p-4 transition hover:border-primary-checked focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-checked"
-				>
-					{#if a.image_url}
-						<img
-							src={a.image_url}
-							alt={a.image_alt || a.name}
-							loading="lazy"
-							class="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-105"
-						/>
-						<span class="absolute inset-0 bg-linear-to-t from-black/70 to-black/0"></span>
-					{/if}
-					<span class="relative font-medium {a.image_url ? 'text-white' : 'text-foreground'}">{a.name}</span>
-					<span class="relative mt-0.5 text-xs {a.image_url ? 'text-white/80' : 'text-muted-foreground-1'}">
-						{a.product_count} prekės
-					</span>
+				<a href={lh(`/veiklos/${a.code}`)} class="group relative block focus:outline-hidden">
+					<div class="overflow-hidden rounded-xl bg-surface">
+						{#if a.image_url}
+							<img
+								src={a.image_url}
+								alt={a.image_alt || a.name}
+								loading="lazy"
+								decoding="async"
+								class="h-40 w-full rounded-xl object-cover transition-transform duration-500 ease-in-out group-hover:scale-105 group-focus:scale-105"
+							/>
+						{:else}
+							<div class="h-40 w-full"></div>
+						{/if}
+					</div>
+					<div class="absolute inset-0">
+						<div class="flex h-full flex-col items-center justify-center">
+							<span
+								class="rounded-full bg-layer px-3 py-1 text-xs uppercase text-layer-foreground transition group-focus-visible:ring-2 group-focus-visible:ring-primary-checked"
+							>
+								{a.name} · {a.product_count}
+							</span>
+						</div>
+					</div>
 				</a>
 			</li>
 		{/each}

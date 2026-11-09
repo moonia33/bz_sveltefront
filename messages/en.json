@@ -103,5 +103,11 @@
 	"cookie_marketing": "Marketing",
 	"cookie_marketing_desc": "Ad measurement and personalisation (Google Ads, Meta).",
 	"cookie_policy": "Privacy policy",
-	"footer_cookie_settings": "Cookie settings"
+	"footer_cookie_settings": "Cookie settings",
+	"act_index_title": "Products by activity",
+	"act_index_meta": "Carp, spinning, float, feeder, camping and more: everything you need in one place.",
+	"act_index_lead": "Choose how you fish or relax and see only the products that fit, with their own filters.",
+	"act_all_products": "All products ({count})",
+	"act_empty": "No activities yet.",
+	"act_fallback_desc": "{name}: all the right products in one place."
 }

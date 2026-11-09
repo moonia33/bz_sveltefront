@@ -1,6 +1,8 @@
 <script lang="ts">
 	import ActivityTiles from '#lib/components/shop/ActivityTiles.svelte';
 	import CatalogPage from '#lib/components/shop/CatalogPage.svelte';
+	import { lh } from '#lib/i18n/instance';
+	import { m } from '#lib/paraglide/messages';
 	import { jsonLd } from '#lib/seo';
 	import type { Snapshot } from './$types';
 
@@ -14,7 +16,7 @@
 	const a = $derived(data.activity);
 	const title = $derived(`${a.seo_title || a.name} — Baltijos Žvynas`);
 	const description = $derived(
-		a.seo_description || a.short_description || `${a.name}: visos tinkamos prekės vienoje vietoje.`
+		a.seo_description || a.short_description || m.act_fallback_desc({ name: a.name })
 	);
 	const canonical = $derived(`${data.origin}${data.pathname}`);
 	const children = $derived(a.children.filter((c) => c.visible));
@@ -35,9 +37,9 @@
 		t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 	const breadcrumbs = $derived([
-		{ name: 'Pradžia', href: '/' },
-		{ name: 'Veiklos', href: '/veiklos' },
-		...(a.parent ? [{ name: a.parent.name, href: `/veiklos/${a.parent.code}` }] : []),
+		{ name: m.ui_home(), href: lh('/') },
+		{ name: m.nav_activities(), href: lh('/veiklos') },
+		...(a.parent ? [{ name: a.parent.name, href: lh(`/veiklos/${a.parent.code}`) }] : []),
 		{ name: a.name }
 	]);
 	const breadcrumbLd = $derived(

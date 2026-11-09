@@ -103,5 +103,11 @@
 	"cookie_marketing": "Rinkodara",
 	"cookie_marketing_desc": "Reklamos matavimas ir personalizavimas (Google Ads, Meta).",
 	"cookie_policy": "Privatumo politika",
-	"footer_cookie_settings": "Slapukų nustatymai"
+	"footer_cookie_settings": "Slapukų nustatymai",
+	"act_index_title": "Prekės pagal veiklą",
+	"act_index_meta": "Karpinė, spiningas, plūdinė, feeder, stovyklavimas ir kitos veiklos: viskas, ko reikia, vienoje vietoje.",
+	"act_index_lead": "Pasirink, kaip žvejoji ar ilsiesi, ir matysi tik tam tinkamas prekes su savais filtrais.",
+	"act_all_products": "Visos prekės ({count})",
+	"act_empty": "Veiklų kol kas nėra.",
+	"act_fallback_desc": "{name}: visos tinkamos prekės vienoje vietoje."
 }

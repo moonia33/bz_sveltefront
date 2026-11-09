@@ -103,5 +103,11 @@
 	"cookie_marketing": "Marketing",
 	"cookie_marketing_desc": "Pomiar i personalizacja reklam (Google Ads, Meta).",
 	"cookie_policy": "Polityka prywatności",
-	"footer_cookie_settings": "Ustawienia cookie"
+	"footer_cookie_settings": "Ustawienia cookie",
+	"act_index_title": "Produkty według aktywności",
+	"act_index_meta": "Karp, spinning, spławik, feeder, kemping i inne aktywności: wszystko, czego potrzebujesz, w jednym miejscu.",
+	"act_index_lead": "Wybierz, jak łowisz lub odpoczywasz, a zobaczysz tylko pasujące produkty z własnymi filtrami.",
+	"act_all_products": "Wszystkie produkty ({count})",
+	"act_empty": "Brak aktywności.",
+	"act_fallback_desc": "{name}: wszystkie odpowiednie produkty w jednym miejscu."
 }

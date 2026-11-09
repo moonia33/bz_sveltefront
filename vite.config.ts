@@ -28,7 +28,8 @@ const ROUTE_ALIASES: Record<string, string> = {
 	'/parduotuves': '/stores',
 	'/paskyra': '/account',
 	'/prisijungti': '/login',
-	'/uzsakymas': '/order'
+	'/uzsakymas': '/order',
+	'/veiklos': '/activities'
 };
 
 type LocalizedTuple = [(typeof LOCALES)[number], string];

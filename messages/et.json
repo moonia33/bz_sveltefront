@@ -103,5 +103,11 @@
 	"cookie_marketing": "Turundus",
 	"cookie_marketing_desc": "Reklaami mõõtmine ja isikupärastamine (Google Ads, Meta).",
 	"cookie_policy": "Privaatsuspoliitika",
-	"footer_cookie_settings": "Küpsiste seaded"
+	"footer_cookie_settings": "Küpsiste seaded",
+	"act_index_title": "Tooted tegevuse järgi",
+	"act_index_meta": "Karp, spinning, ujukipüük, feeder, matkamine ja muud tegevused: kõik vajalik ühes kohas.",
+	"act_index_lead": "Vali, kuidas püüad või puhkad, ja näed ainult sobivaid tooteid koos eraldi filtritega.",
+	"act_all_products": "Kõik tooted ({count})",
+	"act_empty": "Tegevusi veel pole.",
+	"act_fallback_desc": "{name}: kõik sobivad tooted ühes kohas."
 }

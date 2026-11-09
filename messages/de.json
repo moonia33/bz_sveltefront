@@ -103,5 +103,11 @@
 	"cookie_marketing": "Marketing",
 	"cookie_marketing_desc": "Werbemessung und Personalisierung (Google Ads, Meta).",
 	"cookie_policy": "Datenschutzerklärung",
-	"footer_cookie_settings": "Cookie-Einstellungen"
+	"footer_cookie_settings": "Cookie-Einstellungen",
+	"act_index_title": "Produkte nach Aktivität",
+	"act_index_meta": "Karpfen, Spinnfischen, Posenfischen, Feeder, Camping und mehr: alles, was Sie brauchen, an einem Ort.",
+	"act_index_lead": "Wählen Sie, wie Sie angeln oder sich erholen, und sehen Sie nur die passenden Produkte mit eigenen Filtern.",
+	"act_all_products": "Alle Produkte ({count})",
+	"act_empty": "Noch keine Aktivitäten.",
+	"act_fallback_desc": "{name}: alle passenden Produkte an einem Ort."
 }

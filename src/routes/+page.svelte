@@ -7,6 +7,8 @@
 	import ProductRow from '#lib/components/ui/ProductRow.svelte';
 	import type { HomeSlide } from '#lib/api/endpoints';
 	import type { CategoryOut, ProductListOut } from '#lib/api/types';
+	import { lh } from '#lib/i18n/instance';
+	import { m } from '#lib/paraglide/messages';
 
 	let { data } = $props();
 
@@ -79,7 +81,7 @@
 							{@const img = item.menu_icon_url ?? item.hero_image_url}
 							<a
 								class="group relative block w-16 sm:w-20 lg:w-24 text-center focus:outline-hidden"
-								href="/k/{item.slug}"
+								href={lh(`/k/${item.slug}`)}
 							>
 								{#if img}
 									<img
@@ -108,7 +110,7 @@
 					<ProductRow
 						{products}
 						title={String(section.payload?.title ?? '') || undefined}
-						href={productGridHref(section.payload ?? {})}
+						href={lh(productGridHref(section.payload ?? {}))}
 					/>
 				</div>
 			{/if}
@@ -169,7 +171,7 @@
 				Žvejybos prekės su pristatymu visame regione.
 			</p>
 			<a
-				href="/katalogas"
+				href={lh('/katalogas')}
 				class="mt-5 md:mt-8 text-sm md:text-base text-white underline underline-offset-4 hover:text-white/80 focus:outline-hidden focus:text-white/80"
 				>Į katalogą</a
 			>
@@ -186,7 +188,7 @@
 			<ProductRow
 				products={data.newest.items}
 				title="Naujausios prekės"
-				href="/katalogas?sort=-created"
+				href={lh('/katalogas?sort=-created')}
 			/>
 		</div>
 	{/if}
@@ -196,8 +198,9 @@
 	<section class="pt-14 lg:pt-20 w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">
 		<div class="flex items-baseline justify-between gap-3">
 			<h2 class="font-semibold text-xl md:text-2xl text-foreground">{area.name}</h2>
-			<a href={`/veiklos/${area.code}`} class="text-sm text-muted-foreground-1 hover:text-foreground"
-				>Visos prekės</a
+			<a
+				href={lh(`/veiklos/${area.code}`)}
+				class="text-sm text-muted-foreground-1 hover:text-foreground">{m.all_products()}</a
 			>
 		</div>
 		<ActivityTiles class="mt-4" activities={area.children.filter((c) => c.visible)} />

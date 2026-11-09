@@ -103,5 +103,11 @@
 	"cookie_marketing": "Mārketings",
 	"cookie_marketing_desc": "Reklāmas mērīšana un personalizēšana (Google Ads, Meta).",
 	"cookie_policy": "Privātuma politika",
-	"footer_cookie_settings": "Sīkdatņu iestatījumi"
+	"footer_cookie_settings": "Sīkdatņu iestatījumi",
+	"act_index_title": "Preces pēc aktivitātes",
+	"act_index_meta": "Karpa, spiningošana, pludiņmakšķerēšana, fīders, kempings un citas aktivitātes: viss nepieciešamais vienā vietā.",
+	"act_index_lead": "Izvēlieties, kā zvejojat vai atpūšaties, un redzēsiet tikai tam piemērotas preces ar saviem filtriem.",
+	"act_all_products": "Visas preces ({count})",
+	"act_empty": "Aktivitāšu pagaidām nav.",
+	"act_fallback_desc": "{name}: visas piemērotās preces vienā vietā."
 }

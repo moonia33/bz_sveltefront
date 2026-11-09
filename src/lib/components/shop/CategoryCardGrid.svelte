@@ -46,7 +46,7 @@
 			href="/k/{cat.slug}"
 			class="group block rounded-xl border border-layer-line bg-layer p-2 pb-4 transition-shadow hover:shadow-md focus:outline-hidden focus:shadow-md"
 		>
-			<div class="overflow-hidden rounded-lg bg-surface">
+			<div class="relative overflow-hidden rounded-lg bg-surface">
 				{#if bigImg && smallImgs.length > 0}
 					<div class="grid aspect-[5/4] w-full grid-cols-[3fr_2fr] gap-0.5">
 						<img
@@ -96,14 +96,14 @@
 						<span class="font-semibold text-3xl text-white">{initials(cat.name)}</span>
 					</div>
 				{/if}
+				<span
+					class="absolute bottom-2.5 left-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-gray-900 shadow-sm"
+				>
+					{cat.name}{#if cat.product_count}&nbsp;· {cat.product_count}{/if}
+				</span>
 			</div>
-			<p
-				class="mt-3 text-center font-medium text-foreground group-hover:text-primary-hover group-focus:text-primary-focus"
-			>
-				{cat.name}
-			</p>
 			{#if subs}
-				<p class="mt-0.5 text-center text-sm text-muted-foreground-1">
+				<p class="mt-2 text-center text-sm text-muted-foreground-1">
 					{subs}
 					{unit('subcategory', subs)}
 				</p>

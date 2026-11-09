@@ -135,6 +135,7 @@ export interface CategoryOut {
 	menu_icon_url: string | null;
 	card_image_url?: string | null;
 	image_urls?: string[];
+	product_count?: number;
 	seo_title: string;
 	seo_description: string;
 	seo_keywords: string;

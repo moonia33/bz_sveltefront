@@ -240,17 +240,10 @@
 						fetchpriority="high"
 						class="aspect-[16/5] w-full object-cover"
 					/>
-					<span class="absolute bottom-4 right-5 sm:bottom-5 sm:right-6 flex flex-col items-end">
-						<span
-							class="font-semibold text-2xl sm:text-3xl text-white [text-shadow:-1.5px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_1.5px_0_#000,1.5px_1.5px_0_#000,0_3px_8px_rgb(0_0_0/0.5)]"
-						>
-							{title}
-						</span>
-						<span
-							class="mt-1 text-xs sm:text-sm text-white [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000]"
-						>
-							{total} {unit('product', total)}
-						</span>
+					<span
+						class="absolute bottom-4 right-5 sm:bottom-5 sm:right-6 font-semibold text-2xl sm:text-3xl text-white [text-shadow:-1.5px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_1.5px_0_#000,1.5px_1.5px_0_#000,0_3px_8px_rgb(0_0_0/0.5)]"
+					>
+						{title}
 					</span>
 				</div>
 			{/if}

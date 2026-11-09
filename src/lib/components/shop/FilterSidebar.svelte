@@ -28,6 +28,7 @@
 	const selectedFeatures = $derived(new Set((params.get('feature') ?? '').split(',').filter(Boolean)));
 	const selectedOptions = $derived(new Set((params.get('option') ?? '').split(',').filter(Boolean)));
 	const brandSlug = $derived(params.get('brand_slug') ?? '');
+	let brandQuery = $state('');
 	const categorySel = $derived(params.get('category_slug') ?? '');
 	const hideBrands = $derived(hiddenFacets.includes('brands'));
 	const hideGroups = $derived(hiddenFacets.includes('groups'));
@@ -216,6 +217,39 @@
 	}
 </script>
 
+{#snippet brandRow(h: string, selected: boolean, label: string, imgUrl?: string | null)}
+	<div class="flex items-center">
+		<a
+			href={h}
+			data-sveltekit-noscroll
+			data-sveltekit-keepfocus
+			rel="nofollow"
+			aria-current={selected ? 'true' : undefined}
+			class="p-2 group w-full inline-flex items-center text-sm rounded-lg hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus"
+		>
+			<span
+				class="shrink-0 size-4 rounded-sm border border-line-3 inline-flex items-center justify-center {selected
+					? 'bg-primary border-primary text-primary-foreground'
+					: 'bg-transparent'}"
+			>
+				{#if selected}<Check class="size-3" />{/if}
+			</span>
+			<span class="ms-2 text-foreground truncate">{label}</span>
+			{#if imgUrl}
+				<img
+					src={imgUrl}
+					alt=""
+					width="48"
+					height="48"
+					loading="lazy"
+					decoding="async"
+					class="ms-auto shrink-0 size-6 object-contain"
+				/>
+			{/if}
+		</a>
+	</div>
+{/snippet}
+
 {#snippet row(h: string, selected: boolean, label: string)}
 	<div class="flex items-center">
 		<a
@@ -380,23 +414,53 @@
 		{/if}
 
 		{#if facets.brands?.length && !hideBrands}
-			{@const shown = expanded.has('brands') ? facets.brands : facets.brands.slice(0, 8)}
+			{@const q = brandQuery.trim().toLowerCase()}
+			{@const matching = q
+				? facets.brands.filter((b) => b.name.toLowerCase().includes(q))
+				: facets.brands}
+			{@const shown = expanded.has('brands') || q ? matching : matching.slice(0, 8)}
 			<div class="pb-6 mb-6 border-b border-sidebar-divider last:pb-0 last:mb-0 last:border-b-0">
 				<div class="mb-3">
 					<span class="font-medium text-sm text-foreground">Gamintojas</span>
 				</div>
+				{#if facets.brands.length > 10}
+					<div class="relative mb-2">
+						<input
+							type="search"
+							bind:value={brandQuery}
+							placeholder={m.nav_search_placeholder()}
+							class="w-full py-1.5 ps-3 pe-8 text-sm rounded-lg border border-layer-line bg-transparent text-foreground placeholder:text-muted-foreground-2 focus:outline-hidden focus:border-line-3"
+						/>
+						{#if brandQuery}
+							<button
+								type="button"
+								onclick={() => (brandQuery = '')}
+								class="absolute end-1.5 top-1/2 -translate-y-1/2 inline-flex size-5 items-center justify-center rounded-md text-muted-foreground-2 hover:bg-surface-hover focus:outline-hidden"
+								aria-label={m.filters_clear()}
+							>
+								<X class="size-3.5" />
+							</button>
+						{/if}
+					</div>
+				{/if}
 				<div class="space-y-0.5">
 					{#each shown as b (b.id)}
-						{@render row(
+						{@render brandRow(
 							brandSlug === b.slug
 								? href((p) => p.delete('brand_slug'))
 								: href((p) => p.set('brand_slug', b.slug)),
 							brandSlug === b.slug,
-							b.name
+							b.name,
+							b.logo_thumb_url ?? b.logo_url
 						)}
 					{/each}
+					{#if q && !shown.length}
+						<p class="px-2 py-1 text-xs text-muted-foreground-1">—</p>
+					{/if}
 				</div>
-				{@render moreButton('brands', facets.brands.length)}
+				{#if !q}
+					{@render moreButton('brands', facets.brands.length)}
+				{/if}
 			</div>
 		{/if}
 

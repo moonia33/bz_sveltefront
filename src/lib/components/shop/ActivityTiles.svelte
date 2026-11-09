@@ -28,7 +28,7 @@
 							<span
 								class="rounded-full bg-layer px-3 py-1 text-xs uppercase text-layer-foreground transition group-focus-visible:ring-2 group-focus-visible:ring-primary-checked"
 							>
-								{a.name} · {a.product_count}
+								{a.name}
 							</span>
 						</div>
 					</div>

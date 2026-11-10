@@ -168,9 +168,22 @@
 								>
 							</span>
 							{#if p.price}
-								<span class="shrink-0 text-sm font-medium text-foreground"
-									>{formatMoney(p.price)}</span
-								>
+								<span class="flex shrink-0 flex-col items-end leading-tight">
+									{#if p.compare_at_price && p.discount_percent}
+										<span class="flex items-center gap-1.5">
+											<span
+												class="rounded-full bg-layer px-1.5 py-0.5 text-[11px] font-medium text-destructive shadow-2xs"
+												>-{p.discount_percent}%</span
+											>
+											<span class="text-sm font-medium text-destructive"
+												>{formatMoney(p.price)}</span
+											>
+										</span>
+										<s class="text-xs text-muted-foreground-1">{formatMoney(p.compare_at_price)}</s>
+									{:else}
+										<span class="text-sm font-medium text-foreground">{formatMoney(p.price)}</span>
+									{/if}
+								</span>
 							{/if}
 						</a>
 					</li>

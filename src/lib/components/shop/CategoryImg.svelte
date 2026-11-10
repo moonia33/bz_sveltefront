@@ -29,10 +29,10 @@
 	const url = $derived(image?.url || src);
 </script>
 
-{#if image?.webp_srcset?.length}
+{#if image?.avif_srcset?.length || image?.webp_srcset?.length}
 	<picture>
 		{#if image.avif_srcset?.length}<source srcset={srcset(image.avif_srcset)} {sizes} type="image/avif" />{/if}
-		<source srcset={srcset(image.webp_srcset)} {sizes} type="image/webp" />
+		{#if image.webp_srcset?.length}<source srcset={srcset(image.webp_srcset)} {sizes} type="image/webp" />{/if}
 		<img
 			src={url}
 			{alt}

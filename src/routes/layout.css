@@ -6,9 +6,13 @@
 @import '@fontsource-variable/inter';
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Preline moon: muted tekstas gray-400 ant balto = 2,6:1 (WCAG AA reikia 4,5:1). */
+/* Preline moon: kontrastas ant balto ≥ 4,5:1 (WCAG AA); muted gray-400 buvo 2,6:1. */
 [data-theme='theme-moon']:not(.dark) {
 	--muted-foreground: var(--color-gray-500);
+	/* akcijos kaina ir klaidos: red-500 = 3,8:1, red-600 ≥ 4,5:1 */
+	--destructive: var(--color-red-600);
+	--destructive-hover: var(--color-red-700);
+	--destructive-focus: var(--color-red-700);
 }
 
 @theme {

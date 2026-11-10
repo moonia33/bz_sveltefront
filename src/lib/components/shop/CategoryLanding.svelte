@@ -4,6 +4,7 @@
 	import type { CatalogFacetsOut, CategoryOut, ProductListOut } from '#lib/api/types';
 	import CategoryNav from '#lib/components/shop/CategoryNav.svelte';
 	import CategoryCardGrid from '#lib/components/shop/CategoryCardGrid.svelte';
+	import CategoryImg from '#lib/components/shop/CategoryImg.svelte';
 	import ProductRow from '#lib/components/ui/ProductRow.svelte';
 	import { m } from '#lib/paraglide/messages';
 
@@ -87,10 +88,14 @@
 				<div class="mt-6">
 					{#if category.hero_image_url}
 						<div class="relative h-40 md:h-56 rounded-xl overflow-hidden">
-							<img
+							<CategoryImg
+								image={category.hero_image}
 								src={category.hero_image_url}
 								alt={category.name}
-								decoding="async"
+								width={1600}
+								height={500}
+								sizes="(min-width: 1360px) 1300px, 100vw"
+								priority
 								class="absolute inset-0 size-full object-cover"
 							/>
 							<div class="absolute inset-0 bg-black/35"></div>

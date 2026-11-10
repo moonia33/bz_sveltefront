@@ -8,7 +8,14 @@
 	import CategoryCircleRow from '#lib/components/shop/CategoryCircleRow.svelte';
 	import ProductGrid from '#lib/components/shop/ProductGrid.svelte';
 	import ProductList from '#lib/components/shop/ProductList.svelte';
-	import type { CatalogFacetsOut, CategoryOut, Paginated, ProductListOut } from '#lib/api/types';
+	import type {
+		CatalogFacetsOut,
+		CategoryImageOut,
+		CategoryOut,
+		Paginated,
+		ProductListOut
+	} from '#lib/api/types';
+	import CategoryImg from '#lib/components/shop/CategoryImg.svelte';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { m } from '#lib/paraglide/messages';
 	import { unit } from '#lib/i18n/units';
@@ -33,6 +40,7 @@
 		defaultParams = {},
 		logoUrl,
 		heroUrl,
+		heroImage = null,
 		intro,
 		chipPool
 	}: {
@@ -64,6 +72,7 @@
 		defaultParams?: Record<string, string>;
 		// Hero banneris virš pavadinimo (kategorijos hero_image).
 		heroUrl?: string;
+		heroImage?: CategoryImageOut | null;
 		// Papildomas turinys po pavadinimu (pvz. veiklos plytelės ir kategorijų chip'ai).
 		intro?: Snippet;
 		// Pilnas kategorijų sąrašas — nusprendžia ar chip'as turi vaikų
@@ -231,13 +240,14 @@
 		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">
 			{#if heroUrl}
 				<div class="relative mb-6 overflow-hidden rounded-xl bg-surface">
-					<img
+					<CategoryImg
+						image={heroImage}
 						src={heroUrl}
 						alt={title}
-						width="1600"
-						height="500"
-						decoding="async"
-						fetchpriority="high"
+						width={1600}
+						height={500}
+						sizes="(min-width: 1360px) 1000px, (min-width: 1024px) 75vw, 100vw"
+						priority
 						class="aspect-[16/5] w-full object-cover"
 					/>
 					<span
@@ -295,7 +305,7 @@
 			{/if}
 			{#if cardChips.length}
 				<div class="mb-10">
-					<CategoryCardGrid categories={cardChips} all={chipPool ?? []} />
+					<CategoryCardGrid categories={cardChips} all={chipPool ?? []} priority />
 				</div>
 			{/if}
 			{#if circleChips.length}

@@ -212,7 +212,6 @@
 						<button
 							type="button"
 							onclick={() => (searchOpen = true)}
-							aria-label={m.nav_search()}
 							class="relative flex w-full items-center py-1.5 sm:py-2.5 ps-4 pe-10 bg-layer border border-layer-line rounded-full text-base sm:text-sm text-start text-muted-foreground-1 hover:bg-muted-hover focus:outline-hidden focus:border-primary-focus focus:ring-primary-focus"
 						>
 							{m.nav_search_placeholder()}
@@ -235,11 +234,10 @@
 					<button
 						type="button"
 						onclick={() => (searchOpen = true)}
-						aria-label={m.nav_search()}
 						class="{widgetBtn} md:hidden"
 					>
 						<Search class="shrink-0 size-4" />
-						<span class="hidden sm:inline">{m.nav_search()}</span>
+						<span class="sr-only sm:not-sr-only">{m.nav_search()}</span>
 					</button>
 					{#if me}
 						<div class="relative" bind:this={accountBox}>
@@ -251,7 +249,7 @@
 								class={widgetBtn}
 							>
 								<User class="shrink-0 size-4" />
-								<span class="hidden max-w-20 truncate sm:inline">{me.first_name || m.nav_account()}</span>
+								<span class="sr-only sm:not-sr-only sm:max-w-20 sm:truncate">{me.first_name || m.nav_account()}</span>
 							</button>
 							{#if accountOpen}
 								<div
@@ -300,13 +298,13 @@
 					{:else}
 						<a href={lh('/prisijungti')} class={widgetBtn}>
 							<User class="shrink-0 size-4" />
-							<span class="hidden sm:inline">{m.nav_login()}</span>
+							<span class="sr-only sm:not-sr-only">{m.nav_login()}</span>
 						</a>
 					{/if}
 
 					<a href={lh('/megstamos')} class="relative {widgetBtn} hidden sm:flex">
 						<Heart class="shrink-0 size-4" />
-						<span class="hidden sm:inline">{m.nav_favorites()}</span>
+						<span class="sr-only sm:not-sr-only">{m.nav_favorites()}</span>
 						{#if favoriteCount > 0}
 							<span class="flex absolute top-0 inset-e-0 z-10 -mt-1 -me-1">
 								<span
@@ -325,7 +323,7 @@
 						class="relative {widgetBtn}"
 					>
 						<ShoppingCart class="shrink-0 size-4" />
-						<span class="hidden sm:inline">{m.nav_cart()}</span>
+						<span class="sr-only sm:not-sr-only">{m.nav_cart()}</span>
 						{#if cartCount > 0}
 							<span class="flex absolute top-0 inset-e-0 z-10 -mt-1 -me-1">
 								<span

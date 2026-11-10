@@ -6,6 +6,11 @@
 @import '@fontsource-variable/inter';
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Preline moon: muted tekstas gray-400 ant balto = 2,6:1 (WCAG AA reikia 4,5:1). */
+[data-theme='theme-moon']:not(.dark) {
+	--muted-foreground: var(--color-gray-500);
+}
+
 @theme {
 	/* Inter Variable (self-hosted, woff2-variations, font-display: swap).
 	   Fallback – ankstesnis sisteminis stack'as. */

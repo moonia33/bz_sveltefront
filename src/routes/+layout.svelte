@@ -8,6 +8,7 @@
 	import { consentHeadScript, trackingConfig } from '#lib/consent';
 	import LegalReconsent from '#lib/components/account/LegalReconsent.svelte';
 	import './layout.css';
+	import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 
 	let { data, children } = $props();
 
@@ -15,6 +16,8 @@
 </script>
 
 <svelte:head>
+	<!-- Šriftas iš karto: be swap'o nėra layout shift (CLS). -->
+	<link rel="preload" as="font" type="font/woff2" href={interLatin} crossorigin="anonymous" />
 	{@html consentHeadScript(tracking)}
 </svelte:head>
 

@@ -169,12 +169,14 @@
 							</span>
 							{#if p.price}
 								<span class="flex shrink-0 flex-col items-end leading-tight">
-									{#if p.compare_at_price && p.discount_percent}
+									{#if p.compare_at_price}
 										<span class="flex items-center gap-1.5">
-											<span
-												class="rounded-full bg-layer px-1.5 py-0.5 text-[11px] font-medium text-destructive shadow-2xs"
-												>-{p.discount_percent}%</span
-											>
+											{#if p.discount_percent}
+												<span
+													class="rounded-full bg-layer px-1.5 py-0.5 text-[11px] font-medium text-destructive shadow-2xs"
+													>-{p.discount_percent}%</span
+												>
+											{/if}
 											<span class="text-sm font-medium text-destructive"
 												>{formatMoney(p.price)}</span
 											>

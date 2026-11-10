@@ -305,7 +305,6 @@
 	const localLines = $derived(
 		selectedVariant?.stock_lines?.length
 			? selectedVariant.stock_lines
-					.filter((l) => l.is_store || l.qty > 0)
 					.map((l) => ({ key: l.code, label: l.is_store ? 'Parduotuvėje' : l.name, qty: l.qty }))
 			: [{ key: 'store', label: 'Parduotuvėje', qty: localQty }]
 	);

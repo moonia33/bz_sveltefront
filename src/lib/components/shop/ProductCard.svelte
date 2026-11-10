@@ -74,6 +74,8 @@
 					<img
 						src={logoUrl}
 						alt={product.name}
+						width="240"
+						height="120"
 						loading="lazy"
 						decoding="async"
 						class="max-h-full max-w-full object-contain opacity-80"

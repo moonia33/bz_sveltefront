@@ -130,7 +130,7 @@
   /* ============================================ */
   
   --muted: var(--color-zvynas-gray-50);
-  --muted-foreground: var(--color-zvynas-gray-500);
+  --muted-foreground: var(--color-zvynas-gray-600);
   --muted-foreground-1: var(--color-zvynas-gray-600);
   --muted-foreground-2: var(--color-zvynas-gray-700);
   --muted-hover: var(--color-zvynas-gray-100);

@@ -78,6 +78,7 @@
 	categoryChips={data.categoryChips}
 	categoryLinks={data.categoryLinks}
 	heroUrl={cat.hero_image_url || undefined}
+	heroImage={cat.hero_image}
 	chipPool={data.chipPool}
 	fixedParams={{ category_slug: cat.slug }}
 	listTemplate={cat.list_template}

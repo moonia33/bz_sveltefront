@@ -126,6 +126,14 @@ export interface ActivityDetailOut extends ActivityOut {
 	top_brands: { slug: string; name: string; product_count: number }[];
 }
 
+export interface CategoryImageOut {
+	url: string;
+	width: number;
+	height: number;
+	avif_srcset: ImageSourceOut[];
+	webp_srcset: ImageSourceOut[];
+}
+
 export interface CategoryOut {
 	id: number;
 	slug: string;
@@ -136,6 +144,8 @@ export interface CategoryOut {
 	hero_image_url: string | null;
 	menu_icon_url: string | null;
 	card_image_url?: string | null;
+	hero_image?: CategoryImageOut | null;
+	card_image?: CategoryImageOut | null;
 	image_urls?: string[];
 	product_count?: number;
 	seo_title: string;

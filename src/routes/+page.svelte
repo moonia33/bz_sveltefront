@@ -88,6 +88,8 @@
 										class="size-16 sm:size-20 lg:size-24 mx-auto object-cover bg-surface rounded-full ring-2 ring-offset-4 ring-offset-layer ring-transparent group-hover:ring-line-3"
 										src={img}
 										alt={item.name}
+										width="96"
+										height="96"
 										loading="lazy"
 										decoding="async"
 									/>

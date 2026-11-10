@@ -301,6 +301,14 @@
 		selectedVariant?.stock_remote?.delivery_window
 	);
 	const totalQty = $derived(localQty + (remoteQty ?? 0));
+	// Vietiniai sandėliai atskirai (BE stock_lines): parduotuvė + kiti pagal pavadinimą.
+	const localLines = $derived(
+		selectedVariant?.stock_lines?.length
+			? selectedVariant.stock_lines
+					.filter((l) => l.is_store || l.qty > 0)
+					.map((l) => ({ key: l.code, label: l.is_store ? 'Parduotuvėje' : l.name, qty: l.qty }))
+			: [{ key: 'store', label: 'Parduotuvėje', qty: localQty }]
+	);
 
 	// Mėgstamų būsena pasirinktam variantui (užpildyta širdelė).
 	const isFav = $derived(
@@ -1195,11 +1203,13 @@
 						</div>
 					{:else if selectionComplete}
 						<div class="mt-5 space-y-1.5">
-							<p class="flex items-center gap-x-1.5 text-sm">
-								<Store class="shrink-0 size-4 text-foreground" />
-								<span class="text-muted-foreground-1">Parduotuvėje:</span>
-								{@render stockStatus(localQty)}
-							</p>
+							{#each localLines as line (line.key)}
+								<p class="flex items-center gap-x-1.5 text-sm">
+									<Store class="shrink-0 size-4 text-foreground" />
+									<span class="text-muted-foreground-1">{line.label}:</span>
+									{@render stockStatus(line.qty)}
+								</p>
+							{/each}
 							<p class="flex items-center gap-x-1.5 text-sm">
 								<Warehouse class="shrink-0 size-4 text-foreground" />
 								<span class="text-muted-foreground-1">Nuotolinis sandėlys:</span>

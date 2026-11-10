@@ -83,6 +83,8 @@ export interface SuggestItemOut {
 	brand_name: string;
 	image_url: string | null;
 	price: MoneyOut | null;
+	compare_at_price?: MoneyOut | null;
+	discount_percent?: number | null;
 }
 
 export interface ShopConfigOut {

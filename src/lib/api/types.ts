@@ -232,6 +232,13 @@ export interface StockLineOut {
 	delivery_window: DeliveryWindowOut | null;
 }
 
+/** Vietinio sandėlio likutis: is_store – parduotuvė, kitaip rodomas `name`. */
+export interface WarehouseStockLineOut extends StockLineOut {
+	code: string;
+	name: string;
+	is_store: boolean;
+}
+
 export interface VariantOut {
 	id: number;
 	sku: string;
@@ -261,6 +268,7 @@ export interface VariantOut {
 	// Per-warehouse stock split pagal Warehouse.kind (local/remote)
 	stock_local?: StockLineOut | null;
 	stock_remote?: StockLineOut | null;
+	stock_lines?: WarehouseStockLineOut[];
 }
 
 export interface DeliveryWindowOut {

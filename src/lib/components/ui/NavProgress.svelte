@@ -165,7 +165,9 @@
 		.biting .ripple {
 			animation: none;
 		}
-		.nav-line.run {
+		.nav-cast,
+		.nav-line.run,
+		.nav-line.end {
 			transition: none;
 		}
 	}

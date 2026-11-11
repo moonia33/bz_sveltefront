@@ -25,7 +25,7 @@
 	{#each categories as cat (cat.id)}
 		{@const img = cat.card_image_url ?? cat.hero_image_url ?? cat.image_urls?.[0] ?? cat.menu_icon_url}
 		{@const set = cat.card_image_url ? cat.card_image : cat.hero_image_url ? cat.hero_image : null}
-		<a href="/k/{cat.slug}" class="group w-24 sm:w-28 text-center focus:outline-hidden">
+		<a href="/k/{cat.slug}" class="group w-24 sm:w-28 text-center transition-transform duration-150 focus:outline-hidden active:scale-95">
 			<div
 				class="mx-auto size-20 sm:size-24 overflow-hidden rounded-full border border-layer-line bg-surface p-0.5 transition-shadow group-hover:shadow-md group-focus:shadow-md"
 			>

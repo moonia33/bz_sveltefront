@@ -55,6 +55,14 @@ export function getProducts(ctx: Ctx, p: ProductListParams) {
 	return apiFetch<Paginated<ProductListOut>>(ctx, `/catalog/products${qs({ ...p })}`);
 }
 
+export const EMPTY_FACETS: CatalogFacetsOut = {
+	categories: [],
+	brands: [],
+	product_groups: [],
+	features: [],
+	option_types: []
+};
+
 // Facet aggregation over the whole catalog is the slowest BE call (~2s).
 // Facets are public, non-personalized data — cache them briefly server-side.
 const FACETS_TTL_MS = 60_000;
@@ -73,6 +81,17 @@ export function getProductFacets(ctx: Ctx, p: Omit<ProductListParams, 'page' | '
 	if (facetsCache.size >= FACETS_MAX_KEYS) facetsCache.delete(facetsCache.keys().next().value!);
 	facetsCache.set(path, { t: Date.now(), v });
 	return v;
+}
+
+// Kliento navigacijoje facets grąžinami kaip promise (SvelteKit streaming):
+// puslapis rodomas kai tik atėjo prekės, filtrai įsikrauna vėliau.
+// SSR (pirmas atidarymas, robotai) – laukiama, HTML pilnas.
+export async function loadFacets(
+	event: { isDataRequest: boolean },
+	p: Promise<CatalogFacetsOut>
+): Promise<{ facets: CatalogFacetsOut | Promise<CatalogFacetsOut> | null }> {
+	if (event.isDataRequest) return { facets: p.catch(() => EMPTY_FACETS) };
+	return { facets: await p.catch(() => null) };
 }
 
 export function getActivities(ctx: Ctx) {

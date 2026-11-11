@@ -1,5 +1,5 @@
 import { apiFetch } from '#lib/api/client';
-import { getProductFacets, getProducts } from '#lib/api/endpoints';
+import { getProductFacets, getProducts, loadFacets } from '#lib/api/endpoints';
 import type { CategoryOut } from '#lib/api/types';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -22,13 +22,13 @@ export const load: PageServerLoad = async (event) => {
 		page: Number(sp.get('page') ?? 1) || 1
 	};
 
-	const [category, parent, listingProducts, listingFacets] = await Promise.all([
+	const [category, parent, listingProducts, { facets: listingFacets }] = await Promise.all([
 		apiFetch<CategoryOut>(ctx, `/catalog/categories/${slug}`).catch(() => {
 			throw error(404, 'Kategorija nerasta');
 		}),
 		event.parent(),
 		getProducts(ctx, filters).catch(() => null),
-		getProductFacets(ctx, filters).catch(() => null)
+		loadFacets(event, getProductFacets(ctx, filters))
 	]);
 
 	const all = parent.categories ?? [];

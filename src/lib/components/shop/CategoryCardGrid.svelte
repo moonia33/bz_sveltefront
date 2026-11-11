@@ -64,7 +64,7 @@
 		{@const smallImgs = smallPool.slice(0, 2)}
 		<a
 			href="/k/{cat.slug}"
-			class="group block rounded-xl border border-layer-line bg-layer p-2 pb-4 transition-shadow hover:shadow-md focus:outline-hidden focus:shadow-md"
+			class="group block rounded-xl border border-layer-line bg-layer p-2 pb-4 transition-[box-shadow,transform] duration-150 hover:shadow-md focus:outline-hidden focus:shadow-md active:scale-[0.98]"
 		>
 			<div class="relative overflow-hidden rounded-lg bg-surface">
 				{#if big.url && smallImgs.length > 0}

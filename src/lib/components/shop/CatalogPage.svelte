@@ -48,7 +48,8 @@
 		description?: string;
 		logoUrl?: string;
 		products: Paginated<ProductListOut>;
-		facets: CatalogFacetsOut;
+		// Promise – kliento navigacijoje filtrai įsikrauna po prekių.
+		facets: CatalogFacetsOut | Promise<CatalogFacetsOut>;
 		params: URLSearchParams;
 		pathname: string;
 		breadcrumbs?: { name: string; href?: string }[];
@@ -226,15 +227,32 @@
 				<CategoryNav all={navTree} bind:open={filtersOpen} />
 			</div>
 		{:else}
-			<FilterSidebar
-				{facets}
-				{params}
-				bind:open={filtersOpen}
-				{categoryLinks}
-				{categoryFilter}
-				{categoryPool}
-				{hiddenFacets}
-			/>
+			{#await facets}
+				<aside
+					class="hidden lg:block lg:w-72 lg:shrink-0 lg:pe-8 pt-10 border-e border-sidebar-line bg-sidebar"
+					aria-busy="true"
+					aria-label="Kraunami filtrai"
+				>
+					{#each [5, 4, 6] as rows, i (i)}
+						<div class="pb-6 mb-6 border-b border-sidebar-divider animate-pulse">
+							<div class="h-3.5 w-24 mb-4 rounded-sm bg-surface"></div>
+							{#each Array(rows) as _, j (j)}
+								<div class="h-3 mb-3 rounded-sm bg-surface" style:width="{55 + ((j * 17) % 35)}%"></div>
+							{/each}
+						</div>
+					{/each}
+				</aside>
+			{:then loaded}
+				<FilterSidebar
+					facets={loaded}
+					{params}
+					bind:open={filtersOpen}
+					{categoryLinks}
+					{categoryFilter}
+					{categoryPool}
+					{hiddenFacets}
+				/>
+			{/await}
 		{/if}
 
 		<div class="grow min-w-0 pt-6 lg:pt-10 lg:ps-8">

@@ -1,4 +1,4 @@
-import { getProductFacets, getProducts } from '#lib/api/endpoints';
+import { EMPTY_FACETS, getProductFacets, getProducts, loadFacets } from '#lib/api/endpoints';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -18,12 +18,13 @@ export const load: PageServerLoad = async (event) => {
 		page: Number(sp.get('page') ?? 1) || 1
 	};
 
-	const [products, facets, parent] = await Promise.all([
+	const [products, { facets: loadedFacets }, parent] = await Promise.all([
 		getProducts(ctx, filters),
-		getProductFacets(ctx, filters),
+		loadFacets(event, getProductFacets(ctx, filters)),
 		event.parent()
 	]);
 
+	const facets = loadedFacets ?? EMPTY_FACETS;
 	const q = sp.get('q') ?? '';
 	const nofollow = ['brand_slug','group_code','feature','option','range','in_stock_only','category_slug']
 		.some((k) => sp.has(k)) || !!q;

@@ -1,4 +1,4 @@
-import { getActivity, getProductFacets, getProducts } from '#lib/api/endpoints';
+import { getActivity, getProductFacets, getProducts, loadFacets } from '#lib/api/endpoints';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -20,10 +20,10 @@ export const load: PageServerLoad = async (event) => {
 		page: Number(sp.get('page') ?? 1) || 1
 	};
 
-	const [activity, products, facets, parent] = await Promise.all([
+	const [activity, products, { facets }, parent] = await Promise.all([
 		getActivity(ctx, code).catch(() => null),
 		getProducts(ctx, filters).catch(() => null),
-		getProductFacets(ctx, filters).catch(() => null),
+		loadFacets(event, getProductFacets(ctx, filters)),
 		event.parent()
 	]);
 	if (!activity || !activity.visible) throw error(404, 'Veikla nerasta');

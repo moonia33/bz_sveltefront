@@ -1,4 +1,4 @@
-import { getProductFacets, getProductGroup, getProducts } from '#lib/api/endpoints';
+import { EMPTY_FACETS, getProductFacets, getProductGroup, getProducts, loadFacets } from '#lib/api/endpoints';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -19,21 +19,16 @@ export const load: PageServerLoad = async (event) => {
 		page: Number(sp.get('page') ?? 1) || 1
 	};
 
-	const [group, products, facets, parent] = await Promise.all([
+	const [group, products, { facets: loadedFacets }, parent] = await Promise.all([
 		getProductGroup(ctx, slug).catch(() => {
 			throw error(404, 'Kolekcija nerasta');
 		}),
 		getProducts(ctx, filters).catch(() => ({ count: 0, items: [] })),
-		getProductFacets(ctx, filters).catch(() => ({
-			categories: [],
-			brands: [],
-			product_groups: [],
-			features: [],
-			option_types: []
-		})),
+		loadFacets(event, getProductFacets(ctx, filters)),
 		event.parent()
 	]);
 
+	const facets = loadedFacets ?? EMPTY_FACETS;
 	const q = sp.get('q') ?? '';
 	const nofollow =
 		['category_slug', 'brand_slug', 'feature', 'option', 'range', 'in_stock_only'].some((k) =>

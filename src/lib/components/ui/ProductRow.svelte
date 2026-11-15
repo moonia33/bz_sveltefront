@@ -2,7 +2,13 @@
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import type { ProductListOut } from '#lib/api/types';
 	import ProductCard from '#lib/components/shop/ProductCard.svelte';
-	import { trackRecClick, trackRecImpression, type RecContext } from '#lib/recTracking';
+	import {
+		hasAnalyticsConsent,
+		trackRecClick,
+		trackRecImpression,
+		type RecContext
+	} from '#lib/recTracking';
+	import { untrack } from 'svelte';
 
 	let {
 		products,
@@ -41,17 +47,21 @@
 		return () => ro.disconnect();
 	});
 
-	// Vienas impression per sąrašą, kai bent pusė bloko matoma; naujas – pasikeitus seed/prekėms.
+	// Vienas impression per sąrašą, kai bent pusė bloko matoma. Raktas – seed + prekių ID:
+	// tas pats sąrašas po invalidateAll (pvz. mėgstamų) neskaičiuojamas iš naujo.
+	const recKey = $derived(rec ? `${rec.seed ?? ''}|${products.map((p) => p.id).join(',')}` : '');
+
 	$effect(() => {
-		if (!rec || !section || !products.length) return;
-		const ctx = { ...rec };
-		const ids = products.map((p) => p.id);
+		const key = recKey;
+		if (!key || !section) return;
+		const ctx = untrack(() => ({ ...rec! }));
+		const ids = key.slice(key.indexOf('|') + 1).split(',').map(Number);
 		const io = new IntersectionObserver(
 			(entries) => {
-				if (entries.some((e) => e.isIntersecting)) {
-					io.disconnect();
-					trackRecImpression(ctx, ids);
-				}
+				// Be sutikimo stebim toliau – sutikus, kitas matomumas bus užskaitytas.
+				if (!entries.some((e) => e.intersectionRatio >= 0.5) || !hasAnalyticsConsent()) return;
+				io.disconnect();
+				trackRecImpression(ctx, ids);
 			},
 			{ threshold: 0.5 }
 		);
@@ -102,7 +112,7 @@
 				disabled={!canPrev}
 				onclick={() => scroll(-1)}
 				aria-label="Ankstesnės"
-				class="absolute top-1/2 inset-s-2 inline-flex -translate-y-1/2 justify-center items-center size-9.5 rounded-full bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus disabled:opacity-50 disabled:cursor-default"
+				class="absolute z-10 top-1/2 inset-s-2 inline-flex -translate-y-1/2 justify-center items-center size-9.5 rounded-full bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus disabled:opacity-50 disabled:cursor-default"
 			>
 				<ChevronLeft class="shrink-0 size-5" />
 			</button>
@@ -111,7 +121,7 @@
 				disabled={!canNext}
 				onclick={() => scroll(1)}
 				aria-label="Kitos"
-				class="absolute top-1/2 inset-e-2 inline-flex -translate-y-1/2 justify-center items-center size-9.5 rounded-full bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus disabled:opacity-50 disabled:cursor-default"
+				class="absolute z-10 top-1/2 inset-e-2 inline-flex -translate-y-1/2 justify-center items-center size-9.5 rounded-full bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-muted-hover focus:outline-hidden focus:bg-muted-focus disabled:opacity-50 disabled:cursor-default"
 			>
 				<ChevronRight class="shrink-0 size-5" />
 			</button>

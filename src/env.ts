@@ -6,5 +6,14 @@ export const variables = defineEnvVars({
 	SITE_LOCALE: {
 		public: true,
 		schema: (value) => value?.trim().toLowerCase() || 'lt'
+	},
+	// Sentry klaidų stebėjimas (SSR + naršyklė). Tuščia = išjungta.
+	SENTRY_DSN: {
+		public: true,
+		schema: (value) => value?.trim() ?? ''
+	},
+	SENTRY_ENVIRONMENT: {
+		public: true,
+		schema: (value) => value?.trim() || 'production'
 	}
 });

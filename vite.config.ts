@@ -62,6 +62,8 @@ const urlPatterns: { pattern: string; localized: LocalizedTuple[] }[] = [
 ];
 
 export default defineConfig({
+	// Sentry: tik klaidos, be tracing/debug kodo (mažesnis JS bundle).
+	define: { __SENTRY_DEBUG__: false, __SENTRY_TRACING__: false },
 	plugins: [
 		tailwindcss(),
 		sveltekit({

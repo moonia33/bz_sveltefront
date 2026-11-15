@@ -1421,7 +1421,12 @@
 		id="rekomendacijos"
 		class="scroll-mt-20 py-10 w-full max-w-340 px-4 sm:px-6 lg:px-8 mx-auto"
 	>
-		<ProductRow products={data.recommendations} title="Derinti su" href="/katalogas" />
+		<ProductRow
+			products={data.recommendations}
+			title="Derinti su"
+			href="/katalogas"
+			rec={{ kind: 'cross_sell', placement: 'pdp', seed: data.product.slug }}
+		/>
 	</div>
 	<!-- End Complete the look -->
 {/if}

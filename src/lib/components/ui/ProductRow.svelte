@@ -2,16 +2,22 @@
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import type { ProductListOut } from '#lib/api/types';
 	import ProductCard from '#lib/components/shop/ProductCard.svelte';
+	import { trackRecClick, trackRecImpression, type RecContext } from '#lib/recTracking';
 
 	let {
 		products,
 		title,
-		href
+		href,
+		rec
 	}: {
 		products: ProductListOut[];
 		title?: string;
 		href?: string;
+		/** Rekomendacijų sąrašas: impression (kai matomas) ir click metrikos BE. */
+		rec?: RecContext;
 	} = $props();
+
+	let section = $state<HTMLElement | null>(null);
 
 	let scroller = $state<HTMLDivElement | null>(null);
 	let canPrev = $state(false);
@@ -34,10 +40,28 @@
 		ro.observe(scroller);
 		return () => ro.disconnect();
 	});
+
+	// Vienas impression per sąrašą, kai bent pusė bloko matoma; naujas – pasikeitus seed/prekėms.
+	$effect(() => {
+		if (!rec || !section || !products.length) return;
+		const ctx = { ...rec };
+		const ids = products.map((p) => p.id);
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((e) => e.isIntersecting)) {
+					io.disconnect();
+					trackRecImpression(ctx, ids);
+				}
+			},
+			{ threshold: 0.5 }
+		);
+		io.observe(section);
+		return () => io.disconnect();
+	});
 </script>
 
 {#if products.length}
-	<section>
+	<section bind:this={section}>
 		{#if title || href}
 			<div class="mb-4 flex items-end justify-between gap-x-4">
 				{#if title}
@@ -61,8 +85,11 @@
 				onscroll={updateArrows}
 				class="flex snap-x snap-mandatory gap-x-3 overflow-x-auto sm:gap-x-5 scrollbar-none"
 			>
-				{#each products as product (product.id)}
+				{#each products as product, i (product.id)}
 					<div
+						onclickcapture={(e) => {
+							if (rec && (e.target as Element).closest('a')) trackRecClick(rec, product.id, i);
+						}}
 						class="w-[calc(50%-0.5rem)] shrink-0 snap-start sm:w-[calc(33.333%-0.85rem)] lg:w-[calc(25%-0.95rem)]"
 					>
 						<ProductCard {product} />

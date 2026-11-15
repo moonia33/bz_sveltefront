@@ -22,7 +22,7 @@ let queue: RecEvent[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 let listening = false;
 
-function hasAnalyticsConsent(): boolean {
+export function hasAnalyticsConsent(): boolean {
 	const m = document.cookie.match(new RegExp(`(?:^|; )${CONSENT_COOKIE}=([^;]*)`));
 	if (!m) return false;
 	try {
@@ -41,6 +41,11 @@ function nonce(): string {
 function flush() {
 	if (timer) clearTimeout(timer);
 	timer = null;
+	// Sutikimas galėjo būti atšauktas, kol event'ai laukė eilėje.
+	if (!hasAnalyticsConsent()) {
+		queue = [];
+		return;
+	}
 	while (queue.length) {
 		const events = queue.splice(0, MAX_PER_POST);
 		fetch('/api/v1/analytics/rec-events', {

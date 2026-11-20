@@ -378,12 +378,13 @@
 		return [...map.values()];
 	});
 
-	// Pakuotės info: trade_pack_qty (gamintojo dėžė) arba pack_quantity.
+	// Pakuotės info: dėže parduodamam variantui – trade_pack_qty (gamintojo dėžė),
+	// vienetiniam – tik pack_quantity (gamintojo dėžė pirkėjui neaktuali).
 	const packInfo = $derived.by(() => {
 		const v = selectedVariant;
 		if (!v) return null;
-		const qtyInPack = v.trade_pack_qty || v.pack_quantity;
-		if (!v.sold_as_pack && !qtyInPack) return null;
+		const qtyInPack = v.sold_as_pack ? v.trade_pack_qty || v.pack_quantity : v.pack_quantity;
+		if (!v.sold_as_pack && !(qtyInPack > 1)) return null;
 		const unitGross =
 			v.sold_as_pack && qtyInPack > 0 && price ? Number(price.gross) / qtyInPack : null;
 		return {

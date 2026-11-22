@@ -963,6 +963,11 @@
 						{/if}
 					{/if}
 				</p>
+				{#if selectedVariant?.compare_at_price && selectedVariant?.prior_price}
+					<p class="mt-0.5 text-xs text-muted-foreground-1">
+						Mažiausia kaina per 30 d. iki nuolaidos: {formatMoney(selectedVariant.prior_price)}
+					</p>
+				{/if}
 
 				{#if packInfo}
 					<p class="mt-1.5 flex items-center gap-x-1.5 text-sm text-muted-foreground-1">

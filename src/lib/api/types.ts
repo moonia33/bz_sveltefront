@@ -60,6 +60,8 @@ export interface ProductListOut {
 	price: MoneyOut;
 	price_to: MoneyOut | null;
 	compare_at_price: MoneyOut | null;
+	/** Omnibus: mažiausia kaina per 30 d. iki dabartinės (null – istorijos nėra). */
+	prior_price?: MoneyOut | null;
 	discount_percent: number | null;
 	has_video?: boolean;
 	labels?: string[];
@@ -84,6 +86,8 @@ export interface SuggestItemOut {
 	image_url: string | null;
 	price: MoneyOut | null;
 	compare_at_price?: MoneyOut | null;
+	/** Omnibus: mažiausia kaina per 30 d. iki dabartinės (null – istorijos nėra). */
+	prior_price?: MoneyOut | null;
 	discount_percent?: number | null;
 }
 
@@ -259,6 +263,8 @@ export interface VariantOut {
 	stock_available: number;
 	price: MoneyOut;
 	compare_at_price: MoneyOut | null;
+	/** Omnibus: mažiausia kaina per 30 d. iki dabartinės (null – istorijos nėra). */
+	prior_price?: MoneyOut | null;
 	offer_id: number | null;
 	offer_label: string;
 	condition_grade: string;
@@ -402,6 +408,8 @@ export interface CartItemOut {
 	stock_available: number;
 	unit_price: MoneyOut;
 	compare_at_price: MoneyOut | null;
+	/** Omnibus: mažiausia kaina per 30 d. iki dabartinės (null – istorijos nėra). */
+	prior_price?: MoneyOut | null;
 	discount_percent: number | null;
 	line_total: MoneyOut;
 	delivery_window: DeliveryWindowOut | null;
